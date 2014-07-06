@@ -1,0 +1,10 @@
+t1*     Infrastructure to run ArrayTest benchmarks.
+
+t1-0/   Initial ArrayTest run:
+        - Make sure everything works and behaves reasonably.
+        - Compare vectorization on/off results.
+        - Start developing plotting tools.
+
+t1-1/   Compare different ArrayTest features:
+        - sum2 vs. sum3 (access 3 or 4 arrays)
+        - various sum2 and sum3 functions among themselves.
