@@ -3,7 +3,8 @@
 
 //==============================================================================
 
-const int NN = 3;
+const int MaxNN = 6;
+      int NN    = 3;
 
 // Vec / no vec comparison; t1-0:
 // TString  Gsuff[] = { "host_avx", "mic_mic", "host_novec", "mic_novec", "host_nosimd", "mic_nosimd" };
@@ -25,7 +26,7 @@ int      Gmsty[] = { 2, 5, 2, 5, 2, 5};
 int      Gmcol[] = { kRed+2, kBlue+2, kOrange+4, kCyan+2, kYellow+2, kGreen+2 };
 int      Glcol[] = { kRed, kBlue, kOrange, kCyan, kYellow, kGreen };
 
-TTree   *T[NN]   = { 0 };
+TTree   *T[MaxNN]   = { 0 };
 
 //==============================================================================
 
@@ -74,7 +75,7 @@ TMultiGraph* plot_graph(const TString& varexp,
     n = T[i]->Draw(varexp, "", "goff");
     g = new TGraph(n, T[i]->GetV1(), T[i]->GetV2());
 
-    TString nt(Gsuff[i]);
+    TString nt(Gsuff[i]); if (nt.IsNull()) nt = " ";
     g->SetName(nt);
     g->SetTitle(nt);
 
@@ -127,6 +128,11 @@ void do_all(const TString& name, const TString& post, bool save_p=false)
 
 void anal1_t1(bool save_p=false)
 {
+  NN = 3;
+  do_all("arr_sum3", "host_O3", save_p);
   do_all("arr_sum3", "mic_O3", save_p);
-  // do_all("arr_sum2_cube", save_p);
+
+  NN = 5;
+  do_all("arr_sum2", "host_O3", save_p);
+  do_all("arr_sum2", "mic_O3", save_p);
 }

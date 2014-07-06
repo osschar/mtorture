@@ -6,8 +6,8 @@ use Test;
 ########################################################################
 
 my $t = new Test('Base'          => 't1',
-                 'FmtHost'       => 'xxx_${test}_host.rt',
-                 'FmtMic'        => 'xxx_${test}_mic.rt',
+                 'FmtHost'       => 'arr_${test}_host.rt',
+                 'FmtMic'        => 'arr_${test}_mic.rt',
 
                  # 'MAKE_VARS'     => 'OPT=-O3',
 
@@ -17,7 +17,7 @@ my $t = new Test('Base'          => 't1',
                  # 'N_VEC_MAX'     => 64 * 1024 * 1024,
 
                  # "Precise" test:
-                 # 'TEST_DURATION' => 5,
+                 'TEST_DURATION' => 5,
 
                  # "Small" test setting for development
                  # 'TEST_DURATION' => 0.2,
@@ -27,6 +27,8 @@ my $t = new Test('Base'          => 't1',
 
 @TESTS = qw(sum2 sum2_sqr sum2_cube sum2_quad sum2_quint
             sum3 sum3_sqr sum3_cube);
+
+@TESTS = qw(sum3);
 
 $t->make_clean();
 
