@@ -171,7 +171,7 @@ int ArrayTest::sum3(int n)
     Z[i] = A[i] + B[i] + C[i];
   }
 
-  return n;
+  return 2 * n;
 }
 
 int ArrayTest::sum3_sqr(int n)
