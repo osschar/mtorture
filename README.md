@@ -12,7 +12,8 @@ Variables:
 - `USER_CXXFLAGS` -- whatever you want to pass to compiler
 - `USER_LDFLAGS`  -- whatever you want to pass to linker
 
-There is a special target *echo* that will print out the relevant varables, e.g:```
+There is a special target *echo* that will print out the relevant varables, e.g:
+```
   make OPT:=-O2 USER_CPPFLAGS:="-DTEST_FUNC=sum3_cube -DFOO=bar" echo
 ```
 
@@ -21,7 +22,8 @@ There is a special target *echo* that will print out the relevant varables, e.g:
 
 - `TEST_FUNC` -- the function that gets called on the test object
 
-To use this from a script, you'd have to do something like this:```
+To use this from a script, you'd have to do something like this:
+```
   make USER_CPPFLAGS:="-DTEST_FUNC=sum3_cube" -W t1.cxx t1 t1-mic
 ```
 
