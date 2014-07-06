@@ -16,9 +16,13 @@ my $t = new Test('Base'          => 't1',
                  # 'N_VEC_MIN'     => 8,
                  # 'N_VEC_MAX'     => 64 * 1024 * 1024,
 
-                 'TEST_DURATION' => 0.2,
-                 'N_VEC_MIN'     => 1024,
-                 'N_VEC_MAX'     => 8 * 1024,
+                 # "Precise" test:
+                 # 'TEST_DURATION' => 5,
+
+                 # "Small" test setting for development
+                 # 'TEST_DURATION' => 0.2,
+                 # 'N_VEC_MIN'     => 1024,
+                 # 'N_VEC_MAX'     => 8 * 1024,
     );
 
 @TESTS = qw(sum2 sum2_sqr sum2_cube sum2_quad sum2_quint

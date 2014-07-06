@@ -5,8 +5,6 @@
 
 const int NN = 3;
 
-TTree   *T[NN]   = { 0 };
-
 // Vec / no vec comparison; t1-0:
 // TString  Gsuff[] = { "host_avx", "mic_mic", "host_novec", "mic_novec", "host_nosimd", "mic_nosimd" };
 
@@ -26,6 +24,8 @@ TString  Gsuff[] = { "", "sqr", "cube", "quad", "quint" };
 int      Gmsty[] = { 2, 5, 2, 5, 2, 5};
 int      Gmcol[] = { kRed+2, kBlue+2, kOrange+4, kCyan+2, kYellow+2, kGreen+2 };
 int      Glcol[] = { kRed, kBlue, kOrange, kCyan, kYellow, kGreen };
+
+TTree   *T[NN]   = { 0 };
 
 //==============================================================================
 
@@ -73,8 +73,11 @@ TMultiGraph* plot_graph(const TString& varexp,
   {
     n = T[i]->Draw(varexp, "", "goff");
     g = new TGraph(n, T[i]->GetV1(), T[i]->GetV2());
-    g->SetName(Gsuff[i]);
-    g->SetTitle(Gsuff[i]);
+
+    TString nt(Gsuff[i]);
+    g->SetName(nt);
+    g->SetTitle(nt);
+
     g->SetMarkerStyle(Gmsty[i]);
     g->SetMarkerColor(Gmcol[i]);
     g->SetLineColor(Glcol[i]);
@@ -86,7 +89,7 @@ TMultiGraph* plot_graph(const TString& varexp,
 
   mg->Draw("apl");
 
-  gPad->BuildLegend(0.8, 0.8, 1, 1);
+  gPad->BuildLegend(0.8, 0.8, 0.99, 0.99);
 
   if (save_p)
   {
