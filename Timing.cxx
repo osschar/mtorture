@@ -26,6 +26,8 @@ void Timing::print_tuple_header()
 {
   printf("%s/I:%s/D:%s:%s:%s:%s\n",
          "NVec", "Time", "Gops", "Gflops", "OpT", "VecUt");
+  printf("# %6s   %10s   %10s   %10s   %8s   %6s\n",
+         "NVec", "Time", "Gops", "Gflops", "OpT", "VecUt");
 }
 
 void Timing::print_header()
@@ -61,9 +63,10 @@ void Timing::auto_time_loop(int n_vec, double run_time)
 {
   long64 n_ops = m_func(n_vec);
 
-  // Estimate run time at full efficiency, run for 5% of that.
+  // Estimate run time at full efficiency, run for gPreTestFrac of that.
 
-  long64 n_loops = s_cpu_freq * s_vec_unit_width  / n_ops * (0.05 * run_time) + 1;
+  long64 n_loops = s_cpu_freq * s_vec_unit_width / n_ops *
+    (g_pre_test_frac * run_time) + 1;
 
   // printf("Estimate n_loops = %lld\n", n_loops);
 

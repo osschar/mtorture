@@ -3,13 +3,14 @@
 
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <stdexcept>
 
 typedef long long   long64;
 typedef int         idx_t;
 
-const int ALIGN   = 64;
+const int  ALIGN   = 64;
 
 // Set this to 8 for AVX, 16 for MIC
 const idx_t Sfac = 1;
@@ -32,5 +33,23 @@ void free_sth(X* x)
 {
   _mm_free(x);
 }
+
+
+//------------------------------------------------------------------------------
+// Globals and environment overrides
+//------------------------------------------------------------------------------
+
+template <typename X>
+X get_env(const char* name, X def)
+{
+  char *env = getenv(name);
+  return (env == 0) ? def : atof(env);
+}
+
+const double g_test_duration  = get_env("TEST_DURATION", 1.0);
+const double g_pre_test_frac  = get_env("PRE_TEST_FRAC", 0.01);
+
+const int    g_n_vec_min  = get_env("N_VEC_MIN", 8);
+const int    g_n_vec_max  = get_env("N_VEC_MAX", 64 * 1024 * 1024);
 
 #endif

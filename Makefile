@@ -5,34 +5,46 @@
 VECHOST  := -mavx -vec-report=1
 VECMIC   := -mmic -vec-report=1
 
-VECOPTS  :=
-#VECOPTS  := -no-simd -no-vec
-# Just setting one of the above has little effect
+### To disable vectorization set USER_CXXFLAGS := -no-simd -no-vec
+# Setting only one of the above has little effect.
+# Note, this also screws-up prefetching so it's a lousy deal.
 
-CPPFLAGS := -I.
-CXXFLAGS := -O3 -openmp -std=gnu++0x ${VECOPTS}
+OPT      := -O3
 
-LDFLAGS  :=
+CPPFLAGS := -I. ${USER_CPPFLAGS}
+CXXFLAGS := ${OPT} -openmp -std=gnu++0x ${USER_CXXFLAGS}
+
+LDFLAGS  := ${USER_LDFLAGS}
 
 all: t1
 
 %.o: %.cxx *.h
 	icc ${CPPFLAGS} ${CXXFLAGS} ${VECHOST} -c -o $@ $<
 
-
 %.om: %.cxx *.h
 	icc ${CPPFLAGS} ${CXXFLAGS} ${VECMIC} -c -o $@ $<
 
-t1: t1.o ArrayTest.o Timing.o
+
+clean:
+	rm -f t1 t1-mic *.o *.om
+
+echo:
+	@echo CPPFLAGS = ${CPPFLAGS}
+	@echo CXXFLAGS = ${CXXFLAGS}
+	@echo LDFLAGS  = ${LDFLAGS}
+
+
+### t1
+
+T1_DEPS := t1 ArrayTest Timing
+
+t1: $(addsuffix .o, ${T1_DEPS})
 	icc ${CXXFLAGS} ${VECHOST} ${LDFLAGS} -o $@ $^
 
-t1-mic: t1.om ArrayTest.om Timing.om
+t1-mic:  $(addsuffix .om, ${T1_DEPS})
 	icc ${CXXFLAGS} ${VECMIC} ${LDFLAGS} -o $@ $^
 	scp $@ mic0:
 
 run-t1:	t1 t1-mic
 	./t1
 	ssh mic0 ./t1-mic
-
-clean:
-	rm -f t1 t1-mic *.o *.om

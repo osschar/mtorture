@@ -16,6 +16,8 @@ public:
   int sum2(int n);
   int sum2_sqr(int n);
   int sum2_cube(int n);
+  int sum2_quad(int n);
+  int sum2_quint(int n);
 
   int sum3(int n);
   int sum3_sqr(int n);

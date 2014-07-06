@@ -97,10 +97,57 @@ int ArrayTest::sum2_cube(int n)
   {
     const float asqr = A[i]*A[i];
     const float bsqr = B[i]*B[i];
-    Z[i] = A[i]*asqr + 3*asqr*B[i] + 3*A[i]*bsqr + B[i]*bsqr;
+
+    Z[i] = A[i]*asqr + 3*(asqr*B[i] + A[i]*bsqr) + B[i]*bsqr;
   }
 
-  return 11 * n;
+  return 10 * n;
+}
+
+int ArrayTest::sum2_quad(int n)
+{
+  float *Z = fA[0];
+  float *A = fA[1];
+  float *B = fA[2];
+
+  __assume_aligned(Z, 64);
+  __assume_aligned(A, 64);
+  __assume_aligned(B, 64);
+  __assume(n%16==0);
+
+#pragma simd
+  for (int i = 0; i < n; ++i)
+  {
+    const float asqr = A[i]*A[i], acub = A[i]*asqr;
+    const float bsqr = B[i]*B[i], bcub = B[i]*bsqr;
+
+    Z[i] = A[i]*acub + 4*(acub*B[i] + A[i]*bcub) + 6*asqr*bsqr + B[i]*bcub;
+  }
+
+  return 15 * n;
+}
+
+int ArrayTest::sum2_quint(int n)
+{
+  float *Z = fA[0];
+  float *A = fA[1];
+  float *B = fA[2];
+
+  __assume_aligned(Z, 64);
+  __assume_aligned(A, 64);
+  __assume_aligned(B, 64);
+  __assume(n%16==0);
+
+#pragma simd
+  for (int i = 0; i < n; ++i)
+  {
+    const float asqr = A[i]*A[i], acub = A[i]*asqr, aqud = asqr*asqr;
+    const float bsqr = B[i]*B[i], bcub = B[i]*bsqr, bqud = bsqr*bsqr;
+
+    Z[i] = A[i]*aqud + 5*(aqud*B[i] + A[i]*bqud) + 10*(acub*bsqr + asqr*bcub) + B[i]*bqud;
+  }
+
+  return 19 * n;
 }
 
 //------------------------------------------------------------------------------
