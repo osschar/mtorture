@@ -9,6 +9,9 @@ my $t = new Test('Base'          => 't1',
                  'FmtHost'       => 'arr_${test}_host.rt',
                  'FmtMic'        => 'arr_${test}_mic.rt',
 
+                 'RunHost'       => 1,
+                 'RunMic'        => 1,
+
                  # 'MAKE_VARS'     => 'OPT=-O3',
 
                  # Defaults for test duration and problem-size limits:
@@ -27,8 +30,6 @@ my $t = new Test('Base'          => 't1',
 
 @TESTS = qw(sum2 sum2_sqr sum2_cube sum2_quad sum2_quint
             sum3 sum3_sqr sum3_cube);
-
-@TESTS = qw(sum3);
 
 $t->make_clean();
 
