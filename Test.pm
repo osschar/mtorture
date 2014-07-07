@@ -125,8 +125,8 @@ sub run_test
   my $ohost = eval "\"$S->{'FmtHost'}\"";
   my $omic  = eval "\"$S->{'FmtMic'}\"";
 
-  spawn($ohost, $S->{'CmdHost'});
-  spawn($omic,  $S->{'CmdMic'});
+  spawn($ohost, $S->{'CmdHost'}) if $S->{'RunHost'};
+  spawn($omic,  $S->{'CmdMic'})  if $S->{'RunMic'};
 
   wait_all();
 }
