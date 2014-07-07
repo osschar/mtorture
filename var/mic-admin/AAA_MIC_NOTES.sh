@@ -1,8 +1,69 @@
+#!/bin/bash
+################################################################################
+# Core helpers
+################################################################################
+
 function after_mic_reset()
 {
     scp /opt/intel/composer_xe_2013_sp1.0.080/compiler/lib/mic/libiomp5.so root@mic0:/usr/lib64
     scp /opt/intel/composer_xe_2013_sp1.0.080/compiler/lib/mic/libiomp5.so root@mic1:/usr/lib64
 }
+
+### Turbo setting ###
+#
+# Turbo is (it seems):
+# - bit 38 of 0x1a0: IA32_MISC_TURBO_EN  0x1a0 *** Inverse meaning, 0 means on ***
+# - bit 32 of 0x199: IA32_PERF_TURBO_DIS 0x199
+# The following doesn't really change anything ... there must be something
+# else somewhere,
+
+function echo_turbo()
+{
+    local t1
+    local t2
+    echo "Echo turbo (1-enabled, 0-disabled):"
+    echo "Core | IA32_MISC_TURBO_EN | IA32_PERF_TURBO_DIS"
+    for i in $(seq 0 23); do
+        t1=`rdmsr -p $i 0x1a0 -f 38:38`
+        t1=$(( 1 - $t1 ))
+        t2=`rdmsr -p $i 0x199 -f 32:32`
+        printf " %2d  | %1d                  | %1d\n" $i $t1 $t2
+    done
+}
+
+function enable_turbo()
+{
+    local r
+
+    for i in $(seq 0 23); do
+        r=0x`rdmsr -p $i 0x1a0`
+        r=`printf "0x%llx" $((~(1 << 38) & $r))`
+        wrmsr -p $i 0x1a0 $r
+
+        r=0x`rdmsr -p $i 0x199`
+        r=`printf "0x%llx" $(( (1 << 32) | $r))`
+        wrmsr -p $i 0x199 $r
+    done
+}
+
+function disable_turbo()
+{
+    local r
+
+    for i in $(seq 0 23); do
+        r=0x`rdmsr -p $i 0x1a0`
+        r=`printf "0x%llx" $(( (1 << 38) | $r))`
+        wrmsr -p $i 0x1a0 $r
+
+        r=0x`rdmsr -p $i 0x199`
+        r=`printf "0x%llx" $((~(1 << 32) & $r))`
+        wrmsr -p $i 0x199 $r
+    done
+}
+
+################################################################################
+# User / key management
+################################################################################
 
 function merge_auth_keys_for_root()
 {
