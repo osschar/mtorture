@@ -11,6 +11,8 @@ public:
 
   ~ArrayTest();
 
+  int get_n() const { return fN; }
+
   int copy(int n);
 
   int sum2(int n);

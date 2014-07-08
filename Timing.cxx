@@ -45,25 +45,11 @@ void Timing::print(int n_vec)
 
 //------------------------------------------------------------------------------
 
-void Timing::time_loop(int n_vec, int n_loop)
-{
-  m_n_ops = 0;
-
-  start();
-
-  for (int i = 0; i< n_loop; ++i)
-  {
-    m_n_ops += m_func(n_vec);
-  }
-
-  stop();
-}
-
-void Timing::auto_time_loop(int n_vec, double run_time)
+long64 Timing::calibrate_loop(int n_vec, double run_time)
 {
   long64 n_ops = m_func(n_vec);
 
-  // Estimate run time at full efficiency, run for gPreTestFrac of that.
+  // Estimate run time at full efficiency, run for g_pre_test_frac of that.
 
   long64 n_loops = s_cpu_freq * s_vec_unit_width / n_ops *
     (g_pre_test_frac * run_time) + 1;
@@ -77,6 +63,29 @@ void Timing::auto_time_loop(int n_vec, double run_time)
   n_loops = run_time / m_diff * n_loops + 1;
 
   // printf("Run-time was %f, new estimate n_loops = %lld\n", m_diff, n_loops);
+
+  return n_loops;
+}
+
+//------------------------------------------------------------------------------
+
+void Timing::time_loop(int n_vec, long64 n_loop)
+{
+  m_n_ops = 0;
+
+  start();
+
+  for (long64 i = 0; i < n_loop; ++i)
+  {
+    m_n_ops += m_func(n_vec);
+  }
+
+  stop();
+}
+
+void Timing::auto_time_loop(int n_vec, double run_time)
+{
+  long64 n_loops = calibrate_loop(n_vec, run_time);
 
   time_loop(n_vec, n_loops);
 }

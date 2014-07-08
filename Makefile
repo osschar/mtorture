@@ -48,3 +48,19 @@ t1-mic:  $(addsuffix .om, ${T1_DEPS})
 run-t1:	t1 t1-mic
 	./t1
 	ssh mic0 ./t1-mic
+
+### t2
+
+T2_DEPS := t2 ArrayTest Timing
+
+t2: $(addsuffix .o, ${T2_DEPS})
+	icc ${CXXFLAGS} ${VECHOST} ${LDFLAGS} -o $@ $^
+
+t2-mic:  $(addsuffix .om, ${T2_DEPS})
+	icc ${CXXFLAGS} ${VECMIC} ${LDFLAGS} -o $@ $^
+	scp $@ mic0:
+
+run-t2:	t2 t2-mic
+	./t2
+	ssh mic0 ./t2-mic
+

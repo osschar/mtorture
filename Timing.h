@@ -66,7 +66,9 @@ public:
   double ops_per_tick();
   double vector_utilization();
 
-  void time_loop(int n_vec, int n_loop);
+  long64 calibrate_loop(int n_vec, double run_time);
+
+  void time_loop(int n_vec, long64 n_loop);
   void auto_time_loop(int n_vec, double run_time);
 
   void print_tuple_header();
