@@ -17,10 +17,17 @@ const int MaxNN = 6;
 // TString  Gsuff[] = { "mic_O3", "mic_O2", "cube_mic_O3", "cube_mic_O2",  "quint_mic_O3", "quint_mic_O2" };
 
 // sum2 (with N=5) and sum3 (with N=3); t1-1:
-TString  Gsuff[] = { "", "sqr", "cube", "quad", "quint" };
+// TString  Gsuff[] = { "", "sqr", "cube", "quad", "quint" };
 
+// all for SameArray test; t1-2:
+// TString  Gsuff[] = {"sum2_cube_sa",  "sum2_cube",
+//                     "sum2_quint_sa", "sum2_quint",
+//                     "sum3_cube_sa",  "sum3_cube"    };
 
-// TString  Gsuff[] = { "_O2", "_O3", "cube_O2", "cube_O3" };
+// t2-0:
+TString  Gsuff[] = {"sum2_cube_host",  "sum2_cube_mic",
+                    "sum2_quint_host", "sum2_quint_mic",
+                    "sum3_cube_host",  "sum3_cube_mic"  };
 
 int      Gmsty[] = { 2, 5, 2, 5, 2, 5};
 int      Gmcol[] = { kRed+2, kBlue+2, kOrange+4, kCyan+2, kYellow+2, kGreen+2 };
@@ -128,6 +135,12 @@ void do_all(const TString& name, const TString& post, bool save_p=false)
 
 void anal1_t1(bool save_p=false)
 {
+  NN = 6;
+  do_all("arr", "T4", save_p);
+  do_all("arr", "T4",  save_p);
+
+  return;
+
   NN = 3;
   do_all("arr_sum3", "host_O3", save_p);
   do_all("arr_sum3", "mic_O3", save_p);
