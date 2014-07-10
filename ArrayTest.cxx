@@ -222,3 +222,80 @@ int ArrayTest::sum3_cube(int n)
 
   return 22 * n;
 }
+
+//------------------------------------------------------------------------------
+// Same Array clones (store into A, not Z)
+//------------------------------------------------------------------------------
+
+int ArrayTest::sum2_cube_sa(int n)
+{
+  // float *Z = fA[0];
+  float *A = fA[1];
+  float *B = fA[2];
+
+  // __assume_aligned(Z, 64);
+  __assume_aligned(A, 64);
+  __assume_aligned(B, 64);
+  __assume(n%16==0);
+
+#pragma simd
+  for (int i = 0; i < n; ++i)
+  {
+    const float asqr = A[i]*A[i];
+    const float bsqr = B[i]*B[i];
+
+    A[i] = A[i]*asqr + 3*(asqr*B[i] + A[i]*bsqr) + B[i]*bsqr;
+  }
+
+  return 10 * n;
+}
+
+int ArrayTest::sum2_quint_sa(int n)
+{
+  // float *Z = fA[0];
+  float *A = fA[1];
+  float *B = fA[2];
+
+  // __assume_aligned(Z, 64);
+  __assume_aligned(A, 64);
+  __assume_aligned(B, 64);
+  __assume(n%16==0);
+
+#pragma simd
+  for (int i = 0; i < n; ++i)
+  {
+    const float asqr = A[i]*A[i], acub = A[i]*asqr, aqud = asqr*asqr;
+    const float bsqr = B[i]*B[i], bcub = B[i]*bsqr, bqud = bsqr*bsqr;
+
+    A[i] = A[i]*aqud + 5*(aqud*B[i] + A[i]*bqud) + 10*(acub*bsqr + asqr*bcub) + B[i]*bqud;
+  }
+
+  return 19 * n;
+}
+
+int ArrayTest::sum3_cube_sa(int n)
+{
+  // float *Z = fA[0];
+  float *A = fA[1];
+  float *B = fA[2];
+  float *C = fA[3];
+
+  // __assume_aligned(Z, 64);
+  __assume_aligned(A, 64);
+  __assume_aligned(B, 64);
+  __assume_aligned(C, 64);
+  __assume(n%16==0);
+
+#pragma simd
+  for (int i = 0; i < n; ++i)
+  {
+    const float asqr = A[i]*A[i];
+    const float bsqr = B[i]*B[i];
+    const float csqr = C[i]*C[i];
+
+    A[i] = A[i]*asqr + B[i]*bsqr + C[i]*csqr + 6*A[i]*B[i]*C[i] +
+      3*(asqr*(B[i] + C[i]) + bsqr*(A[i] + C[i]) + csqr*(A[i] + B[i]));
+  }
+
+  return 22 * n;
+}

@@ -24,6 +24,12 @@ public:
   int sum3(int n);
   int sum3_sqr(int n);
   int sum3_cube(int n);
+
+  // Store result back in A
+  int sum2_cube_sa(int n);
+  int sum2_quint_sa(int n);
+  int sum3_cube_sa(int n);
+
 };
 
 #endif
