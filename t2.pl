@@ -20,12 +20,15 @@ my $t = new Test('Base'          => 't2',
                  # 'N_VEC_MAX'     => 64 * 1024 * 1024,
 
                  # "Precise" test:
-                 # 'TEST_DURATION' => 5,
+                 'TEST_DURATION' => 5,
 
                  # "Small" test setting for development
                  # 'TEST_DURATION' => 0.5,
-                  'N_VEC_MIN'     => 1024,
-                  'N_VEC_MAX'     => 128 * 1024,
+                 # 'N_VEC_MIN'     => 1024,
+                 # 'N_VEC_MAX'     => 128 * 1024,
+
+                'EnvHost' => "KMP_AFFINITY=scatter",
+                'EnvMic'  => "KMP_AFFINITY='verbose,granularity=fine,compact' KMP_PLACE_THREADS=1T",
     );
 
 @TESTS = qw(sum2_cube sum2_quint sum3_cube);
