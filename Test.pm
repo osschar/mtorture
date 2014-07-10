@@ -83,15 +83,16 @@ sub new
   ### my $S = $proto->SUPER::new(@_);
 
   $S->{'ExeEnv'}  = join(' ', map { defined $S->{$_} ? "$_=$S->{$_}" : () }
-                         qw(TEST_DURATION PRE_TEST_FRAC N_VEC_MIN N_VEC_MAX));
+                         qw(TEST_DURATION PRE_TEST_FRAC N_VEC_MIN N_VEC_MAX
+                            KMP_AFFINITY KMP_PLACE_THREADS));
 
   $S->{'Src'}     = "$S->{'Base'}.cxx";
   $S->{'ExeHost'} = "$S->{'Base'}";
   $S->{'ExeMic'}  = "$S->{'Base'}-mic";
   $S->{'AllExes'} = "$S->{'ExeHost'} $S->{'ExeMic'}";
 
-  $S->{'CmdHost'} = "$S->{'ExeEnv'} ./$S->{'ExeHost'}";
-  $S->{'CmdMic'}  = "ssh mic0 $S->{'ExeEnv'} ./$S->{'ExeMic'}";
+  $S->{'CmdHost'} = "         $S->{'ExeEnv'} $S->{'EnvHost'} ./$S->{'ExeHost'}";
+  $S->{'CmdMic'}  = "ssh mic0 $S->{'ExeEnv'} $S->{'EnvMic'}  ./$S->{'ExeMic'}";
 
   return $S;
 }
