@@ -55,7 +55,9 @@ int main()
 
     t.start();
 
-#pragma omp parallel for num_threads(NT), proc_bind(THREAD_BINDING), reduction(+:n_ops)
+// WTH ... thread_binding ignored ?
+// #pragma omp parallel for num_threads(NT), proc_bind(THREAD_BINDING), reduction(+:n_ops)
+#pragma omp parallel for num_threads(NT), reduction(+:n_ops)
     for (int i = 0; i < NT; ++i)
     {
       for (long64 l = 0; l < n_loop; ++l)
