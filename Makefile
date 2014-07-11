@@ -16,7 +16,7 @@ CXXFLAGS := ${OPT} -openmp -std=gnu++0x ${USER_CXXFLAGS}
 
 LDFLAGS  := ${USER_LDFLAGS}
 
-all: t1
+all: t1 t1-mic t2 t2-mic
 
 %.o: %.cxx *.h
 	icc ${CPPFLAGS} ${CXXFLAGS} ${VECHOST} -c -o $@ $<
