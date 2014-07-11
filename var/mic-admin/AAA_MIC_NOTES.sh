@@ -99,7 +99,7 @@ function clone_ssh_dir()
 function clone_ssh_dirs()
 {
     # for u in `ls /home`; do
-    for u in matevz dsr; do
+    for u in matevz cerati dsr imacneill kmcdermo liamb315 slantz wittich; do
 	clone_ssh_dir $u
     done
 }
