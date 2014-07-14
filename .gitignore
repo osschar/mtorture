@@ -3,6 +3,7 @@
 *.lo
 *.o
 *.obj
+*.om
 
 # Compiled Dynamic libraries
 *.so
@@ -19,3 +20,4 @@
 *.exe
 *.out
 *.app
+t1 t2 t3 t1-mic t2-mic t3-mic
