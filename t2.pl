@@ -16,7 +16,7 @@ my $t = new Test('Base'          => 't2',
 
                  # Defaults for test duration and problem-size limits:
                  # 'TEST_DURATION' => 1,
-                 # 'N_VEC_MIN'     => 8,
+                 # 'N_VEC_MIN'     => 1,
                  # 'N_VEC_MAX'     => 64 * 1024 * 1024,
 
                  # "Precise" test:
