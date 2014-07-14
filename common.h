@@ -15,7 +15,6 @@ const int  ALIGN   = 64;
 // Set this to 8 for AVX, 16 for MIC
 const idx_t Sfac = 1;
 #ifdef __MIC__
-
 const idx_t S = 16 * Sfac;
 #else
 const idx_t S = 8  * Sfac;
@@ -49,7 +48,7 @@ X get_env(const char* name, X def)
 const double g_test_duration  = get_env("TEST_DURATION", 1.0);
 const double g_pre_test_frac  = get_env("PRE_TEST_FRAC", 0.01);
 
-const int    g_n_vec_min  = get_env("N_VEC_MIN", 8);
+const int    g_n_vec_min  = get_env("N_VEC_MIN", 1);
 const int    g_n_vec_max  = get_env("N_VEC_MAX", 64 * 1024 * 1024);
 
 #endif
