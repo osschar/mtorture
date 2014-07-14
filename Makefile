@@ -1,9 +1,9 @@
 # Request latest gcc!
 # . /opt/rh/devtoolset-2/enable
 
-# -mavx -msse4.2
-VECHOST  := -mavx -vec-report=1
-VECMIC   := -mmic -vec-report=1
+VR       := 1
+VECHOST  := -mavx -vec-report=${VR}
+VECMIC   := -mmic -vec-report=${VR}
 
 ### To disable vectorization set USER_CXXFLAGS := -no-simd -no-vec
 # Setting only one of the above has little effect.
@@ -16,7 +16,11 @@ CXXFLAGS := ${OPT} -openmp -std=gnu++0x ${USER_CXXFLAGS}
 
 LDFLAGS  := ${USER_LDFLAGS}
 
-all: t1 t1-mic t2 t2-mic
+TGTS     := t1 t2 t3
+
+EXES     := ${TGTS} $(addsuffix -mic, ${TGTS})
+
+all: ${EXES}
 
 %.o: %.cxx *.h
 	icc ${CPPFLAGS} ${CXXFLAGS} ${VECHOST} -c -o $@ $<
@@ -26,7 +30,7 @@ all: t1 t1-mic t2 t2-mic
 
 
 clean:
-	rm -f t1 t1-mic *.o *.om
+	rm -f ${EXES} *.o *.om
 
 echo:
 	@echo CPPFLAGS = ${CPPFLAGS}
@@ -64,3 +68,19 @@ run-t2:	t2 t2-mic
 	./t2
 	ssh mic0 ./t2-mic
 
+### t3
+
+T3_DEPS := t3 MPlexTest Timing
+
+MPlexTest.o MPlexTest.om: Matriplex/Matriplex.h Matriplex/MatriplexVector.h
+
+t3: $(addsuffix .o, ${T3_DEPS})
+	icc ${CXXFLAGS} ${VECHOST} ${LDFLAGS} -o $@ $^
+
+t3-mic:  $(addsuffix .om, ${T3_DEPS})
+	icc ${CXXFLAGS} ${VECMIC} ${LDFLAGS} -o $@ $^
+	scp $@ mic0:
+
+run-t3:	t3 t3-mic
+	./t3
+	ssh mic0 ./t3-mic
