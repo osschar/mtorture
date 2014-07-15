@@ -4,13 +4,22 @@
 #include "Matriplex/Matriplex.h"
 #include "Matriplex/MatriplexVector.h"
 
+#ifndef MPT_DIM
+#define MPT_DIM 6
+#endif
+#ifndef MPT_SIZE
+#define MPT_SIZE 16
+#endif
+
 class MPlexTest
 {
-  typedef Matriplex::Matriplex<float, 6, 6, 16>       MP;// XXXX
-  typedef Matriplex::MatriplexVector<float, 6, 6, 16> MPV;// XXXX
+  typedef Matriplex::Matriplex<float, MPT_DIM, MPT_DIM, MPT_SIZE>       MP;
+  typedef Matriplex::MatriplexVector<float, MPT_DIM, MPT_DIM, MPT_SIZE> MPV;
 
   MPV **fMPV;
   int   fN;
+
+  static const int sNMul;
 
 public:
   MPlexTest(int n_array, int size);
