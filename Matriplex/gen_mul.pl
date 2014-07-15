@@ -52,22 +52,21 @@ if ($SYMMETRIC)
 }
 else
 {
-
   for (my $i = 0; $i < $D; ++$i)
   {
     for (my $j = 0; $j < $D; ++$j)
     {
       my $x = $i * $D + $j;
-      print "${PREF}C.fArray[$x * N + n] =${POST}";
+      printf "${PREF}C.fArray[%2d*N+n] =${POST}", $x;
 
       my @sum;
 
       for (my $k = 0; $k < $D; ++$k)
       {
-        my $iko = $Off[$i * $D + $k];
-        my $kjo = $Off[$k * $D + $j];
+        my $iko = $i * $D + $k;
+        my $kjo = $k * $D + $j;
 
-        push @sum, "A.fArray[$iko * N + n] * B.fArray[$kjo * N + n]";
+        push @sum, (sprintf "A.fArray[%2d*N+n]*B.fArray[%2d*N+n]", $iko, $kjo);
       }
       print join(" +$JOIN", @sum), ";${POST}";
       print "\n";
