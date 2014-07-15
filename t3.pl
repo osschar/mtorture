@@ -5,14 +5,14 @@ use Test;
 
 ########################################################################
 
-my $t = new Test('Base'          => 't2',
-                 'FmtHost'       => 'mt_${test}_host.rt',
-                 'FmtMic'        => 'mt_${test}_mic.rt',
+my $t = new Test('Base'          => 't3',
+                 'FmtHost'       => 'XXX_${test}_host.rt',
+                 'FmtMic'        => 'XXX_${test}_mic.rt',
 
                  'RunHost'       => 1,
                  'RunMic'        => 1,
 
-                 # 'MAKE_VARS'     => 'OPT=-O3',
+                 'MAKE_VARS'     => 'DEFS="-DMPT_DIM=3 -DMPT_SIZE=16"',
 
                  # Defaults for test duration and problem-size limits:
                  # 'TEST_DURATION' => 1,
@@ -23,21 +23,32 @@ my $t = new Test('Base'          => 't2',
                  'TEST_DURATION' => 5,
 
                  # "Small" test setting for development
-                 # 'TEST_DURATION' => 0.5,
-                 # 'N_VEC_MIN'     => 1024,
-                 # 'N_VEC_MAX'     => 128 * 1024,
+                 #'TEST_DURATION' => 0.5,
+                 #'N_VEC_MIN'     => 1,
+                 #'N_VEC_MAX'     => 16384,
 
                 'EnvHost' => "",
                 'EnvMic'  => "",
     );
 
-@TESTS = qw(sum2_cube sum2_quint sum3_cube);
+@TESTS = qw(mult2); # mult2_3out mult2_3in);
 
-$t->make_clean();
-
-for $test (@TESTS)
+for $dim (3, 6)
 {
-  print "Running test $test ...\n";
+  for $size (8, 16, 32, 64)
+  {
+    $t->{'FmtHost'} = "\${test}_${dim}_${size}_host.rt";
+    $t->{'FmtMic'}  = "\${test}_${dim}_${size}_mic.rt";
 
-  $t->run_test($test);
+    $t->{MAKE_VARS} = "DEFS=\"-DMPT_DIM=$dim -DMPT_SIZE=$size\"";
+
+    $t->make_clean();
+
+    for $test (@TESTS)
+    {
+      print "Running test $test ...\n";
+
+      $t->run_test($test);
+    }
+  }
 }
