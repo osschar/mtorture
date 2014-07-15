@@ -9,9 +9,10 @@ VECMIC   := -mmic -vec-report=${VR}
 # Setting only one of the above has little effect.
 # Note, this also screws-up prefetching so it's a lousy deal.
 
+# -opt-prefetch-distance=64,8
 OPT      := -O3
 
-CPPFLAGS := -I. ${USER_CPPFLAGS}
+CPPFLAGS := -I. ${USER_CPPFLAGS} ${DEFS}
 CXXFLAGS := ${OPT} -openmp -std=gnu++0x ${USER_CXXFLAGS}
 
 LDFLAGS  := ${USER_LDFLAGS}
