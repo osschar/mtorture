@@ -31,7 +31,10 @@ my $t = new Test('Base'          => 't3',
                 'EnvMic'  => "",
     );
 
-@TESTS = qw(mult2); # mult2_3out mult2_3in);
+@TESTS = qw(mult2);
+# Other tests:
+# - mult2_3out mult2_3in    --- made no real difference
+# - inv_cramer inv_cholesky --- works only for 3x3
 
 for $dim (3, 6)
 {
