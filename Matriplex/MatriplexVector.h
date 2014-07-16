@@ -11,13 +11,15 @@
 namespace Matriplex
 {
 
-template<typename T, idx_t D1, idx_t D2, idx_t N>
+//------------------------------------------------------------------------------
+
+template<class MP>
 class MatriplexVector
 {
-   typedef Matriplex<T, D1, D2, N> MP;
-
    MP*   fV;
    idx_t fN;
+
+   typedef typename MP::value_type T;
 
 public:
    MatriplexVector(idx_t n) : fN(n)
@@ -54,18 +56,20 @@ public:
    void Assign(idx_t n, T *arr)             { fV[n/N].Assign(n%N, arr); }
 };
 
+template<class MP> using MPlexVec = MatriplexVector<MP>;
+
 //------------------------------------------------------------------------------
 
 template<typename T, idx_t D1, idx_t D2, idx_t D3, idx_t N>
-void Multiply(const MatriplexVector<T, D1, D2, N>& A,
-              const MatriplexVector<T, D2, D3, N>& B,
-              MatriplexVector<T, D1, D3, N>& C,
-              int n_to_process = 0)
+void Multiply(const MPlexVec<MPlex<T, D1, D2, N>>& A,
+              const MPlexVec<MPlex<T, D2, D3, N>>& B,
+                    MPlexVec<MPlex<T, D1, D3, N>>& C,
+                    int n_to_process = 0)
 {
    assert(A.size() == B.size());
    assert(A.size() == C.size());
 
-   int np = n_to_process ? n_to_process : A.size();
+   const int np = n_to_process ? n_to_process : A.size();
 
    for (int i = 0; i < np; ++i)
    {
@@ -74,15 +78,15 @@ void Multiply(const MatriplexVector<T, D1, D2, N>& A,
 }
 
 template<typename T, idx_t D1, idx_t D2, idx_t D3, idx_t N>
-void MultiplyUnrolled(const MatriplexVector<T, D1, D2, N>& A,
-              const MatriplexVector<T, D2, D3, N>& B,
-              MatriplexVector<T, D1, D3, N>& C,
-              int n_to_process = 0)
+void MultiplyUnrolled(const MPlexVec<MPlex<T, D1, D2, N>>& A,
+                      const MPlexVec<MPlex<T, D2, D3, N>>& B,
+                            MPlexVec<MPlex<T, D1, D3, N>>& C,
+                            int n_to_process = 0)
 {
    assert(A.size() == B.size());
    assert(A.size() == C.size());
 
-   int np = n_to_process ? n_to_process : A.size();
+   const int np = n_to_process ? n_to_process : A.size();
 
    for (int i = 0; i < np; ++i)
    {
@@ -91,15 +95,15 @@ void MultiplyUnrolled(const MatriplexVector<T, D1, D2, N>& A,
 }
 
 template<typename T, idx_t D1, idx_t D2, idx_t D3, idx_t N>
-void Multiply3in(MatriplexVector<T, D1, D2, N>& A,
-                 MatriplexVector<T, D2, D3, N>& B,
-                 MatriplexVector<T, D1, D3, N>& C,
+void Multiply3in(MPlexVec<MPlex<T, D1, D2, N>>& A,
+                 MPlexVec<MPlex<T, D2, D3, N>>& B,
+                 MPlexVec<MPlex<T, D1, D3, N>>& C,
                  int n_to_process = 0)
 {
    assert(A.size() == B.size());
    assert(A.size() == C.size());
 
-   int np = n_to_process ? n_to_process : A.size();
+   const int np = n_to_process ? n_to_process : A.size();
 
    for (int i = 0; i < np; ++i)
    {
@@ -112,23 +116,16 @@ void Multiply3in(MatriplexVector<T, D1, D2, N>& A,
 //------------------------------------------------------------------------------
 
 template<typename T, idx_t D, idx_t N>
-void InvertChol(const MatriplexVector<T, D, D, N>& A)
+void InvertChol(const MPlexVec<MPlex<T, D, D, N>>& A,
+                      int n_to_process = 0)
 {
-   int np = A.size();
+   const int np = n_to_process ? n_to_process : A.size();
 
    for (int i = 0; i < np; ++i)
    {
       InvertChol(A[i]);
    }
 }
-
-template<class M>
-class MatriplexVector2 : public std::vector<M>
-{
-public:
-   MatriplexVector2() {}
-   MatriplexVector2(idx_t n) : std::vector<M>(n) {}
-};
 
 }
 
