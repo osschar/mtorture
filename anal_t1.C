@@ -1,4 +1,8 @@
+// Run this in compiled mode ... the string handling got too complicated :(
+
 #include "TTree.h"
+#include "TCanvas.h"
+#include "TGraph.h"
 #include "TMultiGraph.h"
 
 //==============================================================================
@@ -25,9 +29,20 @@ const int MaxNN = 6;
 //                     "sum3_cube_sa",  "sum3_cube"    };
 
 // t2-0:
-TString  Gsuff[] = {"sum2_cube_host",  "sum2_cube_mic",
-                    "sum2_quint_host", "sum2_quint_mic",
-                    "sum3_cube_host",  "sum3_cube_mic"  };
+// TString  Gsuff[] = {"sum2_cube_host",  "sum2_cube_mic",
+//                     "sum2_quint_host", "sum2_quint_mic",
+//                     "sum3_cube_host",  "sum3_cube_mic"  };
+
+// t3-0:
+// do_all("mult2", "host", save_p); do_all("mult2", "mic", save_p);
+TString  Gsuff[] = { "3_8", "3_16", "3_32", "6_8", "6_16", "6_32" };
+
+
+//------------------------------------------------------------------------------
+
+TString  XLabel = "N_{array}";
+
+bool     PlotVUt = true, PlotOpT = true, PlotFlops = true;
 
 int      Gmsty[] = { 2, 5, 2, 5, 2, 5};
 int      Gmcol[] = { kRed+2, kBlue+2, kOrange+4, kCyan+2, kYellow+2, kGreen+2 };
@@ -37,19 +52,19 @@ TTree   *T[MaxNN]   = { 0 };
 
 //==============================================================================
 
-TString join2(const TString& a, const TString& b)
+TString join2(const TString& a, const TString& b, const TString& sep="_")
 {
   TString j = a;
   if ( ! a.IsNull() && ! b.IsNull())
-    j += "_";
+    j += sep;
   j += b;
 
   return j;
 }
 
-TString join3(const TString& a, const TString& b, const TString& c)
+TString join3(const TString& a, const TString& b, const TString& c, const TString& sep="_")
 {
-  return join2(join2(a, b), c);
+  return join2(join2(a, b, sep), c, sep);
 }
 
 void load_trees(const TString& pref, const TString& post)
@@ -113,14 +128,17 @@ void plot_all_graphs(const TString& name, const TString& post, bool save_p=false
 {
   TString pref = join2(name, post);
 
-  plot_graph("NVec:VecUt", pref + "_VecUt" ,
-             "Vector utilization;N_{array};Utilization", save_p);
+  if (PlotVUt)
+    plot_graph("NVec:VecUt", pref + "_VecUt" ,
+               join3("Vector utilization", XLabel, "Utilization", ";"), save_p);
 
-  plot_graph("NVec:OpT", pref + "_OpT",
-             "Operations per tick;N_{array};N_{ops}", save_p);
+  if (PlotOpT)
+    plot_graph("NVec:OpT", pref + "_OpT",
+               join3("Operations per tick", XLabel, "N_{ops}", ";"), save_p);
 
-  plot_graph("NVec:Gflops", pref + "_Gflops",
-             "Gflops;N_{array};Gflops", save_p);
+  if (PlotFlops)
+    plot_graph("NVec:Gflops", pref + "_Gflops",
+               join3("Gflops", XLabel, "Gflops", ";"), save_p);
 }
 
 //------------------------------------------------------------------------------
@@ -133,19 +151,18 @@ void do_all(const TString& name, const TString& post, bool save_p=false)
 
 //------------------------------------------------------------------------------
 
-void anal1_t1(bool save_p=false)
+void anal_t1(bool save_p=false)
 {
-  NN = 6;
-  do_all("arr", "T4", save_p);
-  do_all("arr", "T4",  save_p);
+  XLabel = "Matriplex vector size";
+  PlotOpT = PlotFlops = false;
 
-  return;
+  NN = 6;
+  do_all("mult2", "host", save_p);
+  do_all("mult2", "mic", save_p);
 
   NN = 3;
-  do_all("arr_sum3", "host_O3", save_p);
-  do_all("arr_sum3", "mic_O3", save_p);
-
-  NN = 5;
-  do_all("arr_sum2", "host_O3", save_p);
-  do_all("arr_sum2", "mic_O3", save_p);
+  do_all("inv_cramer", "host", save_p);
+  do_all("inv_cramer", "mic", save_p);
+  do_all("inv_cholesky", "host", save_p);
+  do_all("inv_cholesky", "mic", save_p);
 }
