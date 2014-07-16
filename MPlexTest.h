@@ -20,6 +20,7 @@ class MPlexTest
   int   fN;
 
   static const int sNMul;
+  // static const int sNMulSym;
 
 public:
   MPlexTest(int n_array, int size);
@@ -28,6 +29,9 @@ public:
   int mult2(int n_vec);
   int mult2_3out(int n_vec);
   int mult2_3in (int n_vec);
+
+  int inv_cramer(int n_vec);
+  int inv_cholesky(int n_vec);
 };
 
 #endif;

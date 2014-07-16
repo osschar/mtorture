@@ -48,3 +48,27 @@ int MPlexTest::mult2_3in(int n_vec)
 
   return 3 * sNMul * n_vec;
 }
+
+//==============================================================================
+
+int MPlexTest::inv_cramer(int n_vec)
+{
+  assert(MPT_DIM == 3);
+
+  Matriplex::InvertCramer(*fMPV[0], n_vec);
+
+  // 3x3: 27 + 5 + 1 + 9 = 42 
+  return 42 * MPT_SIZE * n_vec;
+}
+
+int MPlexTest::inv_cholesky(int n_vec)
+{
+  assert(MPT_DIM == 3);
+
+  Matriplex::InvertCholesky(*fMPV[0], n_vec);
+
+  // 3x3: 32 ops + 3 sqrts
+  // sqrt: latency 8, throughput 2 (have to wait on each of them!)
+  // what do i do then? count each as 4 (every other clock!).
+  return 44 * MPT_SIZE * n_vec;
+}
