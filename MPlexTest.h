@@ -13,8 +13,8 @@
 
 class MPlexTest
 {
-  typedef Matriplex::Matriplex<float, MPT_DIM, MPT_DIM, MPT_SIZE>       MP;
-  typedef Matriplex::MatriplexVector<float, MPT_DIM, MPT_DIM, MPT_SIZE> MPV;
+  typedef Matriplex::Matriplex<float, MPT_DIM, MPT_DIM, MPT_SIZE> MP;
+  typedef Matriplex::MatriplexVector<MP>                          MPV;
 
   MPV **fMPV;
   int   fN;
