@@ -58,7 +58,8 @@ public:
 
 template<class MP> using MPlexVec = MatriplexVector<MP>;
 
-//------------------------------------------------------------------------------
+
+//==============================================================================
 
 template<typename T, idx_t D1, idx_t D2, idx_t D3, idx_t N>
 void Multiply(const MPlexVec<MPlex<T, D1, D2, N>>& A,
@@ -113,17 +114,30 @@ void Multiply3in(MPlexVec<MPlex<T, D1, D2, N>>& A,
    }
 }
 
-//------------------------------------------------------------------------------
+
+//==============================================================================
 
 template<typename T, idx_t D, idx_t N>
-void InvertChol(const MPlexVec<MPlex<T, D, D, N>>& A,
-                      int n_to_process = 0)
+void InvertCramer(MPlexVec<MPlex<T, D, D, N>>& A,
+                  int n_to_process = 0)
 {
    const int np = n_to_process ? n_to_process : A.size();
 
    for (int i = 0; i < np; ++i)
    {
-      InvertChol(A[i]);
+      InvertCramer(A[i]);
+   }
+}
+
+template<typename T, idx_t D, idx_t N>
+void InvertCholesky(MPlexVec<MPlex<T, D, D, N>>& A,
+                    int n_to_process = 0)
+{
+   const int np = n_to_process ? n_to_process : A.size();
+
+   for (int i = 0; i < np; ++i)
+   {
+      InvertCholesky(A[i]);
    }
 }
 

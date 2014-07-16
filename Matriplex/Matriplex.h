@@ -163,7 +163,7 @@ void MultiplyUnrolled(const MPlex<T, D1, D2, N>& A,
 template<typename T, idx_t D, idx_t N>
 struct CramerInverter
 {
-   static void Inverter(MPlex<T, D, D, N>& C, double *determ=0)
+   static void Invert(MPlex<T, D, D, N>& A, double *determ=0)
    {
       throw std::runtime_error("general cramer inversion not supported");
    }
@@ -173,16 +173,16 @@ struct CramerInverter
 template<typename T, idx_t N>
 struct CramerInverter<T, 2, N>
 {
-   static void Invert(MPlex<T, 2, 2, N>& C, double *determ=0)
+   static void Invert(MPlex<T, 2, 2, N>& A, double *determ=0)
    {
       typedef T TT;
+
+      T *M = A.fArray;
 
 #pragma simd
       for (idx_t n = 0; n < N; ++n)
       {
-         T *pM = & C.fArray[0];
-
-         const TT det = pM[n] * pM[3*N + n] - pM[2*N + n] * pM[N + n];
+         const TT det = M[n] * M[3*N + n] - M[2*N + n] * M[N + n];
 
          //if (determ)
          //determ[n] = s;
@@ -190,11 +190,11 @@ struct CramerInverter<T, 2, N>
          //if (det == 0)
          {
             const TT s   = TT(1) / det;
-            const TT tmp = s * pM[3*N + n];
-            pM[N + n]   *= -s;
-            pM[2*N + n] *= -s;
-            pM[3*N + n]  = s * pM[n];
-            pM[n] = tmp;
+            const TT tmp = s * M[3*N + n];
+            M[N + n]   *= -s;
+            M[2*N + n] *= -s;
+            M[3*N + n]  = s * M[n];
+            M[n] = tmp;
          }
       }
    }
@@ -203,51 +203,51 @@ struct CramerInverter<T, 2, N>
 template<typename T, idx_t N>
 struct CramerInverter<T, 3, N>
 {
-   static void Invert(MPlex<T, 3, 3, N>& C, double *determ=0)
+   static void Invert(MPlex<T, 3, 3, N>& A, double *determ=0)
    {
       typedef T TT;
+
+      T *M = A.fArray;
 
 #pragma simd
       for (idx_t n = 0; n < N; ++n)
       {
-         T *pM = & C.fArray[n];
+         const TT c00 = M[4*N+n] * M[8*N+n] - M[5*N+n] * M[7*N+n];
+         const TT c01 = M[5*N+n] * M[6*N+n] - M[3*N+n] * M[8*N+n];
+         const TT c02 = M[3*N+n] * M[7*N+n] - M[4*N+n] * M[6*N+n];
+         const TT c10 = M[7*N+n] * M[2*N+n] - M[8*N+n] * M[1*N+n];
+         const TT c11 = M[8*N+n] * M[0*N+n] - M[6*N+n] * M[2*N+n];
+         const TT c12 = M[6*N+n] * M[1*N+n] - M[7*N+n] * M[0*N+n];
+         const TT c20 = M[1*N+n] * M[5*N+n] - M[2*N+n] * M[4*N+n];
+         const TT c21 = M[2*N+n] * M[3*N+n] - M[0*N+n] * M[5*N+n];
+         const TT c22 = M[0*N+n] * M[4*N+n] - M[1*N+n] * M[3*N+n];
 
-         const TT c00 = pM[4*N] * pM[8*N] - pM[5*N] * pM[7*N];
-         const TT c01 = pM[5*N] * pM[6*N] - pM[3*N] * pM[8*N];
-         const TT c02 = pM[3*N] * pM[7*N] - pM[4*N] * pM[6*N];
-         const TT c10 = pM[7*N] * pM[2*N] - pM[8*N] * pM[1*N];
-         const TT c11 = pM[8*N] * pM[0*N] - pM[6*N] * pM[2*N];
-         const TT c12 = pM[6*N] * pM[1*N] - pM[7*N] * pM[0*N];
-         const TT c20 = pM[1*N] * pM[5*N] - pM[2*N] * pM[4*N];
-         const TT c21 = pM[2*N] * pM[3*N] - pM[0*N] * pM[5*N];
-         const TT c22 = pM[0*N] * pM[4*N] - pM[1*N] * pM[3*N];
-
-         const TT det = pM[0*N] * c00 + pM[1*N] * c01 + pM[2*N] * c02;
+         const TT det = M[0*N+n] * c00 + M[1*N+n] * c01 + M[2*N+n] * c02;
 
          //if (determ)
          //  *determ[n] = det;
 
          const TT s = TT(1) / det;
 
-         pM[0*N] = s*c00;
-         pM[1*N] = s*c10;
-         pM[2*N] = s*c20;
-         pM[3*N] = s*c01;
-         pM[4*N] = s*c11;
-         pM[5*N] = s*c21;
-         pM[6*N] = s*c02;
-         pM[7*N] = s*c12;
-         pM[8*N] = s*c22;
+         M[0*N+n] = s*c00;
+         M[1*N+n] = s*c10;
+         M[2*N+n] = s*c20;
+         M[3*N+n] = s*c01;
+         M[4*N+n] = s*c11;
+         M[5*N+n] = s*c21;
+         M[6*N+n] = s*c02;
+         M[7*N+n] = s*c12;
+         M[8*N+n] = s*c22;
       }
    }
 };
 
 template<typename T, idx_t D, idx_t N>
-void InvertCramer(MPlex<T, D, D, N>& C, double *determ=0)
+void InvertCramer(MPlex<T, D, D, N>& A, double *determ=0)
 {
    // We don't do general Inverts.
 
-   CramerInverter<T, D, N>::Invert(C, determ);
+   CramerInverter<T, D, N>::Invert(A, determ);
 }
 
 
@@ -256,33 +256,38 @@ void InvertCramer(MPlex<T, D, D, N>& C, double *determ=0)
 //==============================================================================
 
 template<typename T, idx_t D, idx_t N>
-struct CholInverter
+struct CholeskyInverter
 {
-   static void Invert(MPlex<T, D, D, N>& m)
+   static void Invert(MPlex<T, D, D, N>& A)
    {
       throw std::runtime_error("general cholesky inversion not supported");
    }
 };
 
 template<typename T, idx_t N>
-struct CholInverter<T, 3, N>
+struct CholeskyInverter<T, 3, N>
 {
+   // Remember, this only works on symmetric matrices!
    // Optimized version for positive definite matrices, no checks.
    // Also, use as little locals as possible.
    // This gives: host  x 5.8 (instead of 4.7x)
    //             mic   x17.7 (instead of 8.5x))
-   static void Invert(MPlex<T, 3, 3, N>& m)
+   static void Invert(MPlex<T, 3, 3, N>& A)
    {
+      typedef T TT;
+
+      T *M = A.fArray;
+
 #pragma simd
       for (idx_t n = 0; n < N; ++n)
       {
-         T l0 = std::sqrt(T(1) / m(n,0,0));
-         T l1 = m(n,1,0) * l0;
-         T l2 = m(n,1,1) - l1 * l1;
+         TT l0 = std::sqrt(T(1) / M[0*N+n]);
+         TT l1 = M[3*N+n] * l0;
+         TT l2 = M[4*N+n] - l1 * l1;
          l2 = std::sqrt(T(1) / l2);
-         T l3 = m(n,2,0) * l0;
-         T l4 = (m(n,2,1) - l1 * l3) * l2;
-         T l5 = m(n,2,2) - (l3 * l3 + l4 * l4);
+         TT l3 = M[6*N+n] * l0;
+         TT l4 = (M[7*N+n] - l1 * l3) * l2;
+         TT l5 = M[8*N+n] - (l3 * l3 + l4 * l4);
          l5 = std::sqrt(T(1) / l5);
 
          // decomposition done
@@ -291,12 +296,12 @@ struct CholInverter<T, 3, N>
          l1 = -l1 * l0 * l2;
          l4 = -l4 * l2 * l5;
 
-         m(n,0,0) = l3*l3 + l1*l1 + l0*l0;
-         m(n,0,1) = m(n,1,0) = l3*l4 + l1*l2;
-         m(n,1,1) = l4*l4 + l2*l2;
-         m(n,0,2) = m(n,2,0) = l3*l5;
-         m(n,2,1) = m(n,2,1) = l4*l5;
-         m(n,2,2) = l5*l5;
+         M[0*N+n] = l3*l3 + l1*l1 + l0*l0;
+         M[1*N+n] = M[3*N+n] = l3*l4 + l1*l2;
+         M[4*N+n] = l4*l4 + l2*l2;
+         M[2*N+n] = M[6*N+n] = l3*l5;
+         M[5*N+n] = M[7*N+n] = l4*l5;
+         M[8*N+n] = l5*l5;
 
          // m(2,x) are all zero if anything went wrong at l5.
          // all zero, if anything went wrong already for l0 or l2.
@@ -305,9 +310,9 @@ struct CholInverter<T, 3, N>
 };
 
 template<typename T, idx_t D, idx_t N>
-void InvertChol(MPlex<T, D, D, N>& m)
+void InvertCholesky(MPlex<T, D, D, N>& A)
 {
-   CholInverter<T, D, N>::Invert(m);
+   CholeskyInverter<T, D, N>::Invert(A);
 }
 
 }
