@@ -26,3 +26,6 @@ t2
 t2-mic
 t3
 t3-mic
+
+# Dependencies
+*.d
