@@ -9,11 +9,11 @@
 #endif
 
 const int mp_len     = S ;
-const int mp_vec_max = g_n_vec_max / (6 * 6 * 16); // XXXX
+const int mp_vec_max = g_n_vec_max / (MPT_DIM * MPT_DIM * MPT_SIZE);
 
 int main()
 {
-  MPlexTest mpt(4, mp_vec_max);
+  MPlexTest mpt(3, 2, mp_vec_max);
 
   Timing t([&](int n_vec)
            {

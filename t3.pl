@@ -31,12 +31,13 @@ my $t = new Test('Base'          => 't3',
                 'EnvMic'  => "",
     );
 
-@TESTS = qw(mult2);
+@TESTS = qw(mult2_sym);
 # Other tests:
-# - mult2_3out mult2_3in    --- made no real difference
-# - inv_cramer inv_cholesky --- works only for 3x3
+# - mult2_3out mult2_3in            --- made no real difference
+# - inv_cramer inv_cholesky         --- works only for 3x3
+# - inv_cramer_sym inv_cholesky_sym --- works only for 3x3
 
-for $dim (3, 6)
+for $dim (3)#, 6)
 {
   for $size (8, 16, 32, 64)
   {
