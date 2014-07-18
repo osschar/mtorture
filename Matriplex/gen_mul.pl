@@ -10,41 +10,42 @@ $BR   = " ";
 $JOIN = "$BR";
 $POST = " ";
 
-$D   = 6;
+$D   = 3;
 @Off = @{$Offs[$D]};
 
-# $E = $D;
-$E = 3; # for Kalman gain multiply
+$E = $D;
+# $E = 3; # for Kalman gain multiply
 
-$SYMMETRIC = 0;
+#$a = "A.fArray";
+#$b = "B.fArray";
+#$c = "C.fArray";
+$a = "a";
+$b = "b";
+$c = "c";
+
+$SYMMETRIC = 1;
 
 if ($SYMMETRIC)
 { 
-
   for (my $i = 0; $i < $D; ++$i)
   {
     for (my $j = 0; $j < $D; ++$j)
     # for (my $j = 0; $j <= $i; ++$j)
     {
-      my $x = $Off[$i * $D + $j];
-      # my $x = $i * $D + $j;
-      print "${PREF}C.fArray[$x * N + n] = A.fArray[$x * N + n] -${POST}";
+      # my $x = $Off[$i * $D + $j];
+      my $x = $i * $D + $j;
+      printf "${PREF}${c}[%2d*N+n] =${POST}", $x;
 
       my @sum;
 
       for (my $k = 0; $k < $E; ++$k)
       {
         my $iko = $Off[$i * $D + $k];
-        # my $iko = $i * $D + $k;
         my $kjo = $Off[$k * $D + $j];
-        # my $kjo = $k * $D + $j;
 
-        push @sum, "A.fArray[$iko * N + n] * B.fArray[$kjo * N + n]";
-
-        # For FinalKalmanErr
-        #push @sum, "B.fArray[$iko * N + n] * A.fArray[$kjo * N + n]";
+        push @sum, sprintf("${a}[%2d*N+n]*${b}[%2d*N+n]", $iko, $kjo);
       }
-      print join(" -$JOIN", @sum), ";${POST}";
+      print join(" +$JOIN", @sum), ";${POST}";
       print "\n";
     }
   }
@@ -57,7 +58,7 @@ else
     for (my $j = 0; $j < $D; ++$j)
     {
       my $x = $i * $D + $j;
-      printf "${PREF}C.fArray[%2d*N+n] =${POST}", $x;
+      printf "${PREF}${c}[%2d*N+n] =${POST}", $x;
 
       my @sum;
 
@@ -66,7 +67,7 @@ else
         my $iko = $i * $D + $k;
         my $kjo = $k * $D + $j;
 
-        push @sum, (sprintf "A.fArray[%2d*N+n]*B.fArray[%2d*N+n]", $iko, $kjo);
+        push @sum, sprintf "${a}[%2d*N+n]*${b}[%2d*N+n]", $iko, $kjo;
       }
       print join(" +$JOIN", @sum), ";${POST}";
       print "\n";
