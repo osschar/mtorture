@@ -79,9 +79,9 @@ template<typename T, idx_t D, idx_t N> using MPlexSym = MatriplexSym<T, D, N>;
 template<typename T, idx_t D, idx_t N>
 struct SymMultiplyCls
 {
-   static void Multiply(const MatriplexSym<T, D, N>& A,
-                        const MatriplexSym<T, D, N>& B,
-                        Matriplex<T, D, D, N>& C)
+   static void Multiply(const MPlexSym<T, D, N>& A,
+                        const MPlexSym<T, D, N>& B,
+                        MPlex<T, D, D, N>& C)
    {
       throw std::runtime_error("general symmetric multiplication not supported");
    }
@@ -91,12 +91,13 @@ struct SymMultiplyCls
 template<typename T, idx_t N>
 struct SymMultiplyCls<T, 3, N>
 {
-   static void Multiply(const MatriplexSym<T, 3, N>& A,
-                        const MatriplexSym<T, 3, N>& B,
-                        Matriplex<T, 3, 3, N>& C)
+   static void Multiply(const MPlexSym<T, 3, N>& A,
+                        const MPlexSym<T, 3, N>& B,
+                        MPlex<T, 3, 3, N>& C)
 {
-   const T *a = A.fArray, *b = B.fArray;
-         T *c = C.fArray;
+   const T *a = A.fArray; __assume_aligned(a, 64);
+   const T *b = B.fArray; __assume_aligned(b, 64);
+         T *c = C.fArray; __assume_aligned(c, 64);
 
 #pragma simd
    for (idx_t n = 0; n < N; ++n)
@@ -117,12 +118,13 @@ struct SymMultiplyCls<T, 3, N>
 template<typename T, idx_t N>
 struct SymMultiplyCls<T, 6, N>
 {
-   static void Multiply(const MatriplexSym<float, 6, N>& A,
-                        const MatriplexSym<float, 6, N>& B,
-                        Matriplex<float, 6, 6, N>& C)
+   static void Multiply(const MPlexSym<float, 6, N>& A,
+                        const MPlexSym<float, 6, N>& B,
+                        MPlex<float, 6, 6, N>& C)
 {
-   const T *a = A.fArray, *b = B.fArray;
-         T *c = C.fArray;
+   const T *a = A.fArray; __assume_aligned(a, 64);
+   const T *b = B.fArray; __assume_aligned(b, 64);
+         T *c = C.fArray; __assume_aligned(c, 64);
 
 #pragma simd
    for (idx_t n = 0; n < N; ++n)
@@ -168,9 +170,9 @@ struct SymMultiplyCls<T, 6, N>
 };
 
 template<typename T, idx_t D, idx_t N>
-void Multiply(const MatriplexSym<T, D, N>& A,
-              const MatriplexSym<T, D, N>& B,
-                    Matriplex<T, D, D, N>& C)
+void Multiply(const MPlexSym<T, D, N>& A,
+              const MPlexSym<T, D, N>& B,
+                    MPlex<T, D, D, N>& C)
 {
    // printf("Multipl %d %d\n", D, N);
 
@@ -185,7 +187,7 @@ void Multiply(const MatriplexSym<T, D, N>& A,
 template<typename T, idx_t D, idx_t N>
 struct CramerInverterSym
 {
-   static void Invert(MatriplexSym<T, D, N>& A)
+   static void Invert(MPlexSym<T, D, N>& A)
    {
      throw std::runtime_error("general cramer inversion not supported");
    }
@@ -194,11 +196,11 @@ struct CramerInverterSym
 template<typename T, idx_t N>
 struct CramerInverterSym<T, 2, N>
 {
-   static void Invert(MatriplexSym<T, 2, N>& A)
+   static void Invert(MPlexSym<T, 2, N>& A)
    {
       typedef T TT;
 
-      T *a = A.fArray;
+      T *a = A.fArray; __assume_aligned(a, 64);
 
 #pragma simd
       for (idx_t n = 0; n < N; ++n)
@@ -217,11 +219,11 @@ struct CramerInverterSym<T, 2, N>
 template<typename T, idx_t N>
 struct CramerInverterSym<T, 3, N>
 {
-   static void Invert(MatriplexSym<T, 3, N>& A)
+   static void Invert(MPlexSym<T, 3, N>& A)
    {
       typedef T TT;
 
-      T *a = A.fArray;
+      T *a = A.fArray; __assume_aligned(a, 64);
 
 #pragma simd
       for (idx_t n = 0; n < N; ++n)
@@ -248,7 +250,7 @@ struct CramerInverterSym<T, 3, N>
 };
 
 template<typename T, idx_t D, idx_t N>
-void InvertCramerSym(MatriplexSym<T, D, N>& A)
+void InvertCramerSym(MPlexSym<T, D, N>& A)
 {
    CramerInverterSym<T, D, N>::Invert(A);
 }
@@ -261,7 +263,7 @@ void InvertCramerSym(MatriplexSym<T, D, N>& A)
 template<typename T, idx_t D, idx_t N>
 struct CholeskyInverterSym
 {
-   static void Invert(MatriplexSym<T, D, N>& A)
+   static void Invert(MPlexSym<T, D, N>& A)
    {
      throw std::runtime_error("general cholesky inversion not supported");
    }
@@ -270,7 +272,7 @@ struct CholeskyInverterSym
 template<typename T, idx_t N>
 struct CholeskyInverterSym<T, 3, N>
 {
-   static void Invert(MatriplexSym<T, 3, N>& A)
+   static void Invert(MPlexSym<T, 3, N>& A)
    {
       typedef T TT;
 
@@ -308,7 +310,7 @@ struct CholeskyInverterSym<T, 3, N>
 };
 
 template<typename T, idx_t D, idx_t N>
-void InvertCholeskySym(MatriplexSym<T, D, N>& A)
+void InvertCholeskySym(MPlexSym<T, D, N>& A)
 {
    CholeskyInverterSym<T, D, N>::Invert(A);
 }
