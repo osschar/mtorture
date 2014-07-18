@@ -73,7 +73,7 @@ run-t2:	t2 t2-mic
 
 T3_DEPS := t3 MPlexTest Timing
 
-MPlexTest.o MPlexTest.om: Matriplex/Matriplex.h Matriplex/MatriplexVector.h
+MPlexTest.o MPlexTest.om: Matriplex/Matriplex.h Matriplex/MatriplexSym.h Matriplex/MatriplexVector.h
 
 t3: $(addsuffix .o, ${T3_DEPS})
 	icc ${CXXFLAGS} ${VECHOST} ${LDFLAGS} -o $@ $^
