@@ -61,9 +61,9 @@ template<typename T, idx_t D1, idx_t D2, idx_t N> using MPlex = Matriplex<T, D1,
 //==============================================================================
 
 template<typename T, idx_t D1, idx_t D2, idx_t D3, idx_t N>
-void Multiply(const MPlex<T, D1, D2, N>& A,
-              const MPlex<T, D2, D3, N>& B,
-              MPlex<T, D1, D3, N>& C)
+void MultiplyGeneral(const MPlex<T, D1, D2, N>& A,
+                     const MPlex<T, D2, D3, N>& B,
+                     MPlex<T, D1, D3, N>& C)
 {
    for (idx_t i = 0; i < D1; ++i)
    {
@@ -93,15 +93,30 @@ void Multiply(const MPlex<T, D1, D2, N>& A,
    }
 }
 
-template<typename T, idx_t D1, idx_t D2, idx_t D3, idx_t N>
-void MultiplyUnrolled(const MPlex<T, D1, D2, N>& A,
-                      const MPlex<T, D2, D3, N>& B,
-                      MPlex<T, D1, D3, N>& C)
-{
-   const T *a = A.fArray, *b = B.fArray;
-         T *c = C.fArray;
+//------------------------------------------------------------------------------
 
-   if (D1 == 3)
+template<typename T, idx_t D, idx_t N>
+struct MultiplyCls
+{
+   static void Multiply(const MPlex<T, D, D, N>& A,
+                        const MPlex<T, D, D, N>& B,
+                        MPlex<T, D, D, N>& C)
+   {
+      throw std::runtime_error("general multiplication not supported, well, call MultiplyGeneral()");
+   }
+};
+
+template<typename T, idx_t N>
+struct MultiplyCls<T, 3, N>
+{
+   static void Multiply(const MPlex<T, 3, 3, N>& A,
+                        const MPlex<T, 3, 3, N>& B,
+                        MPlex<T, 3, 3, N>& C)
+{
+   const T *a = A.fArray; __assume_aligned(a, 64);
+   const T *b = B.fArray; __assume_aligned(b, 64);
+         T *c = C.fArray; __assume_aligned(c, 64);
+
 #pragma simd
    for (idx_t n = 0; n < N; ++n)
    {
@@ -115,7 +130,19 @@ void MultiplyUnrolled(const MPlex<T, D1, D2, N>& A,
       c[ 7*N+n] = a[ 6*N+n]*b[ 1*N+n] + a[ 7*N+n]*b[ 4*N+n] + a[ 8*N+n]*b[ 7*N+n];
       c[ 8*N+n] = a[ 6*N+n]*b[ 2*N+n] + a[ 7*N+n]*b[ 5*N+n] + a[ 8*N+n]*b[ 8*N+n];
    }
-   else if (D1 == 6)
+}
+};
+
+template<typename T, idx_t N>
+struct MultiplyCls<T, 6, N>
+{
+   static void Multiply(const MPlex<T, 6, 6, N>& A,
+                        const MPlex<T, 6, 6, N>& B,
+                        MPlex<T, 6, 6, N>& C)
+{
+   const T *a = A.fArray; __assume_aligned(a, 64);
+   const T *b = B.fArray; __assume_aligned(b, 64);
+         T *c = C.fArray; __assume_aligned(c, 64);
 #pragma simd
    for (idx_t n = 0; n < N; ++n)
    {
@@ -157,6 +184,17 @@ void MultiplyUnrolled(const MPlex<T, D1, D2, N>& A,
       c[35*N+n] = a[30*N+n]*b[ 5*N+n] + a[31*N+n]*b[11*N+n] + a[32*N+n]*b[17*N+n] + a[33*N+n]*b[23*N+n] + a[34*N+n]*b[29*N+n] + a[35*N+n]*b[35*N+n];
    }
 }
+};
+
+template<typename T, idx_t D, idx_t N>
+void Multiply(const MPlex<T, D, D, N>& A,
+              const MPlex<T, D, D, N>& B,
+                    MPlex<T, D, D, N>& C)
+{
+   // printf("Multipl %d %d\n", D, N);
+
+   MultiplyCls<T, D, N>::Multiply(A, B, C);
+}
 
 
 //==============================================================================
@@ -180,7 +218,7 @@ struct CramerInverter<T, 2, N>
    {
       typedef T TT;
 
-      T *a = A.fArray;
+      T *a = A.fArray; __assume_aligned(a, 64);
 
 #pragma simd
       for (idx_t n = 0; n < N; ++n)
@@ -207,7 +245,7 @@ struct CramerInverter<T, 3, N>
    {
       typedef T TT;
 
-      T *a = A.fArray;
+      T *a = A.fArray; __assume_aligned(a, 64);
 
 #pragma simd
       for (idx_t n = 0; n < N; ++n)
@@ -276,7 +314,7 @@ struct CholeskyInverter<T, 3, N>
    {
       typedef T TT;
 
-      T *a = A.fArray;
+      T *a = A.fArray; __assume_aligned(a, 64);
 
 #pragma simd
       for (idx_t n = 0; n < N; ++n)
