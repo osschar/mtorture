@@ -31,13 +31,13 @@ my $t = new Test('Base'          => 't3',
                 'EnvMic'  => "",
     );
 
-@TESTS = qw(mult2_sym);
+@TESTS = qw(mult2_sym inv_cramer_sym inv_cholesky_sym);
 # Other tests:
 # - mult2_3out mult2_3in            --- made no real difference
 # - inv_cramer inv_cholesky         --- works only for 3x3
 # - inv_cramer_sym inv_cholesky_sym --- works only for 3x3
 
-for $dim (3)#, 6)
+for $dim (3, 6)
 {
   for $size (8, 16, 32, 64)
   {
@@ -50,6 +50,8 @@ for $dim (3)#, 6)
 
     for $test (@TESTS)
     {
+      next if $test =~ m/^inv_/ and $dim != 3;
+
       print "Running test $test ...\n";
 
       $t->run_test($test);
