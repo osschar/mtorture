@@ -79,10 +79,10 @@ void Multiply(const MPlexVec<MPlex<T, D1, D2, N>>& A,
 }
 
 template<typename T, idx_t D1, idx_t D2, idx_t D3, idx_t N>
-void MultiplyUnrolled(const MPlexVec<MPlex<T, D1, D2, N>>& A,
-                      const MPlexVec<MPlex<T, D2, D3, N>>& B,
-                            MPlexVec<MPlex<T, D1, D3, N>>& C,
-                            int n_to_process = 0)
+void MultiplyGeneral(const MPlexVec<MPlex<T, D1, D2, N>>& A,
+                     const MPlexVec<MPlex<T, D2, D3, N>>& B,
+                           MPlexVec<MPlex<T, D1, D3, N>>& C,
+                           int n_to_process = 0)
 {
    assert(A.size() == B.size());
    assert(A.size() == C.size());
@@ -91,7 +91,7 @@ void MultiplyUnrolled(const MPlexVec<MPlex<T, D1, D2, N>>& A,
 
    for (int i = 0; i < np; ++i)
    {
-      MultiplyUnrolled(A[i], B[i], C[i]);
+      MultiplyGeneral(A[i], B[i], C[i]);
    }
 }
 

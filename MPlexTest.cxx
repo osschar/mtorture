@@ -41,7 +41,7 @@ MPlexTest::~MPlexTest()
 
 int MPlexTest::mult2(int n_vec)
 {
-  Matriplex::MultiplyUnrolled(*fMPV[0], *fMPV[1], *fMPV[2], n_vec);
+  Matriplex::Multiply(*fMPV[0], *fMPV[1], *fMPV[2], n_vec);
 
   return sNMul * n_vec;
 }
