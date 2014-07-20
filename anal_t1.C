@@ -157,12 +157,12 @@ void anal_t1(bool save_p=false)
   PlotOpT = PlotFlops = false;
 
   NN = 6;
-  do_all("mult2", "host", save_p);
-  do_all("mult2", "mic", save_p);
+  do_all("mult2_sym", "host", save_p);
+  do_all("mult2_sym", "mic", save_p);
 
   NN = 3;
-  do_all("inv_cramer", "host", save_p);
-  do_all("inv_cramer", "mic", save_p);
-  do_all("inv_cholesky", "host", save_p);
-  do_all("inv_cholesky", "mic", save_p);
+  do_all("inv_cramer_sym", "host", save_p);
+  do_all("inv_cramer_sym", "mic", save_p);
+  do_all("inv_cholesky_sym", "host", save_p);
+  do_all("inv_cholesky_sym", "mic", save_p);
 }
