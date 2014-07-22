@@ -127,7 +127,11 @@ void Multiply(const MPlexVec<MPlexSym<T, D, N>>& A,
 
    for (int i = 0; i < np; ++i)
    {
+#ifdef __MIC__
+      Multiply3x3SymIntrinsic(A[i], B[i], C[i]);
+#else
       Multiply(A[i], B[i], C[i]);
+#endif
    }
 }
 
