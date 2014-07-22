@@ -315,6 +315,97 @@ void InvertCholeskySym(MPlexSym<T, D, N>& A)
    CholeskyInverterSym<T, D, N>::Invert(A);
 }
 
+
+//==============================================================================
+//==============================================================================
+// Intrinsics
+//==============================================================================
+//==============================================================================
+
+// An attempt at 3x3 symmetric multiplication using intrinsics directly.
+//
+// This actually runs twice faster than the unrolled loop: vec_ut = 0.90, was 0.425.
+//
+// Still need to check it actuall does the same :)
+
+#ifdef __MIC__
+#include "immintrin.h"
+
+#define LD(a, i)      _mm512_load_ps((void*) &a[i*N+n])
+#define ADD(a, b)     _mm512_add_ps(a, b) 
+#define MUL(a, b)     _mm512_mul_ps(a, b)
+#define FMA(a, b, v)  _mm512_fmadd_ps(a, b, v)
+#define ST(a, i, r)   _mm512_store_ps(&a[i*N+n], r)
+
+template<typename T, idx_t N>
+void Multiply3x3SymIntrinsic(const MPlexSym<T, 3, N>& A,
+                             const MPlexSym<T, 3, N>& B,
+                             MPlex<T, 3, 3, N>& C)
+{
+   const T *a = A.fArray; __assume_aligned(a, 64);
+   const T *b = B.fArray; __assume_aligned(b, 64);
+         T *c = C.fArray; __assume_aligned(c, 64);
+
+   __m512 a0, a1, a2, a3, a4, a5;
+   __m512 b0, b1, b2, b3, b4, b5;
+   __m512 c0, c1, c2, c3, c4, c5, c6, c7, c8;
+
+   for (idx_t n = 0; n < N; n += 16)
+   {
+     a1 = LD(a, 1); a3 = LD(a, 3); b1 = LD(b, 1); b3 = LD(b, 3);
+
+     c4 = MUL(a1, b1); // add to c0
+     c5 = MUL(a1, b3);
+     c7 = MUL(a3, b1);
+     c8 = MUL(a3, b3); // add to c0
+
+     a0 = LD(a, 0); b0 = LD(b, 0);
+
+     c0 = MUL(a0, b0);
+     c1 = MUL(a0, b1);
+     c3 = MUL(a1, b0);
+     c2 = MUL(a0, b3);
+     c6 = MUL(a3, b0);
+     c0 = ADD(c4, c0);
+
+     a2 = LD(a, 2); b2 = LD(b, 2);
+     
+     c1 = FMA(a1, b2, c1);
+     c3 = FMA(a2, b1, c3);
+     c0 = ADD(c8, c0);
+     c4 = FMA(a2, b2, c4);
+
+     a4 = LD(a, 4); b4 = LD(b, 4);
+
+     c2 = FMA(a1, b4, c2);
+     c5 = FMA(a2, b4, c5);
+     c7 = FMA(a4, b2, c7);
+     c6 = FMA(a4, b1, c6);
+     c8 = FMA(a4, b4, c8);
+     c1 = FMA(a3, b4, c1);
+     c3 = FMA(a4, b3, c3);
+     c4 = FMA(a4, b4, c4);
+
+     a5 = LD(a, 5); b5 = LD(b, 5);
+
+     c2 = FMA(a3, b5, c2);
+     c5 = FMA(a4, b5, c5);
+     c6 = FMA(a5, b3, c6);
+     c7 = FMA(a5, b4, c7);
+     c8 = FMA(a5, b5, c8);
+
+     ST(c, 0, c0);  ST(c, 1, c1); ST(c, 2, c2); ST(c, 3, c3); ST(c, 4, c4); 
+     ST(c, 5, c5);  ST(c, 6, c6); ST(c, 7, c7); ST(c, 8, c8);
+   }
+}
+
+#endif // __MIC__
+
+
+//==============================================================================
+// End Attic, close namespace Matriplex
+//==============================================================================
+
 }
 
 #endif
