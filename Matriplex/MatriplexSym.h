@@ -352,50 +352,56 @@ void Multiply3x3SymIntrinsic(const MPlexSym<T, 3, N>& A,
 
    for (idx_t n = 0; n < N; n += 16)
    {
-     a1 = LD(a, 1); a3 = LD(a, 3); b1 = LD(b, 1); b3 = LD(b, 3);
-
-     c4 = MUL(a1, b1); // add to c0
-     c5 = MUL(a1, b3);
-     c7 = MUL(a3, b1);
-     c8 = MUL(a3, b3); // add to c0
-
      a0 = LD(a, 0); b0 = LD(b, 0);
 
      c0 = MUL(a0, b0);
-     c1 = MUL(a0, b1);
+
+     a1 = LD(a, 1); b1 = LD(b, 1);
+
      c3 = MUL(a1, b0);
-     c2 = MUL(a0, b3);
-     c6 = MUL(a3, b0);
-     c0 = ADD(c4, c0);
+     c1 = MUL(a0, b1);
+     c4 = MUL(a1, b1);
+
+     a3 = LD(a, 3); b3 = LD(b, 3);
+
+     c0 = FMA(a1, b1, c0);
+     c5 = MUL(a1, b3);
+     c7 = MUL(a3, b1);
+     c8 = MUL(a3, b3);
 
      a2 = LD(a, 2); b2 = LD(b, 2);
-     
+
      c1 = FMA(a1, b2, c1);
      c3 = FMA(a2, b1, c3);
-     c0 = ADD(c8, c0);
      c4 = FMA(a2, b2, c4);
+     c0 = FMA(a3, b3, c0);
+
+     c2 = MUL(a0, b3);
+     c6 = MUL(a3, b0);
 
      a4 = LD(a, 4); b4 = LD(b, 4);
 
-     c2 = FMA(a1, b4, c2);
      c5 = FMA(a2, b4, c5);
      c7 = FMA(a4, b2, c7);
-     c6 = FMA(a4, b1, c6);
      c8 = FMA(a4, b4, c8);
+
      c1 = FMA(a3, b4, c1);
      c3 = FMA(a4, b3, c3);
      c4 = FMA(a4, b4, c4);
+     c2 = FMA(a1, b4, c2);
+     c6 = FMA(a4, b1, c6);
 
      a5 = LD(a, 5); b5 = LD(b, 5);
+     ST(c, 0, c0); ST(c, 1, c1); ST(c, 3, c3); ST(c, 4, c4);
 
-     c2 = FMA(a3, b5, c2);
      c5 = FMA(a4, b5, c5);
-     c6 = FMA(a5, b3, c6);
      c7 = FMA(a5, b4, c7);
      c8 = FMA(a5, b5, c8);
+     c2 = FMA(a3, b5, c2);
+     c6 = FMA(a5, b3, c6);
 
-     ST(c, 0, c0);  ST(c, 1, c1); ST(c, 2, c2); ST(c, 3, c3); ST(c, 4, c4); 
-     ST(c, 5, c5);  ST(c, 6, c6); ST(c, 7, c7); ST(c, 8, c8);
+     ST(c, 5, c5); ST(c, 7, c7); ST(c, 8, c8);
+     ST(c, 2, c2); ST(c, 6, c6);
    }
 }
 
