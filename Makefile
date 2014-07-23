@@ -85,3 +85,21 @@ t3-mic:  $(addsuffix .om, ${T3_DEPS})
 run-t3:	t3 t3-mic
 	./t3
 	ssh mic0 ./t3-mic
+
+### t4
+
+T4_DEPS := t4 MPlexTest
+
+MPlexTest.o MPlexTest.om: Matriplex/Matriplex.h Matriplex/MatriplexSym.h Matriplex/MatriplexVector.h
+
+t4: $(addsuffix .o, ${T4_DEPS})
+	icc ${CXXFLAGS} ${VECHOST} ${LDFLAGS} -o $@ $^
+
+t4-mic:  $(addsuffix .om, ${T4_DEPS})
+	icc ${CXXFLAGS} ${VECMIC} ${LDFLAGS} -o $@ $^
+	scp $@ mic0:
+
+run-t4:	t4 t4-mic
+	./t4
+	ssh mic0 ./t4-mic
+
