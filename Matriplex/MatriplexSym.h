@@ -326,12 +326,12 @@ void InvertCholeskySym(MPlexSym<T, D, N>& A)
 //
 // This actually runs twice faster than the unrolled loop: vec_ut = 0.90, was 0.425.
 //
-// Still need to check it actuall does the same :)
+// The results are the same as with SMatrix!
 
 #ifdef __MIC__
 #include "immintrin.h"
 
-#define LD(a, i)      _mm512_load_ps((void*) &a[i*N+n])
+#define LD(a, i)      _mm512_load_ps(&a[i*N+n])
 #define ADD(a, b)     _mm512_add_ps(a, b) 
 #define MUL(a, b)     _mm512_mul_ps(a, b)
 #define FMA(a, b, v)  _mm512_fmadd_ps(a, b, v)
