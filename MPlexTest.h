@@ -32,6 +32,16 @@ public:
   MPlexTest(int n_mp, int n_mp_sym, int size);
   ~MPlexTest();
 
+  // ----------------------------------------------------------------
+
+  MPV&  MPlexVec   (int i) { return *fMPV[i];  }
+  MPVS& MPlexVecSym(int i) { return *fMPVS[i]; }
+
+  MP&   MPlex   (int i, int m) { return (*fMPV[i])[m];  }
+  MPS&  MPlexSym(int i, int m) { return (*fMPVS[i])[m]; }
+
+  // ----------------------------------------------------------------
+
   int mult2(int n_vec);
   int mult2_3out(int n_vec);
   int mult2_3in (int n_vec);
