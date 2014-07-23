@@ -26,6 +26,8 @@ t2
 t2-mic
 t3
 t3-mic
+t4
+t4-mic
 
 # Dependencies
 *.d
