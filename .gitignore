@@ -31,3 +31,8 @@ t4-mic
 
 # Dependencies
 *.d
+
+# Auto generated code, included in source ...
+*.ah
+# ... and a make touch file for target that generates matriplex related ones.
+matriplex-auto
