@@ -23,15 +23,22 @@ EXES     := ${TGTS} $(addsuffix -mic, ${TGTS})
 
 all: ${EXES}
 
-%.o: %.cxx *.h
+matriplex-auto:
+	${MAKE} -C Matriplex auto && touch $@
+
+%.o: %.cxx *.h matriplex-auto
 	icc ${CPPFLAGS} ${CXXFLAGS} ${VECHOST} -c -o $@ $<
 
-%.om: %.cxx *.h
+%.om: %.cxx *.h matriplex-auto
 	icc ${CPPFLAGS} ${CXXFLAGS} ${VECMIC} -c -o $@ $<
 
 
 clean:
 	rm -f ${EXES} *.o *.om
+
+distclean: clean
+	${MAKE} -C Matriplex clean
+	rm -f matriplex-auto
 
 echo:
 	@echo CPPFLAGS = ${CPPFLAGS}
@@ -78,7 +85,7 @@ MPlexTest.o MPlexTest.om: Matriplex/Matriplex.h Matriplex/MatriplexSym.h Matripl
 t3: $(addsuffix .o, ${T3_DEPS})
 	icc ${CXXFLAGS} ${VECHOST} ${LDFLAGS} -o $@ $^
 
-t3-mic:  $(addsuffix .om, ${T3_DEPS})
+t3-mic: $(addsuffix .om, ${T3_DEPS})
 	icc ${CXXFLAGS} ${VECMIC} ${LDFLAGS} -o $@ $^
 	scp $@ mic0:
 
@@ -95,7 +102,7 @@ MPlexTest.o MPlexTest.om: Matriplex/Matriplex.h Matriplex/MatriplexSym.h Matripl
 t4: $(addsuffix .o, ${T4_DEPS})
 	icc ${CXXFLAGS} ${VECHOST} ${LDFLAGS} -o $@ $^
 
-t4-mic:  $(addsuffix .om, ${T4_DEPS})
+t4-mic: $(addsuffix .om, ${T4_DEPS})
 	icc ${CXXFLAGS} ${VECMIC} ${LDFLAGS} -o $@ $^
 	scp $@ mic0:
 
