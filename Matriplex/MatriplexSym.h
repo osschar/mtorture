@@ -4,6 +4,30 @@
 #include "MatriplexCommon.h"
 #include "Matriplex.h"
 
+
+//==============================================================================
+// Intrinsics -- preamble
+//==============================================================================
+
+#if defined(__MIC__) && defined(MPLEX_USE_INTRINSICS)
+
+#include "immintrin.h"
+
+#define MIC_INTRINSICS
+
+#define LD(a, i)      _mm512_load_ps(&a[i*N+n])
+#define ADD(a, b)     _mm512_add_ps(a, b) 
+#define MUL(a, b)     _mm512_mul_ps(a, b)
+#define FMA(a, b, v)  _mm512_fmadd_ps(a, b, v)
+#define ST(a, i, r)   _mm512_store_ps(&a[i*N+n], r)
+
+#endif
+
+
+//==============================================================================
+// MatriplexSym
+//==============================================================================
+
 namespace Matriplex
 {
 
@@ -95,26 +119,26 @@ struct SymMultiplyCls<T, 3, N>
                         const MPlexSym<T, 3, N>& B,
                         MPlex<T, 3, 3, N>& C)
 {
-   Multiply3x3SymIntrinsic(A, B, C);
-   return;
-
    const T *a = A.fArray; __assume_aligned(a, 64);
    const T *b = B.fArray; __assume_aligned(b, 64);
          T *c = C.fArray; __assume_aligned(c, 64);
 
+#ifdef MIC_INTRINSICS
+
+   for (idx_t n = 0; n < N; n += 64 / sizeof(T))
+   {
+#include "intr_sym_3x3.ah"
+   }
+
+#else
+
 #pragma simd
    for (idx_t n = 0; n < N; ++n)
    {
-      c[ 0*N+n] = a[ 0*N+n]*b[ 0*N+n] + a[ 1*N+n]*b[ 1*N+n] + a[ 3*N+n]*b[ 3*N+n];
-      c[ 1*N+n] = a[ 0*N+n]*b[ 1*N+n] + a[ 1*N+n]*b[ 2*N+n] + a[ 3*N+n]*b[ 4*N+n];
-      c[ 2*N+n] = a[ 0*N+n]*b[ 3*N+n] + a[ 1*N+n]*b[ 4*N+n] + a[ 3*N+n]*b[ 5*N+n];
-      c[ 3*N+n] = a[ 1*N+n]*b[ 0*N+n] + a[ 2*N+n]*b[ 1*N+n] + a[ 4*N+n]*b[ 3*N+n];
-      c[ 4*N+n] = a[ 1*N+n]*b[ 1*N+n] + a[ 2*N+n]*b[ 2*N+n] + a[ 4*N+n]*b[ 4*N+n];
-      c[ 5*N+n] = a[ 1*N+n]*b[ 3*N+n] + a[ 2*N+n]*b[ 4*N+n] + a[ 4*N+n]*b[ 5*N+n];
-      c[ 6*N+n] = a[ 3*N+n]*b[ 0*N+n] + a[ 4*N+n]*b[ 1*N+n] + a[ 5*N+n]*b[ 3*N+n];
-      c[ 7*N+n] = a[ 3*N+n]*b[ 1*N+n] + a[ 4*N+n]*b[ 2*N+n] + a[ 5*N+n]*b[ 4*N+n];
-      c[ 8*N+n] = a[ 3*N+n]*b[ 3*N+n] + a[ 4*N+n]*b[ 4*N+n] + a[ 5*N+n]*b[ 5*N+n];
+#include "std_sym_3x3.ah"
    }
+
+#endif
 }
 };
 
@@ -125,53 +149,26 @@ struct SymMultiplyCls<T, 6, N>
                         const MPlexSym<float, 6, N>& B,
                         MPlex<float, 6, 6, N>& C)
 {
-   Multiply6x6SymIntrinsic(A, B, C);
-   return;
-
    const T *a = A.fArray; __assume_aligned(a, 64);
    const T *b = B.fArray; __assume_aligned(b, 64);
          T *c = C.fArray; __assume_aligned(c, 64);
 
+#ifdef MIC_INTRINSICS
+
+   for (idx_t n = 0; n < N; n += 64 / sizeof(T))
+   {
+#include "intr_sym_6x6.ah"
+   }
+
+#else
+
 #pragma simd
    for (idx_t n = 0; n < N; ++n)
    {
-      c[ 0*N+n] = a[ 0*N+n]*b[ 0*N+n] + a[ 1*N+n]*b[ 1*N+n] + a[ 3*N+n]*b[ 3*N+n] + a[ 6*N+n]*b[ 6*N+n] + a[10*N+n]*b[10*N+n] + a[15*N+n]*b[15*N+n];
-      c[ 1*N+n] = a[ 0*N+n]*b[ 1*N+n] + a[ 1*N+n]*b[ 2*N+n] + a[ 3*N+n]*b[ 4*N+n] + a[ 6*N+n]*b[ 7*N+n] + a[10*N+n]*b[11*N+n] + a[15*N+n]*b[16*N+n];
-      c[ 2*N+n] = a[ 0*N+n]*b[ 3*N+n] + a[ 1*N+n]*b[ 4*N+n] + a[ 3*N+n]*b[ 5*N+n] + a[ 6*N+n]*b[ 8*N+n] + a[10*N+n]*b[12*N+n] + a[15*N+n]*b[17*N+n];
-      c[ 3*N+n] = a[ 0*N+n]*b[ 6*N+n] + a[ 1*N+n]*b[ 7*N+n] + a[ 3*N+n]*b[ 8*N+n] + a[ 6*N+n]*b[ 9*N+n] + a[10*N+n]*b[13*N+n] + a[15*N+n]*b[18*N+n];
-      c[ 4*N+n] = a[ 0*N+n]*b[10*N+n] + a[ 1*N+n]*b[11*N+n] + a[ 3*N+n]*b[12*N+n] + a[ 6*N+n]*b[13*N+n] + a[10*N+n]*b[14*N+n] + a[15*N+n]*b[19*N+n];
-      c[ 5*N+n] = a[ 0*N+n]*b[15*N+n] + a[ 1*N+n]*b[16*N+n] + a[ 3*N+n]*b[17*N+n] + a[ 6*N+n]*b[18*N+n] + a[10*N+n]*b[19*N+n] + a[15*N+n]*b[20*N+n];
-      c[ 6*N+n] = a[ 1*N+n]*b[ 0*N+n] + a[ 2*N+n]*b[ 1*N+n] + a[ 4*N+n]*b[ 3*N+n] + a[ 7*N+n]*b[ 6*N+n] + a[11*N+n]*b[10*N+n] + a[16*N+n]*b[15*N+n];
-      c[ 7*N+n] = a[ 1*N+n]*b[ 1*N+n] + a[ 2*N+n]*b[ 2*N+n] + a[ 4*N+n]*b[ 4*N+n] + a[ 7*N+n]*b[ 7*N+n] + a[11*N+n]*b[11*N+n] + a[16*N+n]*b[16*N+n];
-      c[ 8*N+n] = a[ 1*N+n]*b[ 3*N+n] + a[ 2*N+n]*b[ 4*N+n] + a[ 4*N+n]*b[ 5*N+n] + a[ 7*N+n]*b[ 8*N+n] + a[11*N+n]*b[12*N+n] + a[16*N+n]*b[17*N+n];
-      c[ 9*N+n] = a[ 1*N+n]*b[ 6*N+n] + a[ 2*N+n]*b[ 7*N+n] + a[ 4*N+n]*b[ 8*N+n] + a[ 7*N+n]*b[ 9*N+n] + a[11*N+n]*b[13*N+n] + a[16*N+n]*b[18*N+n];
-      c[10*N+n] = a[ 1*N+n]*b[10*N+n] + a[ 2*N+n]*b[11*N+n] + a[ 4*N+n]*b[12*N+n] + a[ 7*N+n]*b[13*N+n] + a[11*N+n]*b[14*N+n] + a[16*N+n]*b[19*N+n];
-      c[11*N+n] = a[ 1*N+n]*b[15*N+n] + a[ 2*N+n]*b[16*N+n] + a[ 4*N+n]*b[17*N+n] + a[ 7*N+n]*b[18*N+n] + a[11*N+n]*b[19*N+n] + a[16*N+n]*b[20*N+n];
-      c[12*N+n] = a[ 3*N+n]*b[ 0*N+n] + a[ 4*N+n]*b[ 1*N+n] + a[ 5*N+n]*b[ 3*N+n] + a[ 8*N+n]*b[ 6*N+n] + a[12*N+n]*b[10*N+n] + a[17*N+n]*b[15*N+n];
-      c[13*N+n] = a[ 3*N+n]*b[ 1*N+n] + a[ 4*N+n]*b[ 2*N+n] + a[ 5*N+n]*b[ 4*N+n] + a[ 8*N+n]*b[ 7*N+n] + a[12*N+n]*b[11*N+n] + a[17*N+n]*b[16*N+n];
-      c[14*N+n] = a[ 3*N+n]*b[ 3*N+n] + a[ 4*N+n]*b[ 4*N+n] + a[ 5*N+n]*b[ 5*N+n] + a[ 8*N+n]*b[ 8*N+n] + a[12*N+n]*b[12*N+n] + a[17*N+n]*b[17*N+n];
-      c[15*N+n] = a[ 3*N+n]*b[ 6*N+n] + a[ 4*N+n]*b[ 7*N+n] + a[ 5*N+n]*b[ 8*N+n] + a[ 8*N+n]*b[ 9*N+n] + a[12*N+n]*b[13*N+n] + a[17*N+n]*b[18*N+n];
-      c[16*N+n] = a[ 3*N+n]*b[10*N+n] + a[ 4*N+n]*b[11*N+n] + a[ 5*N+n]*b[12*N+n] + a[ 8*N+n]*b[13*N+n] + a[12*N+n]*b[14*N+n] + a[17*N+n]*b[19*N+n];
-      c[17*N+n] = a[ 3*N+n]*b[15*N+n] + a[ 4*N+n]*b[16*N+n] + a[ 5*N+n]*b[17*N+n] + a[ 8*N+n]*b[18*N+n] + a[12*N+n]*b[19*N+n] + a[17*N+n]*b[20*N+n];
-      c[18*N+n] = a[ 6*N+n]*b[ 0*N+n] + a[ 7*N+n]*b[ 1*N+n] + a[ 8*N+n]*b[ 3*N+n] + a[ 9*N+n]*b[ 6*N+n] + a[13*N+n]*b[10*N+n] + a[18*N+n]*b[15*N+n];
-      c[19*N+n] = a[ 6*N+n]*b[ 1*N+n] + a[ 7*N+n]*b[ 2*N+n] + a[ 8*N+n]*b[ 4*N+n] + a[ 9*N+n]*b[ 7*N+n] + a[13*N+n]*b[11*N+n] + a[18*N+n]*b[16*N+n];
-      c[20*N+n] = a[ 6*N+n]*b[ 3*N+n] + a[ 7*N+n]*b[ 4*N+n] + a[ 8*N+n]*b[ 5*N+n] + a[ 9*N+n]*b[ 8*N+n] + a[13*N+n]*b[12*N+n] + a[18*N+n]*b[17*N+n];
-      c[21*N+n] = a[ 6*N+n]*b[ 6*N+n] + a[ 7*N+n]*b[ 7*N+n] + a[ 8*N+n]*b[ 8*N+n] + a[ 9*N+n]*b[ 9*N+n] + a[13*N+n]*b[13*N+n] + a[18*N+n]*b[18*N+n];
-      c[22*N+n] = a[ 6*N+n]*b[10*N+n] + a[ 7*N+n]*b[11*N+n] + a[ 8*N+n]*b[12*N+n] + a[ 9*N+n]*b[13*N+n] + a[13*N+n]*b[14*N+n] + a[18*N+n]*b[19*N+n];
-      c[23*N+n] = a[ 6*N+n]*b[15*N+n] + a[ 7*N+n]*b[16*N+n] + a[ 8*N+n]*b[17*N+n] + a[ 9*N+n]*b[18*N+n] + a[13*N+n]*b[19*N+n] + a[18*N+n]*b[20*N+n];
-      c[24*N+n] = a[10*N+n]*b[ 0*N+n] + a[11*N+n]*b[ 1*N+n] + a[12*N+n]*b[ 3*N+n] + a[13*N+n]*b[ 6*N+n] + a[14*N+n]*b[10*N+n] + a[19*N+n]*b[15*N+n];
-      c[25*N+n] = a[10*N+n]*b[ 1*N+n] + a[11*N+n]*b[ 2*N+n] + a[12*N+n]*b[ 4*N+n] + a[13*N+n]*b[ 7*N+n] + a[14*N+n]*b[11*N+n] + a[19*N+n]*b[16*N+n];
-      c[26*N+n] = a[10*N+n]*b[ 3*N+n] + a[11*N+n]*b[ 4*N+n] + a[12*N+n]*b[ 5*N+n] + a[13*N+n]*b[ 8*N+n] + a[14*N+n]*b[12*N+n] + a[19*N+n]*b[17*N+n];
-      c[27*N+n] = a[10*N+n]*b[ 6*N+n] + a[11*N+n]*b[ 7*N+n] + a[12*N+n]*b[ 8*N+n] + a[13*N+n]*b[ 9*N+n] + a[14*N+n]*b[13*N+n] + a[19*N+n]*b[18*N+n];
-      c[28*N+n] = a[10*N+n]*b[10*N+n] + a[11*N+n]*b[11*N+n] + a[12*N+n]*b[12*N+n] + a[13*N+n]*b[13*N+n] + a[14*N+n]*b[14*N+n] + a[19*N+n]*b[19*N+n];
-      c[29*N+n] = a[10*N+n]*b[15*N+n] + a[11*N+n]*b[16*N+n] + a[12*N+n]*b[17*N+n] + a[13*N+n]*b[18*N+n] + a[14*N+n]*b[19*N+n] + a[19*N+n]*b[20*N+n];
-      c[30*N+n] = a[15*N+n]*b[ 0*N+n] + a[16*N+n]*b[ 1*N+n] + a[17*N+n]*b[ 3*N+n] + a[18*N+n]*b[ 6*N+n] + a[19*N+n]*b[10*N+n] + a[20*N+n]*b[15*N+n];
-      c[31*N+n] = a[15*N+n]*b[ 1*N+n] + a[16*N+n]*b[ 2*N+n] + a[17*N+n]*b[ 4*N+n] + a[18*N+n]*b[ 7*N+n] + a[19*N+n]*b[11*N+n] + a[20*N+n]*b[16*N+n];
-      c[32*N+n] = a[15*N+n]*b[ 3*N+n] + a[16*N+n]*b[ 4*N+n] + a[17*N+n]*b[ 5*N+n] + a[18*N+n]*b[ 8*N+n] + a[19*N+n]*b[12*N+n] + a[20*N+n]*b[17*N+n];
-      c[33*N+n] = a[15*N+n]*b[ 6*N+n] + a[16*N+n]*b[ 7*N+n] + a[17*N+n]*b[ 8*N+n] + a[18*N+n]*b[ 9*N+n] + a[19*N+n]*b[13*N+n] + a[20*N+n]*b[18*N+n];
-      c[34*N+n] = a[15*N+n]*b[10*N+n] + a[16*N+n]*b[11*N+n] + a[17*N+n]*b[12*N+n] + a[18*N+n]*b[13*N+n] + a[19*N+n]*b[14*N+n] + a[20*N+n]*b[19*N+n];
-      c[35*N+n] = a[15*N+n]*b[15*N+n] + a[16*N+n]*b[16*N+n] + a[17*N+n]*b[17*N+n] + a[18*N+n]*b[18*N+n] + a[19*N+n]*b[19*N+n] + a[20*N+n]*b[20*N+n];
+#include "std_sym_6x6.ah"
    }
+
+#endif
 }
 };
 
@@ -323,118 +320,20 @@ void InvertCholeskySym(MPlexSym<T, D, N>& A)
 
 
 //==============================================================================
-//==============================================================================
-// Intrinsics
-//==============================================================================
+// Intrinsics -- postamble
 //==============================================================================
 
-// An attempt at 3x3 symmetric multiplication using intrinsics directly.
-//
-// This actually runs twice faster than the unrolled loop: vec_ut = 0.90, was 0.425.
-//
-// The results are the same as with SMatrix!
+#ifdef MIC_INTRINSICS
 
-#ifdef __MIC__
-#include "immintrin.h"
+#undef LD(a, i)
+#undef ADD(a, b)
+#undef MUL(a, b)
+#undef FMA(a, b, v)
+#undef ST(a, i, r)
 
-#define LD(a, i)      _mm512_load_ps(&a[i*N+n])
-#define ADD(a, b)     _mm512_add_ps(a, b) 
-#define MUL(a, b)     _mm512_mul_ps(a, b)
-#define FMA(a, b, v)  _mm512_fmadd_ps(a, b, v)
-#define ST(a, i, r)   _mm512_store_ps(&a[i*N+n], r)
+#undef MIC_INTRINSICS
 
-
-template<typename T, idx_t N>
-void Multiply6x6SymIntrinsic(const MPlexSym<T, 6, N>& A,
-                             const MPlexSym<T, 6, N>& B,
-                             MPlex<T, 6, 6, N>& C)
-{
-   const T *a = A.fArray; __assume_aligned(a, 64);
-   const T *b = B.fArray; __assume_aligned(b, 64);
-         T *c = C.fArray; __assume_aligned(c, 64);
-
-   for (idx_t n = 0; n < N; n += 16)
-   {
-#include "intr_6x6_sym.ah"
-   }
-}
-
-
-template<typename T, idx_t N>
-void Multiply3x3SymIntrinsic(const MPlexSym<T, 3, N>& A,
-                             const MPlexSym<T, 3, N>& B,
-                             MPlex<T, 3, 3, N>& C)
-{
-   const T *a = A.fArray; __assume_aligned(a, 64);
-   const T *b = B.fArray; __assume_aligned(b, 64);
-         T *c = C.fArray; __assume_aligned(c, 64);
-
-   for (idx_t n = 0; n < N; n += 16)
-   {
-#include "intr_3x3_sym.ah"
-   }
-   /*
-   __m512 a0, a1, a2, a3, a4, a5;
-   __m512 b0, b1, b2, b3, b4, b5;
-   __m512 c0, c1, c2, c3, c4, c5, c6, c7, c8;
-
-   for (idx_t n = 0; n < N; n += 16)
-   {
-     a0 = LD(a, 0); b0 = LD(b, 0);
-
-     c0 = MUL(a0, b0);
-
-     a1 = LD(a, 1); b1 = LD(b, 1);
-
-     c3 = MUL(a1, b0);
-     c1 = MUL(a0, b1);
-     c4 = MUL(a1, b1);
-
-     a3 = LD(a, 3); b3 = LD(b, 3);
-
-     c0 = FMA(a1, b1, c0);
-     c5 = MUL(a1, b3);
-     c7 = MUL(a3, b1);
-     c8 = MUL(a3, b3);
-
-     a2 = LD(a, 2); b2 = LD(b, 2);
-
-     c1 = FMA(a1, b2, c1);
-     c3 = FMA(a2, b1, c3);
-     c4 = FMA(a2, b2, c4);
-     c0 = FMA(a3, b3, c0);
-
-     c2 = MUL(a0, b3);
-     c6 = MUL(a3, b0);
-
-     a4 = LD(a, 4); b4 = LD(b, 4);
-
-     c5 = FMA(a2, b4, c5);
-     c7 = FMA(a4, b2, c7);
-     c8 = FMA(a4, b4, c8);
-
-     c1 = FMA(a3, b4, c1);
-     c3 = FMA(a4, b3, c3);
-     c4 = FMA(a4, b4, c4);
-     c2 = FMA(a1, b4, c2);
-     c6 = FMA(a4, b1, c6);
-
-     a5 = LD(a, 5); b5 = LD(b, 5);
-     ST(c, 0, c0); ST(c, 1, c1); ST(c, 3, c3); ST(c, 4, c4);
-
-     c5 = FMA(a4, b5, c5);
-     c7 = FMA(a5, b4, c7);
-     c8 = FMA(a5, b5, c8);
-     c2 = FMA(a3, b5, c2);
-     c6 = FMA(a5, b3, c6);
-
-     ST(c, 5, c5); ST(c, 7, c7); ST(c, 8, c8);
-     ST(c, 2, c2); ST(c, 6, c6);
-   }
-   */
-}
-
-#endif // __MIC__
+#endif
 
 
 //==============================================================================
