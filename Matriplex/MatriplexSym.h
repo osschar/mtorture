@@ -95,6 +95,9 @@ struct SymMultiplyCls<T, 3, N>
                         const MPlexSym<T, 3, N>& B,
                         MPlex<T, 3, 3, N>& C)
 {
+   Multiply3x3SymIntrinsic(A, B, C);
+   return;
+
    const T *a = A.fArray; __assume_aligned(a, 64);
    const T *b = B.fArray; __assume_aligned(b, 64);
          T *c = C.fArray; __assume_aligned(c, 64);
@@ -122,6 +125,9 @@ struct SymMultiplyCls<T, 6, N>
                         const MPlexSym<float, 6, N>& B,
                         MPlex<float, 6, 6, N>& C)
 {
+   Multiply6x6SymIntrinsic(A, B, C);
+   return;
+
    const T *a = A.fArray; __assume_aligned(a, 64);
    const T *b = B.fArray; __assume_aligned(b, 64);
          T *c = C.fArray; __assume_aligned(c, 64);
@@ -337,6 +343,23 @@ void InvertCholeskySym(MPlexSym<T, D, N>& A)
 #define FMA(a, b, v)  _mm512_fmadd_ps(a, b, v)
 #define ST(a, i, r)   _mm512_store_ps(&a[i*N+n], r)
 
+
+template<typename T, idx_t N>
+void Multiply6x6SymIntrinsic(const MPlexSym<T, 6, N>& A,
+                             const MPlexSym<T, 6, N>& B,
+                             MPlex<T, 6, 6, N>& C)
+{
+   const T *a = A.fArray; __assume_aligned(a, 64);
+   const T *b = B.fArray; __assume_aligned(b, 64);
+         T *c = C.fArray; __assume_aligned(c, 64);
+
+   for (idx_t n = 0; n < N; n += 16)
+   {
+#include "intr_6x6_sym.ah"
+   }
+}
+
+
 template<typename T, idx_t N>
 void Multiply3x3SymIntrinsic(const MPlexSym<T, 3, N>& A,
                              const MPlexSym<T, 3, N>& B,
@@ -346,6 +369,11 @@ void Multiply3x3SymIntrinsic(const MPlexSym<T, 3, N>& A,
    const T *b = B.fArray; __assume_aligned(b, 64);
          T *c = C.fArray; __assume_aligned(c, 64);
 
+   for (idx_t n = 0; n < N; n += 16)
+   {
+#include "intr_3x3_sym.ah"
+   }
+   /*
    __m512 a0, a1, a2, a3, a4, a5;
    __m512 b0, b1, b2, b3, b4, b5;
    __m512 c0, c1, c2, c3, c4, c5, c6, c7, c8;
@@ -403,6 +431,7 @@ void Multiply3x3SymIntrinsic(const MPlexSym<T, 3, N>& A,
      ST(c, 5, c5); ST(c, 7, c7); ST(c, 8, c8);
      ST(c, 2, c2); ST(c, 6, c6);
    }
+   */
 }
 
 #endif // __MIC__
