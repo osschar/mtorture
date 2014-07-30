@@ -157,7 +157,7 @@ struct SymMultiplyCls<T, 6, N>
 
    for (idx_t n = 0; n < N; n += 64 / sizeof(T))
    {
-#include "intr_sym_6x6.ah"
+      #include "intr_sym_6x6.ah"
    }
 
 #else
@@ -165,7 +165,7 @@ struct SymMultiplyCls<T, 6, N>
 #pragma simd
    for (idx_t n = 0; n < N; ++n)
    {
-#include "std_sym_6x6.ah"
+      #include "std_sym_6x6.ah"
    }
 
 #endif
@@ -177,8 +177,6 @@ void Multiply(const MPlexSym<T, D, N>& A,
               const MPlexSym<T, D, N>& B,
                     MPlex<T, D, D, N>& C)
 {
-   // printf("Multipl %d %d\n", D, N);
-
    SymMultiplyCls<T, D, N>::Multiply(A, B, C);
 }
 
