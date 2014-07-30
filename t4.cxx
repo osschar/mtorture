@@ -57,7 +57,10 @@ init:
       // There are occasional diffs up to 4.768372e-07 on host, very very
       // rarely on MIC. Apparently this is a rounding difference between AVX
       // and normal maths. On MIC it might be usage of FMA?
-      if (std::abs(c(j,k) - mpt.MPlex(0, 0).At(0,j, k)) > 3e-7)
+      // The above was for 3x3.
+      // For 6x6 practically all elements differ by 4.768372e-07, some
+      // by 9.536743e-07.
+      if (std::abs(c(j,k) - mpt.MPlex(0, 0).At(0,j, k)) > 5e-7)
       {
         dump = true;
         printf("%d,%d d=%e (count = %lld)\n", j, k, c(j,k) - mpt.MPlex(0, 0).At(0, j, k), count);
@@ -66,6 +69,7 @@ init:
 
   if (dump)
   {
+    printf("\n");
     for (int i = 0; i < M; ++i)
     {
       for (int j = 0; j < M; ++j)
@@ -80,7 +84,7 @@ init:
         printf("%8f ", mpt.MPlex(0, 0).At(0,i,j));
       printf("\n");
     }
-    printf("\n");
+    printf("\n\n");
   }
 
   goto init;
