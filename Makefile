@@ -34,7 +34,7 @@ matriplex-auto:
 
 
 clean:
-	rm -f ${EXES} *.o *.om mkFit/mkFit mkFit/*.o mkFit/*.om
+	rm -f ${EXES} *.o *.om mkFit/mkFit mkFit/mkFit-mic mkFit/*.o mkFit/*.om
 
 distclean: clean
 	${MAKE} -C Matriplex clean
