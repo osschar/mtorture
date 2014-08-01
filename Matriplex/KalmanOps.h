@@ -8,20 +8,26 @@
 namespace Matriplex
 {
 
+typedef float T; // XXXXX This is horrible!!!
+
+
 inline
-void MultForKalmanGain(const MatriplexSym<float, 6>& A,
-                       const MatriplexSym<float, 6>& B,
-                             Matriplex<float, 6, 6>& C)
+void MultForKalmanGain(const MPlexSS& A,
+                       const MPlexSS& B,
+                             MPlexMM& C)
 {
    // calculate Kalman gain -- multiplication where B / resErr is only populated
    // in upper-left 3x3
    // kalmanGain = propErr * resErrInverse
    //     C      =    A    *      B
 
-   const idx_t N = A.N;
+   // XXXXX Cannonize!
 
-  __assume_aligned(C.fArray, 64);
-  __assume(N%16==0);
+   const idx_t N = NN;
+
+   const T *a = A.fArray; __assume_aligned(a, 64);
+   const T *b = B.fArray; __assume_aligned(b, 64);
+         T *c = C.fArray; __assume_aligned(c, 64);
 
 #pragma simd
    for (idx_t n = 0; n < N; ++n)
@@ -50,16 +56,18 @@ void MultForKalmanGain(const MatriplexSym<float, 6>& A,
 //------------------------------------------------------------------------------
 
 inline
-void MultResidualsAdd(const Matriplex<float, 6, 6>& A,
-                      const Matriplex<float, 6, 1>& B,
-                      const Matriplex<float, 6, 1>& C,
-                            Matriplex<float, 6, 1>& D)
+void MultResidualsAdd(const MPlexMM& A,
+                      const MPlexMV& B,
+                      const MPlexMV& C,
+                            MPlexMV& D)
 {
    // outPar = psPar + kalmanGain*(msPar-psPar)
    //   D    =   B         A         C  -  B
    // where right half of kalman gain is 0 
 
-   const idx_t N = A.N;
+   // XXXXX Cannonize, align!
+
+   const idx_t N = NN;
 
 #pragma simd
    for (idx_t n = 0; n < N; ++n)
@@ -82,15 +90,17 @@ void MultResidualsAdd(const Matriplex<float, 6, 6>& A,
 //------------------------------------------------------------------------------
 
 inline
-void FinalKalmanErr(const MatriplexSym<float, 6>& A,
-                    const Matriplex<float, 6, 6>& B,
-                          MatriplexSym<float, 6>& C)
+void FinalKalmanErr(const MPlexSS& A,
+                    const MPlexMM& B,
+                          MPlexSS& C)
 {
    // propErr - kalmanGain*propErr
    //    A    -      B    *   A
    // where right half of B is 0
 
-   const idx_t N = A.N;
+   // XXXXX Cannonize, align!
+
+   const idx_t N = NN;
 
 #pragma simd
    for (idx_t n = 0; n < N; ++n)
