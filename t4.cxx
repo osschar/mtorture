@@ -21,8 +21,8 @@ int main()
 {
   MPlexTest mpt(3, 2, 1);
 
-  SMatS a, b;
-  SMat  c;
+  SMatS a[16], b[16];
+  SMat  c[16];
 
   std::default_random_engine      gen(0xbeef0133);
   std::normal_distribution<float> dis(1.0, 0.05);
@@ -30,61 +30,73 @@ int main()
   long64 count = 0;
 
 init:
-  for (int i = 0; i < M; ++i)
+  for (int m = 0; m < 16; ++m)
   {
-    for (int j = i; j < M; ++j)
+    for (int i = 0; i < M; ++i)
     {
-      a(i,j) = dis(gen);
-      b(i,j) = dis(gen);
+      for (int j = i; j < M; ++j)
+      {
+        a[m](i,j) = dis(gen);
+        b[m](i,j) = dis(gen);
+      }
     }
+
+    mpt.MPlexSym(0, 0).Assign(m, a[m].Array());
+    mpt.MPlexSym(1, 0).Assign(m, b[m].Array());
+
+    c[m] = a[m] * b[m];
   }
-
-  mpt.MPlexSym(0, 0).Assign(0, a.Array());
-  mpt.MPlexSym(1, 0).Assign(0, b.Array());
-
-  c = a * b;
 
   mpt.mult2_sym(1);
 
   if (++count % 100000 == 0)
     printf("Count = %lld\n", count);
 
-  bool dump = false;
+  for (int m = 0; m < 16; ++m)
+  {
+    bool dump = false;
 
-  for (int j = 0; j < M; ++j)
-    for (int k = 0; k < M; ++k)
+    for (int j = 0; j < M; ++j)
     {
-      // There are occasional diffs up to 4.768372e-07 on host, very very
-      // rarely on MIC. Apparently this is a rounding difference between AVX
-      // and normal maths. On MIC it might be usage of FMA?
-      // The above was for 3x3.
-      // For 6x6 practically all elements differ by 4.768372e-07, some
-      // by 9.536743e-07.
-      if (std::abs(c(j,k) - mpt.MPlex(0, 0).At(0,j, k)) > 5e-7)
+      for (int k = 0; k < M; ++k)
       {
-        dump = true;
-        printf("%d,%d d=%e (count = %lld)\n", j, k, c(j,k) - mpt.MPlex(0, 0).At(0, j, k), count);
+        // There are occasional diffs up to 4.768372e-07 on host, very very
+        // rarely on MIC. Apparently this is a rounding difference between AVX
+        // and normal maths. On MIC it might be usage of FMA?
+        // The above was for 3x3.
+        // For 6x6 practically all elements differ by 4.768372e-07, some
+        // by 9.536743e-07.
+        if (std::abs(c[m](j,k) - mpt.MPlex(0, 0).At(m, j, k)) > 5e-7)
+        {
+          dump = true;
+          printf("M=%d  %d,%d d=%e (count = %lld)\n", m, j, k, c[m](j,k) - mpt.MPlex(0, 0).At(m, j, k), count);
+        }
       }
     }
 
-  if (dump)
-  {
-    printf("\n");
-    for (int i = 0; i < M; ++i)
+    if (dump && false)
     {
-      for (int j = 0; j < M; ++j)
-        printf("%8f ", c(i,j));
       printf("\n");
-    }
-    printf("\n");
+      for (int i = 0; i < M; ++i)
+      {
+        for (int j = 0; j < M; ++j)
+          printf("%8f ", c[m](i,j));
+        printf("\n");
+      }
+      printf("\n");
 
-    for (int i = 0; i < M; ++i)
-    {
-      for (int j = 0; j < M; ++j)
-        printf("%8f ", mpt.MPlex(0, 0).At(0,i,j));
+      for (int i = 0; i < M; ++i)
+      {
+        for (int j = 0; j < M; ++j)
+          printf("%8f ", mpt.MPlex(0, 0).At(m, i, j));
+        printf("\n");
+      }
       printf("\n");
     }
-    printf("\n\n");
+    if (dump)
+    {
+      printf("\n");
+    }
   }
 
   goto init;
