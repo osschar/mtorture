@@ -34,7 +34,7 @@ matriplex-auto:
 
 
 clean:
-	rm -f ${EXES} *.o *.om
+	rm -f ${EXES} *.o *.om mkFit/mkFit mkFit/*.o mkFit/*.om
 
 distclean: clean
 	${MAKE} -C Matriplex clean
@@ -45,6 +45,26 @@ echo:
 	@echo CXXFLAGS = ${CXXFLAGS}
 	@echo LDFLAGS  = ${LDFLAGS}
 
+################################################################
+
+### mkFit test
+
+MKFSRCS := $(wildcard mkFit/*.cc)
+MKFOBJS := $(MKFSRCS:.cc=.o)
+MKFHDRS := $(wildcard mkFit/*.h)
+
+mkFit/mkFit: ${MKFOBJS}
+	icc ${CXXFLAGS} ${VECHOST} ${LDFLAGS} -o $@ $^
+
+mkFit/mkFit-mic: $(MKFOBJS:.o=.om)
+	icc ${CXXFLAGS} ${VECMIC} ${LDFLAGS} -o $@ $^
+	scp $@ mic0:
+
+mkFit/%.o: mkFit/%.cc
+	icc ${CPPFLAGS} ${CXXFLAGS} ${VECHOST} -DNO_ROOT -IMatriplex -c -o $@ $<
+
+mkFit/%.om: mkFit/%.cc
+	icc ${CPPFLAGS} ${CXXFLAGS} ${VECMIC} -DNO_ROOT -IMatriplex -c -o $@ $<
 
 ### t1
 
