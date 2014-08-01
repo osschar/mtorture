@@ -36,3 +36,7 @@ t4-mic
 *.ah
 # ... and a make touch file for target that generates matriplex related ones.
 matriplex-auto
+
+# mkFit
+mkFit/mkFit
+mkFit/mkFit-mic
