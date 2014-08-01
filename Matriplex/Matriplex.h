@@ -39,6 +39,9 @@ public:
       }
    }
 
+   T  operator[](idx_t xx) const { return fArray[xx]; }
+   T& operator[](idx_t xx)       { return fArray[xx]; }
+
    T& At(idx_t n, idx_t i, idx_t j) { return fArray[(i * D2 + j) * N + n]; }
 
    T& operator()(idx_t n, idx_t i, idx_t j) { return fArray[(i * D2 + j) * N + n]; }
