@@ -77,7 +77,9 @@ public:
    idx_t * Offsets()    { return gSymOffsets[D];    }
    idx_t   Off(idx_t i) { return gSymOffsets[D][i]; }
 
-   // This is krappe
+   T  operator[](idx_t xx) const { return fArray[xx]; }
+   T& operator[](idx_t xx)       { return fArray[xx]; }
+
    T& At(idx_t n, idx_t i, idx_t j) { return fArray[Off(i * D + j) * N + n]; }
 
    T& operator()(idx_t n, idx_t i, idx_t j) { return At(n, i, j); }
@@ -88,6 +90,85 @@ public:
       for (idx_t i = n; i < kTotSize; i += N)
       {
          fArray[i] = *(arr++);
+      }
+   }
+
+
+  // ==================================================================
+  // Super crazy shit for Kalman fit that should probably go elsewhere
+  // ==================================================================
+
+     void AddNoiseIntoUpperLeft3x3(T noise)
+   {
+      // XXXXX Review, cannonize
+      // XXX icc bitch says: loop was not vectorized: cannot vectorize empty simd loop
+
+      T *p = fArray; __assume_aligned(p, 64);
+
+#pragma omp simd
+      for (idx_t n = 0; n < N; ++n)
+      {
+         p[0*N+n] += noise;
+         p[2*N+n] += noise;
+         p[5*N+n] += noise;
+      }
+   }
+
+   void AddIntoUpperLeft3x3(const MatriplexSym& A, const MatriplexSym& B)
+   {
+      // XXXXX Review, cannonize
+      // The rest of matrix is left untouched.
+
+      const T *a = A.fArray; __assume_aligned(a, 64);
+      const T *b = B.fArray; __assume_aligned(b, 64);
+            T *p =   fArray; __assume_aligned(p, 64);
+
+#pragma simd
+      for (idx_t n = 0; n < N; ++n)
+      {
+         p[0*N+n] = a[0*N+n] + b[0*N+n];
+         p[1*N+n] = a[1*N+n] + b[1*N+n];
+         p[2*N+n] = a[2*N+n] + b[2*N+n];
+         p[3*N+n] = a[3*N+n] + b[3*N+n];
+         p[4*N+n] = a[4*N+n] + b[4*N+n];
+         p[5*N+n] = a[5*N+n] + b[5*N+n];
+      }
+   }
+
+   void InvertUpperLeft3x3()
+   {
+      // XXXXX Review, cannonize
+      // XXXXX Do Cramer, not Cholesky !!!
+
+      T *p = fArray; __assume_aligned(p, 64);
+
+#pragma simd
+      for (idx_t n = 0; n < N; ++n)
+      {
+         T l0 = std::sqrt(T(1) / p[0*N+n]);
+         T l1 = p[1*N+n] * l0;
+         T l2 = p[2*N+n] - l1 * l1;
+         l2 = std::sqrt(T(1) / l2);
+         T l3 = p[3*N+n] * l0;
+         T l4 = (p[4*N+n] - l1 * l3) * l2;
+         T l5 = p[5*N+n] - (l3 * l3 + l4 * l4);
+         l5 = std::sqrt(T(1) / l5);
+
+         // decomposition done
+
+         l3 = (l1 * l4 * l2 - l3) * l0 * l5;
+         l1 = -l1 * l0 * l2;
+         l4 = -l4 * l2 * l5;
+
+         p[0*N+n] = l3*l3 + l1*l1 + l0*l0;
+         p[1*N+n] = l3*l4 + l1*l2;
+         p[2*N+n] = l4*l4 + l2*l2;
+         p[3*N+n] = l3*l5;
+         p[4*N+n] = l4*l5;
+         p[5*N+n] = l5*l5;
+
+         // m(2,x) are all zero if anything went wrong at l5.
+         // all zero, if anything went wrong already for l0 or l2.
       }
    }
 };
