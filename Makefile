@@ -60,10 +60,10 @@ mkFit/mkFit-mic: $(MKFOBJS:.o=.om)
 	icc ${CXXFLAGS} ${VECMIC} ${LDFLAGS} -o $@ $^
 	scp $@ mic0:
 
-mkFit/%.o: mkFit/%.cc
+mkFit/%.o: mkFit/%.cc mkFit/*.h Matriplex/*
 	icc ${CPPFLAGS} ${CXXFLAGS} ${VECHOST} -DNO_ROOT -IMatriplex -c -o $@ $<
 
-mkFit/%.om: mkFit/%.cc
+mkFit/%.om: mkFit/%.cc mkFit/*.h Matriplex/*
 	icc ${CPPFLAGS} ${CXXFLAGS} ${VECMIC} -DNO_ROOT -IMatriplex -c -o $@ $<
 
 ### t1
