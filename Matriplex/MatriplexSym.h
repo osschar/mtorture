@@ -94,11 +94,11 @@ public:
    }
 
 
-  // ==================================================================
-  // Super crazy shit for Kalman fit that should probably go elsewhere
-  // ==================================================================
+   // ==================================================================
+   // Super crazy shit for Kalman fit that should probably go elsewhere
+   // ==================================================================
 
-     void AddNoiseIntoUpperLeft3x3(T noise)
+   void AddNoiseIntoUpperLeft3x3(T noise)
    {
       // XXXXX Review, cannonize
       // XXX icc bitch says: loop was not vectorized: cannot vectorize empty simd loop
@@ -111,27 +111,6 @@ public:
          p[0*N+n] += noise;
          p[2*N+n] += noise;
          p[5*N+n] += noise;
-      }
-   }
-
-   void AddIntoUpperLeft3x3(const MatriplexSym& A, const MatriplexSym& B)
-   {
-      // XXXXX Review, cannonize
-      // The rest of matrix is left untouched.
-
-      const T *a = A.fArray; __assume_aligned(a, 64);
-      const T *b = B.fArray; __assume_aligned(b, 64);
-            T *p =   fArray; __assume_aligned(p, 64);
-
-#pragma simd
-      for (idx_t n = 0; n < N; ++n)
-      {
-         p[0*N+n] = a[0*N+n] + b[0*N+n];
-         p[1*N+n] = a[1*N+n] + b[1*N+n];
-         p[2*N+n] = a[2*N+n] + b[2*N+n];
-         p[3*N+n] = a[3*N+n] + b[3*N+n];
-         p[4*N+n] = a[4*N+n] + b[4*N+n];
-         p[5*N+n] = a[5*N+n] + b[5*N+n];
       }
    }
 
