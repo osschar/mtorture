@@ -151,9 +151,9 @@ double runFittingTest(bool saveTree, unsigned int Ntracks)
 }
 
 
-    //==============================================================================
-    // runFittingTestPlex
-    //==============================================================================
+//==============================================================================
+// runFittingTestPlex
+//==============================================================================
 
 #ifndef __APPLE__
 
@@ -194,10 +194,11 @@ double runFittingTestPlex(bool saveTree, int Ntracks)
       simtracks.push_back(simtrk);
    }
 
-   const int Nhits = 10; // XXXXX ARGH !!!!
+   const int Nhits = 10; // XXXXX ARGH !!!! What if there's a missing / double layer?
+   // Eventually, should sort track vector by number of hits!
 
    // XXXXX This *MUST* be on heap, not on stack.
-   std::auto_ptr<MkFitter> mkfp( new MkFitter(Nhits));
+   std::auto_ptr<MkFitter> mkfp( new MkFitter(Nhits) );
 
    double time = dtime();
 
@@ -205,6 +206,8 @@ double runFittingTestPlex(bool saveTree, int Ntracks)
    for (int itrack = 0; itrack < theEnd; itrack += NN)
    {
       int end = std::min(itrack + NN, theEnd);
+
+      // printf("Jebo %d - %d ... total %d\n", itrack, end, theEnd);
 
       mkfp->SetTracksAndHits(simtracks, itrack, end);
 
