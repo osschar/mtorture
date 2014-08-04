@@ -53,6 +53,9 @@ MKFSRCS := $(wildcard mkFit/*.cc)
 MKFOBJS := $(MKFSRCS:.cc=.o)
 MKFHDRS := $(wildcard mkFit/*.h)
 
+.PHONY: mkFit
+mkFit: mkFit/mkFit mkFit/mkFit-mic
+
 mkFit/mkFit: ${MKFOBJS}
 	icc ${CXXFLAGS} ${VECHOST} ${LDFLAGS} -o $@ $^
 
