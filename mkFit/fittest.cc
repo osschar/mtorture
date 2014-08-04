@@ -15,7 +15,31 @@
 #include <iostream>
 #include <memory>
 
-double runFittingTest(bool saveTree, unsigned int Ntracks)
+//==============================================================================
+
+void generateTracks(std::vector<Track>& simtracks, int Ntracks)
+{
+   for (unsigned int itrack=0;itrack<Ntracks;++itrack)
+   {
+      //create the track
+      SVector3 pos;
+      SVector3 mom;
+      SMatrixSym66 covtrk;
+      std::vector<Hit> hits;
+      int q=0;//set it in setup function
+      float pt = 0.5 + g_unif(g_gen) * 9.5;//this input, 0.5<pt<10 GeV  (below ~0.5 GeV does not make 10 layers)
+      setupTrackByToyMC(pos,mom,covtrk,hits,q,pt);
+      Track simtrk(q,pos,mom,covtrk,hits,0.);
+      simtracks.push_back(simtrk);
+   }
+}
+
+
+//==============================================================================
+// runFittingTest
+//==============================================================================
+
+double runFittingTest(bool saveTree, int Ntracks)
 {
    float pt_mc=0.,pt_fit=0.,pt_err=0.; 
 #ifndef NO_ROOT
@@ -38,19 +62,7 @@ double runFittingTest(bool saveTree, unsigned int Ntracks)
    SMatrix63 projMatrix36T = ROOT::Math::Transpose(projMatrix36);
 
    std::vector<Track> simtracks;
-   for (unsigned int itrack=0;itrack<Ntracks;++itrack)
-   {
-      //create the track
-      SVector3 pos;
-      SVector3 mom;
-      SMatrixSym66 covtrk;
-      std::vector<Hit> hits;
-      int q=0;//set it in setup function
-      float pt = 0.5 + g_unif(g_gen) * 9.5;//this input, 0.5<pt<10 GeV  (below ~0.5 GeV does not make 10 layers)
-      setupTrackByToyMC(pos,mom,covtrk,hits,q,pt);
-      Track simtrk(q,pos,mom,covtrk,hits,0.);
-      simtracks.push_back(simtrk);
-   }
+   generateTracks(simtracks, Ntracks);
 
    double time = dtime();
 
@@ -77,7 +89,11 @@ double runFittingTest(bool saveTree, unsigned int Ntracks)
       for (std::vector<Hit>::iterator hit=hits.begin();hit!=hits.end();++hit)
       {
          //for each hit, propagate to hit radius and update track state with hit measurement
+         // TrackState propState = propagateHelixToR(updatedState,hit->r());
+
+         // XXXXXX Changed to Line ... to compare with Matriplex
          TrackState propState = propagateHelixToR(updatedState,hit->r());
+
          MeasurementState measState = hit->measurementState();
          updatedState = updateParameters(propState, measState,projMatrix36,projMatrix36T);
          //updateParameters66(propState, measState, updatedState);//updated state is now modified
@@ -180,19 +196,7 @@ double runFittingTestPlex(bool saveTree, int Ntracks)
    SMatrix63 projMatrix36T = ROOT::Math::Transpose(projMatrix36);
 
    std::vector<Track> simtracks;
-   for (int itrack=0;itrack<Ntracks;++itrack)
-   {
-      //create the track
-      SVector3 pos;
-      SVector3 mom;
-      SMatrixSym66 covtrk;
-      std::vector<Hit> hits;
-      int q=0;//set it in setup function
-      float pt = 0.5+g_unif(g_gen)*9.5;//this input, 0.5<pt<10 GeV  (below ~0.5 GeV does not make 10 layers)
-      setupTrackByToyMC(pos,mom,covtrk,hits,q,pt);
-      Track simtrk(q,pos,mom,covtrk,hits,0.);
-      simtracks.push_back(simtrk);
-   }
+   generateTracks(simtracks, Ntracks);
 
    const int Nhits = 10; // XXXXX ARGH !!!! What if there's a missing / double layer?
    // Eventually, should sort track vector by number of hits!
