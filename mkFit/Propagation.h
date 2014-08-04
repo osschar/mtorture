@@ -24,9 +24,9 @@ TrackState propagateHelixToR_test(TrackState& inputState, float r);
 
 class updateParametersContext;
 
-void propagateLineToRMPlex(const MPlexSS &psErr,  const MPlexMV& psPar,
-                           const MPlexSS &msErr,  const MPlexMV& msPar,
-                                 MPlexSS &outErr,       MPlexMV& outPar,
+void propagateLineToRMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
+                           const MPlexHS &msErr,  const MPlexHV& msPar,
+                                 MPlexLS &outErr,       MPlexLV& outPar,
                                  updateParametersContext &ctx);
 
 #endif
