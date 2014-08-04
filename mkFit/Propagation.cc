@@ -58,13 +58,15 @@ void propagateLineToRMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
    for (int n = 0; n < N; ++n)
    {
       // Here we get SEGV on MIC for O2 and O3. WTF, etc.
+      float dr = hipo(msPar[0 * N6 + n], msPar[1 * N6 + n]) - hipo(psPar[0 * N6 + n], psPar[1 * N6 + n]);
+
       // Broken up false calculation to detrmine where it crashes.
-      // First line already :(
-      float dr = msPar[0 * N6 + n];
-      dr += msPar[1 * N6 + n];
-      dr += psPar[0 * N6 + n];
-      dr += psPar[1 * N6 + n];
-      // float dr = hipo(msPar[0 * N6 + n], msPar[1 * N6 + n]) - hipo(psPar[0 * N6 + n], psPar[1 * N6 + n]);
+      // On the first line already :(
+      // float dr = msPar[0 * N6 + n];
+      // dr += msPar[1 * N6 + n];
+      // dr += psPar[0 * N6 + n];
+      // dr += psPar[1 * N6 + n];
+
       float pt = hipo(psPar[3 * N6 + n], psPar[4 * N6 + n]);
       float path = dr / pt;
 
