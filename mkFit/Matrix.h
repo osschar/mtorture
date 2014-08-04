@@ -41,12 +41,18 @@ inline double dtime()
 
 typedef int idx_t;
 
-const idx_t MM =  6; // Default dimension of MPlex matrices
-const idx_t NN = 16; // Default "length" of MPlex
+const idx_t NN = 16; // "Length" of MPlex.
 
-typedef Matriplex::Matriplex<float, MM, MM, NN>   MPlexMM;
-typedef Matriplex::Matriplex<float, MM,  1, NN>   MPlexMV;
-typedef Matriplex::MatriplexSym<float, MM,  NN>   MPlexSS;
+const idx_t LL =  6; // Dimension of large/long  MPlex entities
+const idx_t HH =  3; // Dimension of small/short MPlex entities
+
+typedef Matriplex::Matriplex<float, LL, LL, NN>   MPlexLL;
+typedef Matriplex::Matriplex<float, LL,  1, NN>   MPlexLV;
+typedef Matriplex::MatriplexSym<float, LL,  NN>   MPlexLS;
+
+typedef Matriplex::Matriplex<float, HH, HH, NN>   MPlexHH;
+typedef Matriplex::Matriplex<float, HH,  1, NN>   MPlexHV;
+typedef Matriplex::MatriplexSym<float, HH,  NN>   MPlexHS;
 
 typedef Matriplex::Matriplex<float, 1, 1, 16>   MPlexQF;
 typedef Matriplex::Matriplex<int,   1, 1, 16>   MPlexQI;
