@@ -89,9 +89,9 @@ void updateParameters66(TrackState& propagatedState, MeasurementState& measureme
 
 #ifndef __APPLE__
 
-void updateParametersMPlex(const MPlexSS &psErr,  const MPlexMV& psPar,
-                           const MPlexSS &msErr,  const MPlexMV& msPar,
-                                 MPlexSS &outErr,       MPlexMV& outPar,
+void updateParametersMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
+                           const MPlexHS &msErr,  const MPlexHV& msPar,
+                                 MPlexLS &outErr,       MPlexLV& outPar,
                                  updateParametersContext &ctx)
 {
   // const idx_t N = psErr.N;
@@ -103,7 +103,7 @@ void updateParametersMPlex(const MPlexSS &psErr,  const MPlexMV& psPar,
   // Also: resErr could be 3x3, kalmanGain 6x3
 
   //MPlexSS propErr(N);
-  MPlexSS &propErr = ctx.propErr;
+  MPlexLS &propErr = ctx.propErr;
   propErr = psErr;       // could use/overwrite psErr?
   propErr.AddNoiseIntoUpperLeft3x3(0.0); // e.g. ?
 
@@ -118,8 +118,8 @@ void updateParametersMPlex(const MPlexSS &psErr,  const MPlexMV& psPar,
   // } printf("\n");
 
   //MPlexSS resErr(N);
-  MPlexSS &resErr = ctx.resErr;
-  resErr.AddIntoUpperLeft3x3(msErr, propErr);
+  MPlexLS &resErr = ctx.resErr;
+  AddIntoUpperLeft3x3(propErr, msErr, resErr);
   // Do not really need to zero the rest ... it is not used.
 
   // printf("resErr:\n");
@@ -137,7 +137,7 @@ void updateParametersMPlex(const MPlexSS &psErr,  const MPlexMV& psPar,
   // } printf("\n");
 
   //MPlexMM kalmanGain(N);
-  MPlexMM &kalmanGain = ctx.kalmanGain;
+  MPlexLL &kalmanGain = ctx.kalmanGain;
   MultForKalmanGain(propErr, resErr, kalmanGain);
   // Do not need the right part, leave it unitialized.
 

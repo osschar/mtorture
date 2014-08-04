@@ -19,15 +19,7 @@ TrackState updateParameters(TrackState& propagatedState, MeasurementState& measu
 
 #ifndef __APPLE__
 
-// #include "MatriplexSymNT.h"
-
-// const idx_t M = 6;
-
-// typedef Matriplex<float, M, M>   MPlexMM;
-// typedef Matriplex<float, M, 1>   MPlexMV;
-// typedef MatriplexSym<float, M>   MPlexSS;
-
-#include "Matriplex/KalmanOps.h"
+#include "KalmanOps.h"
 
 struct updateParametersContext
 {
@@ -35,9 +27,9 @@ struct updateParametersContext
   // easy to swap last "out" into "in" for the next measuerement).
 
   // Temporaries
-  MPlexSS propErr;
-  MPlexSS resErr;
-  MPlexMM kalmanGain;
+  MPlexLS propErr;
+  MPlexLS resErr;
+  MPlexLL kalmanGain;
   MPlexQF pathLen;
 
   // XXX The constructor could (should?) take size argument???
@@ -49,9 +41,9 @@ struct updateParametersContext
    {}
 };
 
-void updateParametersMPlex(const MPlexSS &psErr,  const MPlexMV& psPar,
-                           const MPlexSS &msErr,  const MPlexMV& msPar,
-                                 MPlexSS &outErr,       MPlexMV& outPar,
+void updateParametersMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
+                           const MPlexHS &msErr,  const MPlexHV& msPar,
+                                 MPlexLS &outErr,       MPlexLV& outPar,
                                  updateParametersContext &ctx);
 #endif
 
