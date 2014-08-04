@@ -4,7 +4,7 @@
 
 void MkFitter::SetTracksAndHits(std::vector<Track>& tracks, int beg, int end)
 {
-  // Assign - RAW copy -- needs to be chunked somehow
+  // Assign track parameters to initial state and copy hit values in.
 
   // This is not true for the last chunk!
   // assert(end - beg == NN);
@@ -31,8 +31,7 @@ void MkFitter::SetTracksAndHits(std::vector<Track>& tracks, int beg, int end)
 
 void MkFitter::Fit()
 {
-
-  // Fitting loop - RAW copy -- needs to be chunked
+  // Fitting loop.
 
   for (int hi = 0; hi < Nhits; ++hi)
   {

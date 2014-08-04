@@ -6,22 +6,20 @@
 
 class MkFitter
 {
-  MPlexSS psErr;  MPlexMV psPar;
-  MPlexSS outErr; MPlexMV outPar;
-
-  MPlexSS Err[2];
-  MPlexMV Par[2];
+  MPlexLS Err[2];
+  MPlexLV Par[2];
 
   MPlexQI Chg;
 
-  int iC = 0; // current
-  int iP = 1; // propagated
-
-
-  std::vector<MPlexSS> msErr;
-  std::vector<MPlexMV> msPar;
-
   updateParametersContext updateCtx;
+
+  std::vector<MPlexHS> msErr;
+  std::vector<MPlexHV> msPar;
+
+  // Indices into Err and Par arrays.
+  // Thought I'll have to flip between them ...
+  const int iC = 0; // current
+  const int iP = 1; // propagated
 
   int Nhits;
 
