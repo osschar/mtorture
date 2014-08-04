@@ -12,9 +12,9 @@ typedef float T; // XXXXX This is horrible!!!
 
 
 inline
-void MultForKalmanGain(const MPlexSS& A,
-                       const MPlexSS& B,
-                             MPlexMM& C)
+void MultForKalmanGain(const MPlexLS& A,
+                       const MPlexLS& B,
+                             MPlexLL& C)
 {
    // calculate Kalman gain -- multiplication where B / resErr is only populated
    // in upper-left 3x3
@@ -56,10 +56,10 @@ void MultForKalmanGain(const MPlexSS& A,
 //------------------------------------------------------------------------------
 
 inline
-void MultResidualsAdd(const MPlexMM& A,
-                      const MPlexMV& B,
-                      const MPlexMV& C,
-                            MPlexMV& D)
+void MultResidualsAdd(const MPlexLL& A,
+                      const MPlexLV& B,
+                      const MPlexHV& C,
+                            MPlexLV& D)
 {
    // outPar = psPar + kalmanGain*(msPar-psPar)
    //   D    =   B         A         C  -  B
@@ -90,9 +90,9 @@ void MultResidualsAdd(const MPlexMM& A,
 //------------------------------------------------------------------------------
 
 inline
-void FinalKalmanErr(const MPlexSS& A,
-                    const MPlexMM& B,
-                          MPlexSS& C)
+void FinalKalmanErr(const MPlexLS& A,
+                    const MPlexLL& B,
+                          MPlexLS& C)
 {
    // propErr - kalmanGain*propErr
    //    A    -      B    *   A
@@ -128,6 +128,34 @@ void FinalKalmanErr(const MPlexSS& A,
       C.fArray[20 * N + n] = A.fArray[20 * N + n] - B.fArray[30 * N + n] * A.fArray[15 * N + n] - B.fArray[31 * N + n] * A.fArray[16 * N + n] - B.fArray[32 * N + n] * A.fArray[17 * N + n];
    }
 }
+
+//------------------------------------------------------------------------------
+
+inline
+void AddIntoUpperLeft3x3(const MPlexLS& A, const MPlexHS& B, MPlexLS& C)
+{
+   // XXXXX Review, cannonize
+   // The rest of matrix is left untouched.
+
+   const idx_t N = NN;
+
+   const T *a = A.fArray; __assume_aligned(a, 64);
+   const T *b = B.fArray; __assume_aligned(b, 64);
+         T *c = C.fArray; __assume_aligned(c, 64);
+
+#pragma simd
+   for (idx_t n = 0; n < N; ++n)
+   {
+      c[0*N+n] = a[0*N+n] + b[0*N+n];
+      c[1*N+n] = a[1*N+n] + b[1*N+n];
+      c[2*N+n] = a[2*N+n] + b[2*N+n];
+      c[3*N+n] = a[3*N+n] + b[3*N+n];
+      c[4*N+n] = a[4*N+n] + b[4*N+n];
+      c[5*N+n] = a[5*N+n] + b[5*N+n];
+   }
+}
+
+
 
 //------------------------------------------------------------------------------
 
