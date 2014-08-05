@@ -108,15 +108,17 @@ run-t2:	t2 t2-mic
 
 ### t3
 
-T3_DEPS := t3 MPlexTest Timing
+T3_DEPS     := t3 MPlexTest Timing
+T3_OBJS     := $(addsuffix .o,  ${T3_DEPS})
+T3_OBJS_MIC := $(addsuffix .om, ${T3_DEPS})
 
 MPlexTest.o MPlexTest.om: Matriplex/Matriplex.h Matriplex/MatriplexSym.h Matriplex/MatriplexVector.h
 
-t3: $(addsuffix .o, ${T3_DEPS})
-	icc ${CXXFLAGS} ${VECHOST} ${LDFLAGS} -o $@ $^
+t3: auto ${T3_OBJS}
+	icc ${CXXFLAGS} ${VECHOST} ${LDFLAGS} -o $@ ${T3_OBJS}
 
-t3-mic: $(addsuffix .om, ${T3_DEPS})
-	icc ${CXXFLAGS} ${VECMIC} ${LDFLAGS} -o $@ $^
+t3-mic: auto ${T3_OBJS_MIC}
+	icc ${CXXFLAGS} ${VECMIC}  ${LDFLAGS} -o $@ ${T3_OBJS_MIC}
 	scp $@ mic0:
 
 run-t3:	t3 t3-mic
@@ -125,15 +127,17 @@ run-t3:	t3 t3-mic
 
 ### t4
 
-T4_DEPS := t4 MPlexTest
+T4_DEPS     := t4 MPlexTest
+T4_OBJS     := $(addsuffix .o,  ${T4_DEPS})
+T4_OBJS_MIC := $(addsuffix .om, ${T4_DEPS})
 
 MPlexTest.o MPlexTest.om: Matriplex/Matriplex.h Matriplex/MatriplexSym.h Matriplex/MatriplexVector.h
 
-t4: $(addsuffix .o, ${T4_DEPS})
-	icc ${CXXFLAGS} ${VECHOST} ${LDFLAGS} -o $@ $^
+t4: auto ${T4_OBJS}
+	icc ${CXXFLAGS} ${VECHOST} ${LDFLAGS} -o $@ ${T4_OBJS}
 
-t4-mic: $(addsuffix .om, ${T4_DEPS})
-	icc ${CXXFLAGS} ${VECMIC} ${LDFLAGS} -o $@ $^
+t4-mic: auto ${T4_OBJS_MIC}
+	icc ${CXXFLAGS} ${VECMIC}  ${LDFLAGS} -o $@ ${T4_OBJS_MIC}
 	scp $@ mic0:
 
 run-t4:	t4 t4-mic
