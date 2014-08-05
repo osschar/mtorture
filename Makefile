@@ -17,7 +17,7 @@ CXXFLAGS := ${OPT} -openmp -std=gnu++0x ${USER_CXXFLAGS}
 
 LDFLAGS  := ${USER_LDFLAGS}
 
-TGTS     := t1 t2 t3
+TGTS     := t1 t2 t3 t4 mkFit/mkFit
 
 EXES     := ${TGTS} $(addsuffix -mic, ${TGTS})
 
@@ -25,6 +25,9 @@ all: ${EXES}
 
 matriplex-auto:
 	${MAKE} -C Matriplex auto && touch $@
+
+auto: matriplex-auto
+.PHONY: auto
 
 %.o: %.cxx *.h matriplex-auto
 	icc ${CPPFLAGS} ${CXXFLAGS} ${VECHOST} -c -o $@ $<
@@ -50,17 +53,21 @@ echo:
 ### mkFit test
 
 MKFSRCS := $(wildcard mkFit/*.cc)
-MKFOBJS := $(MKFSRCS:.cc=.o)
 MKFHDRS := $(wildcard mkFit/*.h)
 
+MKFOBJS     := $(MKFSRCS:.cc=.o)
+MKFOBJS_MIC := $(MKFSRCS:.cc=.om)
+
+MKEXES  := mkFit/mkFit mkFit/mkFit-mic
+
 .PHONY: mkFit
-mkFit: mkFit/mkFit mkFit/mkFit-mic
+mkFit: ${MKEXES}
 
-mkFit/mkFit: ${MKFOBJS}
-	icc ${CXXFLAGS} ${VECHOST} ${LDFLAGS} -o $@ $^
+mkFit/mkFit: auto ${MKFOBJS}
+	icc ${CXXFLAGS} ${VECHOST} ${LDFLAGS} -o $@ ${MKFOBJS}
 
-mkFit/mkFit-mic: $(MKFOBJS:.o=.om)
-	icc ${CXXFLAGS} ${VECMIC} ${LDFLAGS} -o $@ $^
+mkFit/mkFit-mic: auto ${MKFOBJS_MIC}
+	icc ${CXXFLAGS} ${VECMIC}  ${LDFLAGS} -o $@ ${MKFOBJS_MIC}
 	scp $@ mic0:
 
 mkFit/%.o: mkFit/%.cc mkFit/*.h Matriplex/*
