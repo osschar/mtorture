@@ -1,5 +1,5 @@
 #include "fittest.h"
-#include "Track.h"
+
 #include "Matrix.h"
 #include "KalmanUtils.h"
 #include "Propagation.h"
@@ -19,7 +19,7 @@
 
 void generateTracks(std::vector<Track>& simtracks, int Ntracks)
 {
-   for (unsigned int itrack=0;itrack<Ntracks;++itrack)
+   for (int itrack = 0; itrack < Ntracks; ++itrack)
    {
       //create the track
       SVector3 pos;
@@ -39,7 +39,7 @@ void generateTracks(std::vector<Track>& simtracks, int Ntracks)
 // runFittingTest
 //==============================================================================
 
-double runFittingTest(bool saveTree, int Ntracks)
+double runFittingTest(std::vector<Track>& simtracks, bool saveTree)
 {
    float pt_mc=0.,pt_fit=0.,pt_err=0.; 
 #ifndef NO_ROOT
@@ -61,8 +61,6 @@ double runFittingTest(bool saveTree, int Ntracks)
    projMatrix36(2,2)=1.;
    SMatrix63 projMatrix36T = ROOT::Math::Transpose(projMatrix36);
 
-   std::vector<Track> simtracks;
-   generateTracks(simtracks, Ntracks);
 
    double time = dtime();
 
@@ -173,7 +171,7 @@ double runFittingTest(bool saveTree, int Ntracks)
 
 #ifndef __APPLE__
 
-double runFittingTestPlex(bool saveTree, int Ntracks)
+double runFittingTestPlex(std::vector<Track>& simtracks, bool saveTree)
 {
    float pt_mc=0.,pt_fit=0.,pt_err=0.; 
 #ifndef NO_ROOT
@@ -188,15 +186,14 @@ double runFittingTestPlex(bool saveTree, int Ntracks)
    }
 #endif
 
-   //these matrices are dummy and can be optimized without multriplying by zero all the world...
-   SMatrix36 projMatrix36;
-   projMatrix36(0,0)=1.;
-   projMatrix36(1,1)=1.;
-   projMatrix36(2,2)=1.;
-   SMatrix63 projMatrix36T = ROOT::Math::Transpose(projMatrix36);
+   // these matrices are dummy and can be optimized without multriplying by zero all the world...
+   // not used in plex now
+   // SMatrix36 projMatrix36;
+   // projMatrix36(0,0)=1.;
+   // projMatrix36(1,1)=1.;
+   // projMatrix36(2,2)=1.;
+   // SMatrix63 projMatrix36T = ROOT::Math::Transpose(projMatrix36);
 
-   std::vector<Track> simtracks;
-   generateTracks(simtracks, Ntracks);
 
    const int Nhits = 10; // XXXXX ARGH !!!! What if there's a missing / double layer?
    // Eventually, should sort track vector by number of hits!

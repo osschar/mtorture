@@ -12,13 +12,17 @@
 
 int main()
 {
+  int  Ntracks  = 5000;
   bool saveTree = false;
+
+  std::vector<Track> simtracks;
+  generateTracks(simtracks, Ntracks);
 
   double tmp, tsm;
 
-  tsm = runFittingTest(saveTree, 5000);
+  tsm = runFittingTest(simtracks, saveTree);
 
-  tmp = runFittingTestPlex(saveTree, 5000);
+  tmp = runFittingTestPlex(simtracks, saveTree);
 
   printf("SMatrix = %.3f   Matriplex = %.3f   ---   SM/MP = %.3f\n", tsm, tmp, tsm / tmp);
 
