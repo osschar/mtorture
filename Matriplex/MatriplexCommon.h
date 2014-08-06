@@ -13,7 +13,7 @@ namespace Matriplex
 
    inline void align_check(const char* pref, void *adr)
    {
-      printf("%s 0x%llx   - %d\n", pref, adr, (long long)adr%64);
+      printf("%s 0x%llx  -  modulo 64 = %d\n", pref, adr, (long long)adr%64);
    }
 }
 
