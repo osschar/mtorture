@@ -46,11 +46,19 @@ public:
 
    T& operator()(idx_t n, idx_t i, idx_t j) { return fArray[(i * D2 + j) * N + n]; }
 
-   void Assign(idx_t n, T *arr)
+   void CopyIn(idx_t n, T *arr)
    {
       for (idx_t i = n; i < kTotSize; i += N)
       {
          fArray[i] = *(arr++);
+      }
+   }
+
+   void CopyOut(idx_t n, T *arr)
+   {
+      for (idx_t i = n; i < kTotSize; i += N)
+      {
+         *(arr++) = fArray[i];
       }
    }
 };

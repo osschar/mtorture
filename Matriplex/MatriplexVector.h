@@ -53,7 +53,8 @@ public:
 
    T& operator()(idx_t n, idx_t i, idx_t j) { return fV[n/N].At(i, j, n%N); }
 
-   void Assign(idx_t n, T *arr)             { fV[n/N].Assign(n%N, arr); }
+   void CopyIn (idx_t n, T *arr)            { fV[n/N].CopyIn (n%N, arr); }
+   void CopyOut(idx_t n, T *arr)            { fV[n/N].CopyOut(n%N, arr); }
 };
 
 template<class MP> using MPlexVec = MatriplexVector<MP>;

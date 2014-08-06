@@ -84,15 +84,21 @@ public:
 
    T& operator()(idx_t n, idx_t i, idx_t j) { return At(n, i, j); }
 
-   void Assign(idx_t n, T *arr)
+   void CopyIn(idx_t n, T *arr)
    {
-#pragma simd
       for (idx_t i = n; i < kTotSize; i += N)
       {
          fArray[i] = *(arr++);
       }
    }
 
+   void CopyOut(idx_t n, T *arr)
+   {
+      for (idx_t i = n; i < kTotSize; i += N)
+      {
+         *(arr++) = fArray[i];
+      }
+   }
 
    // ==================================================================
    // Super crazy shit for Kalman fit that should probably go elsewhere
