@@ -41,8 +41,8 @@ init:
       }
     }
 
-    mpt.MPlexSym(0, 0).Assign(m, a[m].Array());
-    mpt.MPlexSym(1, 0).Assign(m, b[m].Array());
+    mpt.MPlexSym(0, 0).CopyIn(m, a[m].Array());
+    mpt.MPlexSym(1, 0).CopyIn(m, b[m].Array());
 
     c[m] = a[m] * b[m];
   }
