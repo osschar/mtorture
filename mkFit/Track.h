@@ -15,6 +15,8 @@ public:
 class Track {
 
 public:
+  Track() {}
+
   Track(TrackState state,std::vector<Hit> hits, float chi2) {
     state_=state;
     hits_=hits;
@@ -42,7 +44,7 @@ public:
   SVector3 momentum() {return SVector3(state_.parameters[3],state_.parameters[4],state_.parameters[5]);}
   SVector6& parameters() {return state_.parameters;}
   SMatrixSym66& errors() {return state_.errors;}
-  TrackState state() {return state_;}
+  TrackState& state() {return state_;}
   std::vector<Hit>& hitsVector() {return hits_;}
   float& chi2() {return chi2_;}
   void resetHits() {hits_.clear();}
