@@ -1,14 +1,6 @@
-/*
-  g++ -std=c++11 -o main main.cc Track.cc Hit.cc Matrix.cc KalmanUtils.cc Propagation.cc Simulation.cc buildtest.cc fittest.cc -I. `root-config --libs --cflags`
-  icc -std=gnu++0x -O3 -openmp -o main main.cc Track.cc Hit.cc Matrix.cc KalmanUtils.cc Propagation.cc Simulation.cc buildtest.cc fittest.cc -I. `root-config --libs --cflags`
-*/
-
-#include <iostream>
-
 #include "MatriplexCommon.h"
 
 #include "fittest.h"
-//#include "buildtest.h"
 
 int main()
 {
@@ -18,15 +10,22 @@ int main()
   std::vector<Track> simtracks;
   generateTracks(simtracks, Ntracks);
 
+  std::vector<Track> smat_tracks; smat_tracks.reserve(simtracks.size());
+  std::vector<Track> plex_tracks; plex_tracks.resize (simtracks.size());
+
+
   double tmp, tsm;
 
-  tsm = runFittingTest(simtracks, saveTree);
+  tsm = runFittingTest(simtracks, smat_tracks);
 
-  tmp = runFittingTestPlex(simtracks, saveTree);
+  tmp = runFittingTestPlex(simtracks, plex_tracks);
 
   printf("SMatrix = %.3f   Matriplex = %.3f   ---   SM/MP = %.3f\n", tsm, tmp, tsm / tmp);
 
-  // runBuildingTest(saveTree,10);
+#ifndef NO_ROOT
+  make_validation_tree("validation-smat.root", simtracks, smat_tracks);
+  make_validation_tree("validation-plex.root", simtracks, plex_tracks);
+#endif
 
   return 0;
 }
