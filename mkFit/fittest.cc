@@ -193,7 +193,10 @@ double runFittingTestPlex(std::vector<Track>& simtracks, std::vector<Track>& rec
    // measurments errors, params).
 
    // NOTE: This *MUST* be on heap, not on stack!
-   std::auto_ptr<MkFitter> mkfp( new MkFitter(Nhits) );
+   // Further, normal new screws up alignment of ALL MPlex memebrs of MkFitter,
+   // even if one adds attr(aligned(64)) thingy to every possible place.
+   //
+   MkFitter *mkfp = new (_mm_malloc(sizeof(MkFitter), 64)) MkFitter(Nhits);
 
    double time = dtime();
 
@@ -210,6 +213,8 @@ double runFittingTestPlex(std::vector<Track>& simtracks, std::vector<Track>& rec
       mkfp->OutputFittedTracks(rectracks, itrack, end);
 #endif
    }
+
+   _mm_free(mkfp);
 
    return dtime() - time;
 }
