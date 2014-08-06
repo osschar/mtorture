@@ -21,7 +21,7 @@ void MultForKalmanGain(const MPlexLS& A,
    // kalmanGain = propErr * resErrInverse
    //     C      =    A    *      B
 
-   // XXXXX Cannonize!
+   // XXX Regenerate with a script.
 
    const idx_t N = NN;
 
@@ -65,7 +65,7 @@ void MultResidualsAdd(const MPlexLL& A,
    //   D    =   B         A         C  -  B
    // where right half of kalman gain is 0 
 
-   // XXXXX Cannonize, align!
+   // XXX Regenerate with a script.
 
    const idx_t N = NN;
 
@@ -98,7 +98,7 @@ void FinalKalmanErr(const MPlexLS& A,
    //    A    -      B    *   A
    // where right half of B is 0
 
-   // XXXXX Cannonize, align!
+   // XXX Regenerate with a script.
 
    const idx_t N = NN;
 
@@ -134,7 +134,6 @@ void FinalKalmanErr(const MPlexLS& A,
 inline
 void AddIntoUpperLeft3x3(const MPlexLS& A, const MPlexHS& B, MPlexLS& C)
 {
-   // XXXXX Review, cannonize
    // The rest of matrix is left untouched.
 
    const idx_t N = NN;
@@ -154,7 +153,6 @@ void AddIntoUpperLeft3x3(const MPlexLS& A, const MPlexHS& B, MPlexLS& C)
       c[5*N+n] = a[5*N+n] + b[5*N+n];
    }
 }
-
 
 
 //------------------------------------------------------------------------------
