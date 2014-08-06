@@ -30,8 +30,9 @@ public:
     msPar.resize(Nhits);
   }
 
-  void SetTracksAndHits(std::vector<Track>& tracks, int beg, int end);
-  void Fit();
+  void InputTracksAndHits(std::vector<Track>& tracks, int beg, int end);
+  void FitTracks();
+  void OutputFittedTracks(std::vector<Track>& tracks, int beg, int end);
 };
 
 #endif
