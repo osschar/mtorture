@@ -10,6 +10,11 @@
 namespace Matriplex
 {
    typedef int idx_t;
+
+   inline void align_check(const char* pref, void *adr)
+   {
+      printf("%s 0x%llx   - %d\n", pref, adr, (long long)adr%64);
+   }
 }
 
 #endif
