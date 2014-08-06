@@ -46,36 +46,25 @@ void propagateLineToRMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
                                  MPlexLS &outErr,       MPlexLV& outPar,
                                  updateParametersContext &ctx)
 {
-   // XXXXX This is an abomination:
-   // - set aligns
-   // - N6 ... sigh, this is NSQ, really, right? No, ARGH! XXXXXX
-   // operator[] in Matriplex and MatriplexSym is not really needed. (??)
+   // XXX Regenerate parts below with a script.
 
    const idx_t N  = NN;
-   const idx_t N6 = N; //  * 6; // ???? WTF !!!!
 
 #pragma simd
    for (int n = 0; n < N; ++n)
    {
       // Here we get SEGV on MIC for O2 and O3. WTF, etc.
-      float dr = hipo(msPar[0 * N6 + n], msPar[1 * N6 + n]) - hipo(psPar[0 * N6 + n], psPar[1 * N6 + n]);
+      float dr = hipo(msPar[0 * N + n], msPar[1 * N + n]) - hipo(psPar[0 * N + n], psPar[1 * N + n]);
 
-      // Broken up false calculation to detrmine where it crashes.
-      // On the first line already :(
-      // float dr = msPar[0 * N6 + n];
-      // dr += msPar[1 * N6 + n];
-      // dr += psPar[0 * N6 + n];
-      // dr += psPar[1 * N6 + n];
-
-      float pt = hipo(psPar[3 * N6 + n], psPar[4 * N6 + n]);
+      float pt = hipo(psPar[3 * N + n], psPar[4 * N + n]);
       float path = dr / pt;
 
-      outPar[0 * N6 + n] = psPar[0 * N6 + n] + path * psPar[3 * N6 + n];
-      outPar[1 * N6 + n] = psPar[1 * N6 + n] + path * psPar[4 * N6 + n];
-      outPar[2 * N6 + n] = psPar[2 * N6 + n] + path * psPar[5 * N6 + n];
-      outPar[3 * N6 + n] = psPar[3 * N6 + n];
-      outPar[4 * N6 + n] = psPar[4 * N6 + n];
-      outPar[5 * N6 + n] = psPar[5 * N6 + n];
+      outPar[0 * N + n] = psPar[0 * N + n] + path * psPar[3 * N + n];
+      outPar[1 * N + n] = psPar[1 * N + n] + path * psPar[4 * N + n];
+      outPar[2 * N + n] = psPar[2 * N + n] + path * psPar[5 * N + n];
+      outPar[3 * N + n] = psPar[3 * N + n];
+      outPar[4 * N + n] = psPar[4 * N + n];
+      outPar[5 * N + n] = psPar[5 * N + n];
 
       {
         const MPlexLS& A = psErr;
