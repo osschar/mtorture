@@ -58,20 +58,27 @@ MKFHDRS := $(wildcard mkFit/*.h)
 MKFOBJS     := $(MKFSRCS:.cc=.o)
 MKFOBJS_MIC := $(MKFSRCS:.cc=.om)
 
-MKEXES  := mkFit/mkFit mkFit/mkFit-mic
+MKEXES   := mkFit/mkFit mkFit/mkFit-mic
+
+### To run without validation
+MK_HOST_CFLAGS := -DNO_ROOT
+MK_HOST_LIBS   :=
+### To run with validation (host only)
+# MK_HOST_CFLAGS := -I${ROOTSYS}/include
+# MK_HOST_LIBS   := -L${ROOTSYS}/lib -lCore -lRIO -lTree
 
 .PHONY: mkFit
 mkFit: ${MKEXES}
 
 mkFit/mkFit: auto ${MKFOBJS}
-	icc ${CXXFLAGS} ${VECHOST} ${LDFLAGS} -o $@ ${MKFOBJS}
+	icc ${CXXFLAGS} ${VECHOST} ${LDFLAGS} ${MK_HOST_LIBS} -o $@ ${MKFOBJS}
 
 mkFit/mkFit-mic: auto ${MKFOBJS_MIC}
 	icc ${CXXFLAGS} ${VECMIC}  ${LDFLAGS} -o $@ ${MKFOBJS_MIC}
 	scp $@ mic0:
 
 mkFit/%.o: mkFit/%.cc mkFit/*.h Matriplex/*
-	icc ${CPPFLAGS} ${CXXFLAGS} ${VECHOST} -DNO_ROOT -IMatriplex -c -o $@ $<
+	icc ${CPPFLAGS} ${CXXFLAGS} ${VECHOST} -IMatriplex ${MK_HOST_CFLAGS} -c -o $@ $<
 
 mkFit/%.om: mkFit/%.cc mkFit/*.h Matriplex/*
 	icc ${CPPFLAGS} ${CXXFLAGS} ${VECMIC} -DNO_ROOT -IMatriplex -c -o $@ $<
