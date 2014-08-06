@@ -66,6 +66,8 @@ public:
    MatriplexSym()    {}
    MatriplexSym(T v) { SetVal(v); }
 
+   idx_t PlexSize() const { return N; }
+
    void SetVal(T v)
    {
       for (idx_t i = 0; i < kTotSize; ++i)
@@ -74,11 +76,11 @@ public:
       }
    }
 
-   idx_t * Offsets()    { return gSymOffsets[D];    }
-   idx_t   Off(idx_t i) { return gSymOffsets[D][i]; }
-
    T  operator[](idx_t xx) const { return fArray[xx]; }
    T& operator[](idx_t xx)       { return fArray[xx]; }
+
+   idx_t * Offsets()    { return gSymOffsets[D];    }
+   idx_t   Off(idx_t i) { return gSymOffsets[D][i]; }
 
    T& At(idx_t n, idx_t i, idx_t j) { return fArray[Off(i * D + j) * N + n]; }
 

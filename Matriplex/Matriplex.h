@@ -31,6 +31,8 @@ public:
    Matriplex()    {}
    Matriplex(T v) { SetVal(v); }
 
+   idx_t PlexSize() const { return N; }
+
    void SetVal(T v)
    {
       for (idx_t i = 0; i < kTotSize; ++i)
