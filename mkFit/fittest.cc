@@ -34,25 +34,52 @@ void generateTracks(std::vector<Track>& simtracks, int Ntracks)
    }
 }
 
+void make_validation_tree(const char         *fname,
+                          std::vector<Track> &simtracks,
+                          std::vector<Track> &rectracks)
+{
+#ifndef NO_ROOT
+
+   assert(simtracks.size() == rectracks.size());
+
+   float pt_mc, pt_fit, pt_err;
+
+   TFile *file = TFile::Open(fname, "recreate");
+   TTree *tree = new TTree("T", "Validation Tree for simple Kalman fitter");;
+
+   tree->Branch("pt_mc",  &pt_mc,  "pt_mc");
+   tree->Branch("pt_fit", &pt_fit, "pt_fit");
+   tree->Branch("pt_err", &pt_err, "pt_err");
+
+   const int NT = simtracks.size();
+   for (int i = 0; i < NT; ++i)
+   {
+      SVector6     &simp   = simtracks[i].parameters();
+      SVector6     &recp   = rectracks[i].parameters();
+      SMatrixSym66 &recerr = rectracks[i].errors();
+
+      pt_mc  = sqrt(simp[3]*simp[3] + simp[4]*simp[4]);
+      pt_fit = sqrt(recp[3]*recp[3] + recp[4]*recp[4]);
+      pt_err = sqrt(recerr[3][3]*recp[3]*recp[3] +
+                    recerr[4][4]*recp[4]*recp[4] +
+                    recerr[3][4]*recp[3]*recp[4] * 2) / pt_fit;
+
+      tree->Fill();
+   }
+
+   file->Write();
+   file->Close();
+   delete file;
+#endif
+}
 
 //==============================================================================
 // runFittingTest
 //==============================================================================
 
-double runFittingTest(std::vector<Track>& simtracks, bool saveTree)
+double runFittingTest(std::vector<Track>& simtracks, std::vector<Track>& rectracks)
 {
-   float pt_mc=0.,pt_fit=0.,pt_err=0.; 
-#ifndef NO_ROOT
-   TFile* f=0;
-   TTree *tree=0;
-   if (saveTree) {
-      f=TFile::Open("validationtree.root", "recreate");
-      tree = new TTree("tree","tree");
-      tree->Branch("pt_mc",&pt_mc,"pt_mc");
-      tree->Branch("pt_fit",&pt_fit,"pt_fit");
-      tree->Branch("pt_err",&pt_err,"pt_err");
-   }
-#endif
+   // Standard fitting test using SMatrix
 
    //these matrices are dummy and can be optimized without multriplying by zero all the world...
    SMatrix36 projMatrix36;
@@ -143,25 +170,11 @@ double runFittingTest(std::vector<Track>& simtracks, bool saveTree)
       // dumpMatrix(updatedState.errors);
 
 #ifndef NO_ROOT
-      if (saveTree) {
-         pt_mc = sqrt(initState.parameters[3]*initState.parameters[3]+initState.parameters[4]*initState.parameters[4]);
-         pt_fit = sqrt(updatedState.parameters[3]*updatedState.parameters[3]+updatedState.parameters[4]*updatedState.parameters[4]);
-         pt_err = sqrt( updatedState.errors[3][3]*updatedState.parameters[3]*updatedState.parameters[3] +
-                        updatedState.errors[4][4]*updatedState.parameters[4]*updatedState.parameters[4] +
-                        2*updatedState.errors[3][4]*updatedState.parameters[3]*updatedState.parameters[4] )/pt_fit;
-         tree->Fill();
-      }
+      rectracks.push_back(trk);
 #endif
    }
 
    return dtime() - time;
-
-#ifndef NO_ROOT
-   if (saveTree) {
-      f->Write();
-      f->Close();
-   }
-#endif
 }
 
 
@@ -171,34 +184,15 @@ double runFittingTest(std::vector<Track>& simtracks, bool saveTree)
 
 #ifndef __APPLE__
 
-double runFittingTestPlex(std::vector<Track>& simtracks, bool saveTree)
+double runFittingTestPlex(std::vector<Track>& simtracks, std::vector<Track>& rectracks)
 {
-   float pt_mc=0.,pt_fit=0.,pt_err=0.; 
-#ifndef NO_ROOT
-   TFile* f=0;
-   TTree *tree=0;
-   if (saveTree) {
-      f=TFile::Open("validationtree_plex.root", "recreate");
-      tree = new TTree("tree","tree");
-      tree->Branch("pt_mc",&pt_mc,"pt_mc");
-      tree->Branch("pt_fit",&pt_fit,"pt_fit");
-      tree->Branch("pt_err",&pt_err,"pt_err");
-   }
-#endif
-
-   // these matrices are dummy and can be optimized without multriplying by zero all the world...
-   // not used in plex now
-   // SMatrix36 projMatrix36;
-   // projMatrix36(0,0)=1.;
-   // projMatrix36(1,1)=1.;
-   // projMatrix36(2,2)=1.;
-   // SMatrix63 projMatrix36T = ROOT::Math::Transpose(projMatrix36);
-
-
    const int Nhits = 10; // XXXXX ARGH !!!! What if there's a missing / double layer?
    // Eventually, should sort track vector by number of hits!
+   // And pass the number in on each "setup" call.
+   // Reserves should be made for maximum possible number (but this is just
+   // measurments errors, params).
 
-   // XXXXX This *MUST* be on heap, not on stack.
+   // NOTE: This *MUST* be on heap, not on stack!
    std::auto_ptr<MkFitter> mkfp( new MkFitter(Nhits) );
 
    double time = dtime();
@@ -208,11 +202,13 @@ double runFittingTestPlex(std::vector<Track>& simtracks, bool saveTree)
    {
       int end = std::min(itrack + NN, theEnd);
 
-      // printf("Jebo %d - %d ... total %d\n", itrack, end, theEnd);
+      mkfp->InputTracksAndHits(simtracks, itrack, end);
 
-      mkfp->SetTracksAndHits(simtracks, itrack, end);
+      mkfp->FitTracks();
 
-      mkfp->Fit();
+#ifndef NO_ROOT
+      mkfp->OutputFittedTracks(rectracks, itrack, end);
+#endif
    }
 
    return dtime() - time;
