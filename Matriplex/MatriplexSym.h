@@ -124,38 +124,30 @@ public:
 
    void InvertUpperLeft3x3()
    {
-      // XXXXX Review, cannonize
-      // XXXXX Do Cramer, not Cholesky !!!
+      typedef T TT;
 
-      T *p = fArray; __assume_aligned(p, 64);
+      T *a = fArray; __assume_aligned(a, 64);
 
 #pragma simd
       for (idx_t n = 0; n < N; ++n)
       {
-         T l0 = std::sqrt(T(1) / p[0*N+n]);
-         T l1 = p[1*N+n] * l0;
-         T l2 = p[2*N+n] - l1 * l1;
-         l2 = std::sqrt(T(1) / l2);
-         T l3 = p[3*N+n] * l0;
-         T l4 = (p[4*N+n] - l1 * l3) * l2;
-         T l5 = p[5*N+n] - (l3 * l3 + l4 * l4);
-         l5 = std::sqrt(T(1) / l5);
+         const TT c00 = a[2*N+n] * a[5*N+n] - a[4*N+n] * a[4*N+n];
+         const TT c01 = a[4*N+n] * a[3*N+n] - a[1*N+n] * a[5*N+n];
+         const TT c02 = a[1*N+n] * a[4*N+n] - a[2*N+n] * a[3*N+n];
+         const TT c11 = a[5*N+n] * a[0*N+n] - a[3*N+n] * a[3*N+n];
+         const TT c12 = a[3*N+n] * a[1*N+n] - a[4*N+n] * a[0*N+n];
+         const TT c22 = a[0*N+n] * a[2*N+n] - a[1*N+n] * a[1*N+n];
 
-         // decomposition done
+         const TT det = a[0*N+n] * c00 + a[1*N+n] * c01 + a[3*N+n] * c02;
 
-         l3 = (l1 * l4 * l2 - l3) * l0 * l5;
-         l1 = -l1 * l0 * l2;
-         l4 = -l4 * l2 * l5;
+         const TT s = TT(1) / det;
 
-         p[0*N+n] = l3*l3 + l1*l1 + l0*l0;
-         p[1*N+n] = l3*l4 + l1*l2;
-         p[2*N+n] = l4*l4 + l2*l2;
-         p[3*N+n] = l3*l5;
-         p[4*N+n] = l4*l5;
-         p[5*N+n] = l5*l5;
-
-         // m(2,x) are all zero if anything went wrong at l5.
-         // all zero, if anything went wrong already for l0 or l2.
+         a[0*N+n] = s*c00;
+         a[1*N+n] = s*c01;
+         a[2*N+n] = s*c11;
+         a[3*N+n] = s*c02;
+         a[4*N+n] = s*c12;
+         a[5*N+n] = s*c22;
       }
    }
 };
