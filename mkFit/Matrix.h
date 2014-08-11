@@ -39,9 +39,13 @@ inline double dtime()
 #ifndef __APPLE__
 #include "Matriplex/MatriplexSym.h"
 
+#ifndef MPT_SIZE
+#define MPT_SIZE 16
+#endif
+
 typedef int idx_t;
 
-const idx_t NN = 16; // "Length" of MPlex.
+const idx_t NN =  MPT_SIZE; // "Length" of MPlex.
 
 const idx_t LL =  6; // Dimension of large/long  MPlex entities
 const idx_t HH =  3; // Dimension of small/short MPlex entities
@@ -54,8 +58,8 @@ typedef Matriplex::Matriplex<float, HH, HH, NN>   MPlexHH;
 typedef Matriplex::Matriplex<float, HH,  1, NN>   MPlexHV;
 typedef Matriplex::MatriplexSym<float, HH,  NN>   MPlexHS;
 
-typedef Matriplex::Matriplex<float, 1, 1, 16>   MPlexQF;
-typedef Matriplex::Matriplex<int,   1, 1, 16>   MPlexQI;
+typedef Matriplex::Matriplex<float, 1, 1, 16>     MPlexQF;
+typedef Matriplex::Matriplex<int,   1, 1, 16>     MPlexQI;
 
 #endif
 
