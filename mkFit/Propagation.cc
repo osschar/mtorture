@@ -53,15 +53,15 @@ void propagateLineToRMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
 #pragma simd
    for (int n = 0; n < N; ++n)
    {
-      // Here we get SEGV on MIC for O2 and O3. WTF, etc.
-      float dr = hipo(msPar[0 * N + n], msPar[1 * N + n]) - hipo(psPar[0 * N + n], psPar[1 * N + n]);
+      const float dr  = hipo(msPar[0 * N + n], msPar[1 * N + n]) - hipo(psPar[0 * N + n], psPar[1 * N + n]);
 
-      float pt = hipo(psPar[3 * N + n], psPar[4 * N + n]);
-      float path = dr / pt;
+      const float pt  = hipo(psPar[3 * N + n], psPar[4 * N + n]);
+      const float p   = dr / pt; // path
+      const float psq = p * p;
 
-      outPar[0 * N + n] = psPar[0 * N + n] + path * psPar[3 * N + n];
-      outPar[1 * N + n] = psPar[1 * N + n] + path * psPar[4 * N + n];
-      outPar[2 * N + n] = psPar[2 * N + n] + path * psPar[5 * N + n];
+      outPar[0 * N + n] = psPar[0 * N + n] + p * psPar[3 * N + n];
+      outPar[1 * N + n] = psPar[1 * N + n] + p * psPar[4 * N + n];
+      outPar[2 * N + n] = psPar[2 * N + n] + p * psPar[5 * N + n];
       outPar[3 * N + n] = psPar[3 * N + n];
       outPar[4 * N + n] = psPar[4 * N + n];
       outPar[5 * N + n] = psPar[5 * N + n];
@@ -69,8 +69,6 @@ void propagateLineToRMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
       {
         const MPlexLS& A = psErr;
               MPlexLS& B = outErr;
-              float p = path;
-              float psq = p * p;
 
         B.fArray[0 * N + n] = A.fArray[0 * N + n];
         B.fArray[1 * N + n] = A.fArray[1 * N + n];
