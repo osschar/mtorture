@@ -109,12 +109,12 @@ void updateParametersMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
 
   // printf("propErr:\n");
   // for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
-  //     printf("%8f ", propErr.At(i,j,0)); printf("\n");
+  //     printf("%8f ", propErr.At(0,i,j)); printf("\n");
   // } printf("\n");
 
   // printf("msErr:\n");
   // for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
-  //     printf("%8f ", msErr.At(i,j,0)); printf("\n");
+  //     printf("%8f ", msErr.At(0,i,j)); printf("\n");
   // } printf("\n");
 
   //MPlexSS resErr(N);
@@ -124,7 +124,7 @@ void updateParametersMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
 
   // printf("resErr:\n");
   // for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
-  //     printf("%8f ", resErr.At(i,j,0)); printf("\n");
+  //     printf("%8f ", resErr.At(0,i,j)); printf("\n");
   // } printf("\n");
 
   resErr.InvertUpperLeft3x3();
@@ -133,7 +133,7 @@ void updateParametersMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
 
   // printf("resErrInv:\n");
   // for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
-  //     printf("%8f ", resErr.At(i,j,0)); printf("\n");
+  //     printf("%8f ", resErr.At(0,i,j)); printf("\n");
   // } printf("\n");
 
   //MPlexMM kalmanGain(N);
@@ -143,7 +143,7 @@ void updateParametersMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
 
   // printf("kalmanGain:\n");
   // for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
-  //     printf("%8f ", kalmanGain.At(i,j,0)); printf("\n");
+  //     printf("%8f ", kalmanGain.At(0,i,j)); printf("\n");
   // } printf("\n");
 
   // outPar = psPar + kalmanGain*(msPar-psPar)[0-2] (last three are 0!)
@@ -151,7 +151,7 @@ void updateParametersMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
 
   // printf("outPar:\n");
   // for (int i = 0; i < 6; ++i) {
-  //     printf("%8f ", outPar.At(i,0,0)); printf("\n");
+  //     printf("%8f ", outPar.At(0,i,0)); printf("\n");
   // } printf("\n");
 
 
@@ -162,7 +162,7 @@ void updateParametersMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
 
   // printf("outErr:\n");
   // for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
-  //     printf("%8f ", outErr.At(i,j,0)); printf("\n");
+  //     printf("%8f ", outErr.At(0,i,j)); printf("\n");
   // } printf("\n");
 }
 #endif
