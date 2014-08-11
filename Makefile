@@ -55,8 +55,8 @@ echo:
 MKFSRCS := $(wildcard mkFit/*.cc)
 MKFHDRS := $(wildcard mkFit/*.h)
 
-MKFOBJS     := $(MKFSRCS:.cc=.o)
-MKFOBJS_MIC := $(MKFSRCS:.cc=.om)
+MKFOBJS     := $(MKFSRCS:.cc=.o)  Timing.o
+MKFOBJS_MIC := $(MKFSRCS:.cc=.om) Timing.om
 
 MKEXES   := mkFit/mkFit mkFit/mkFit-mic
 
