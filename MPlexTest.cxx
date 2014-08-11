@@ -39,14 +39,14 @@ MPlexTest::~MPlexTest()
 
 //==============================================================================
 
-int MPlexTest::mult2(int n_vec)
+long64 MPlexTest::mult2(int n_vec)
 {
   Matriplex::Multiply(*fMPV[0], *fMPV[1], *fMPV[2], n_vec);
 
   return sNMul * n_vec;
 }
 
-int MPlexTest::mult2_3out(int n_vec)
+long64 MPlexTest::mult2_3out(int n_vec)
 {
   Matriplex::Multiply(*fMPV[0], *fMPV[1], *fMPV[2], n_vec);
   Matriplex::Multiply(*fMPV[1], *fMPV[2], *fMPV[0], n_vec);
@@ -55,7 +55,7 @@ int MPlexTest::mult2_3out(int n_vec)
   return 3 * sNMul * n_vec;
 }
 
-int MPlexTest::mult2_3in(int n_vec)
+long64 MPlexTest::mult2_3in(int n_vec)
 {
   Matriplex::Multiply3in(*fMPV[0], *fMPV[1], *fMPV[2], n_vec);
 
@@ -64,7 +64,7 @@ int MPlexTest::mult2_3in(int n_vec)
 
 //==============================================================================
 
-int MPlexTest::inv_cramer(int n_vec)
+long64 MPlexTest::inv_cramer(int n_vec)
 {
   assert(MPT_DIM == 3);
 
@@ -74,7 +74,7 @@ int MPlexTest::inv_cramer(int n_vec)
   return 42 * MPT_SIZE * n_vec;
 }
 
-int MPlexTest::inv_cholesky(int n_vec)
+long64 MPlexTest::inv_cholesky(int n_vec)
 {
   assert(MPT_DIM == 3);
 
@@ -91,14 +91,14 @@ int MPlexTest::inv_cholesky(int n_vec)
 // Symmetric
 //==============================================================================
 
-int MPlexTest::mult2_sym(int n_vec)
+long64 MPlexTest::mult2_sym(int n_vec)
 {
   Matriplex::Multiply(*fMPVS[0], *fMPVS[1], *fMPV[0], n_vec);
 
   return sNMul * n_vec;
 }
 
-int MPlexTest::inv_cramer_sym(int n_vec)
+long64 MPlexTest::inv_cramer_sym(int n_vec)
 {
   assert(MPT_DIM == 3);
 
@@ -108,7 +108,7 @@ int MPlexTest::inv_cramer_sym(int n_vec)
   return 30 * MPT_SIZE * n_vec;
 }
 
-int MPlexTest::inv_cholesky_sym(int n_vec)
+long64 MPlexTest::inv_cholesky_sym(int n_vec)
 {
   assert(MPT_DIM == 3);
 

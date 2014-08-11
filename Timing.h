@@ -13,7 +13,7 @@
 class Timing
 {
 public:
-  typedef std::function<int (int)> Func_t;
+  typedef std::function<long64 (int)> Func_t;
 
 private:
   double m_beg, m_end, m_diff;

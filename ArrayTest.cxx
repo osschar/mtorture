@@ -24,7 +24,7 @@ ArrayTest::~ArrayTest()
   free_sth(fA);
 }
 
-int ArrayTest::copy(int n)
+long64 ArrayTest::copy(int n)
 {
   float *Z = fA[0];
   float *A = fA[1];
@@ -41,7 +41,7 @@ int ArrayTest::copy(int n)
   return n;
 }
 
-int ArrayTest::sum2(int n)
+long64 ArrayTest::sum2(int n)
 {
   float *Z = fA[0];
   float *A = fA[1];
@@ -61,7 +61,7 @@ int ArrayTest::sum2(int n)
   return n;
 }
 
-int ArrayTest::sum2_sqr(int n)
+long64 ArrayTest::sum2_sqr(int n)
 {
   float *Z = fA[0];
   float *A = fA[1];
@@ -81,7 +81,7 @@ int ArrayTest::sum2_sqr(int n)
   return 6 * n;
 }
 
-int ArrayTest::sum2_cube(int n)
+long64 ArrayTest::sum2_cube(int n)
 {
   float *Z = fA[0];
   float *A = fA[1];
@@ -104,7 +104,7 @@ int ArrayTest::sum2_cube(int n)
   return 10 * n;
 }
 
-int ArrayTest::sum2_quad(int n)
+long64 ArrayTest::sum2_quad(int n)
 {
   float *Z = fA[0];
   float *A = fA[1];
@@ -127,7 +127,7 @@ int ArrayTest::sum2_quad(int n)
   return 15 * n;
 }
 
-int ArrayTest::sum2_quint(int n)
+long64 ArrayTest::sum2_quint(int n)
 {
   float *Z = fA[0];
   float *A = fA[1];
@@ -152,7 +152,7 @@ int ArrayTest::sum2_quint(int n)
 
 //------------------------------------------------------------------------------
 
-int ArrayTest::sum3(int n)
+long64 ArrayTest::sum3(int n)
 {
   float *Z = fA[0];
   float *A = fA[1];
@@ -174,7 +174,7 @@ int ArrayTest::sum3(int n)
   return 2 * n;
 }
 
-int ArrayTest::sum3_sqr(int n)
+long64 ArrayTest::sum3_sqr(int n)
 {
   float *Z = fA[0];
   float *A = fA[1];
@@ -196,7 +196,8 @@ int ArrayTest::sum3_sqr(int n)
 
   return 12 * n;
 }
-int ArrayTest::sum3_cube(int n)
+
+long64 ArrayTest::sum3_cube(int n)
 {
   float *Z = fA[0];
   float *A = fA[1];
@@ -227,7 +228,7 @@ int ArrayTest::sum3_cube(int n)
 // Same Array clones (store into A, not Z)
 //------------------------------------------------------------------------------
 
-int ArrayTest::sum2_cube_sa(int n)
+long64 ArrayTest::sum2_cube_sa(int n)
 {
   // float *Z = fA[0];
   float *A = fA[1];
@@ -250,7 +251,7 @@ int ArrayTest::sum2_cube_sa(int n)
   return 10 * n;
 }
 
-int ArrayTest::sum2_quint_sa(int n)
+long64 ArrayTest::sum2_quint_sa(int n)
 {
   // float *Z = fA[0];
   float *A = fA[1];
@@ -273,7 +274,7 @@ int ArrayTest::sum2_quint_sa(int n)
   return 19 * n;
 }
 
-int ArrayTest::sum3_cube_sa(int n)
+long64 ArrayTest::sum3_cube_sa(int n)
 {
   // float *Z = fA[0];
   float *A = fA[1];
