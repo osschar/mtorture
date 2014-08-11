@@ -58,8 +58,8 @@ typedef Matriplex::Matriplex<float, HH, HH, NN>   MPlexHH;
 typedef Matriplex::Matriplex<float, HH,  1, NN>   MPlexHV;
 typedef Matriplex::MatriplexSym<float, HH,  NN>   MPlexHS;
 
-typedef Matriplex::Matriplex<float, 1, 1, 16>     MPlexQF;
-typedef Matriplex::Matriplex<int,   1, 1, 16>     MPlexQI;
+typedef Matriplex::Matriplex<float, 1, 1, NN>     MPlexQF;
+typedef Matriplex::Matriplex<int,   1, 1, NN>     MPlexQI;
 
 #endif
 
