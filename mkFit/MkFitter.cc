@@ -2,6 +2,17 @@
 
 #include "Propagation.h"
 
+void MkFitter::CheckAlignment()
+{
+  printf("MkFitter alignment check:\n");
+  Matriplex::align_check("  Err[0]   =", &Err[0].fArray[0]);
+  Matriplex::align_check("  Err[1]   =", &Err[1].fArray[0]);
+  Matriplex::align_check("  Par[0]   =", &Par[0].fArray[0]);
+  Matriplex::align_check("  Par[1]   =", &Par[1].fArray[0]);
+  Matriplex::align_check("  msErr[0] =", &msErr[0].fArray[0]);
+  Matriplex::align_check("  msPar[0] =", &msPar[0].fArray[0]);
+}
+
 void MkFitter::InputTracksAndHits(std::vector<Track>& tracks, int beg, int end)
 {
   // Assign track parameters to initial state and copy hit values in.
@@ -26,6 +37,26 @@ void MkFitter::InputTracksAndHits(std::vector<Track>& tracks, int beg, int end)
       msErr[hi].CopyIn(itrack, hit.error().Array());
       msPar[hi].CopyIn(itrack, hit.parameters().Array());
     }
+  }
+}
+
+void MkFitter::InputTracksOnly(std::vector<Track>& tracks, int beg, int end)
+{
+  // Assign track parameters to initial state, do NOT copy hit values.
+  // Used for benchmarking the fitting with less "copy-in" load.
+
+  // This might not be true for the last chunk!
+  // assert(end - beg == NN);
+
+  int itrack = 0;
+  for (int i = beg; i < end; ++i, ++itrack)
+  {
+    Track &trk = tracks[i];
+
+    Err[iC].CopyIn(itrack, trk.errors().Array());
+    Par[iC].CopyIn(itrack, trk.parameters().Array());
+
+    Chg(itrack, 0, 0) = trk.charge();
   }
 }
 

@@ -29,23 +29,17 @@ class MkFitter
 public:
   MkFitter(int n_hits) : Nhits(n_hits)
   {
-    // XXXX Eventually dynamically allocate measurement arrays
-    // msErr.resize(Nhits);
-    // msPar.resize(Nhits);
-
-    printf("MkFitter alignment check:\n");
-    Matriplex::align_check("  Err[0]   =", &Err[0].fArray[0]);
-    Matriplex::align_check("  Err[1]   =", &Err[1].fArray[0]);
-    Matriplex::align_check("  Par[0]   =", &Par[0].fArray[0]);
-    Matriplex::align_check("  Par[1]   =", &Par[1].fArray[0]);
-    Matriplex::align_check("  msErr[0] =", &msErr[0].fArray[0]);
-    Matriplex::align_check("  msPar[0] =", &msPar[0].fArray[0]);
+    // XXXX Eventually dynamically allocate measurement arrays.
+    // XXXX std::vector is no good, not aligned!
   }
 
+  void CheckAlignment();
+
   void InputTracksAndHits(std::vector<Track>& tracks, int beg, int end);
+  void InputTracksOnly   (std::vector<Track>& tracks, int beg, int end);
   void FitTracks();
   void OutputFittedTracks(std::vector<Track>& tracks, int beg, int end);
 
-} __attribute__((aligned(64)));
+};
 
 #endif
