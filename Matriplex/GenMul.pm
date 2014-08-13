@@ -61,13 +61,12 @@ sub set_pattern
 
 sub mat_size
 {
-  die "max_size() should be overriden in concrete matrix class"
-
+  die "max_size() should be overriden in concrete matrix class";
 }
 
 sub idx
 {
-  die "idx() should be overriden in concrete matrix class"
+  die "idx() should be overriden in concrete matrix class";
 }
 
 sub reg_name
