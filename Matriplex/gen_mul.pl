@@ -48,7 +48,7 @@ sub mult_sym
 
         push @sum, sprintf("${a}[%2d*N+n]*${b}[%2d*N+n]", $iko, $kjo);
       }
-      print join(" +$JOIN", @sum), ";${POST}";
+      print join(" +$JOIN", @sum), ";";
       print "\n";
     }
   }
@@ -216,7 +216,7 @@ sub mult_std
 
         push @sum, sprintf "${a}[%2d*N+n]*${b}[%2d*N+n]", $iko, $kjo;
       }
-      print join(" +$JOIN", @sum), ";${POST}";
+      print join(" +$JOIN", @sum), ";";
       print "\n";
     }
   }
