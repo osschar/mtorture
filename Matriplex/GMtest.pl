@@ -24,4 +24,7 @@ $m = new GenMul::Multiply;
 
 $m->multiply_standard($a, $b, $c);
 
-# $m->multiply_intrinsic($a, $b, $c);
+print "\n", '-' x 80, "\n\n";
+
+# Intrinsics do not support patterns yet!
+$m->multiply_intrinsic($a, $b, $c);
