@@ -330,7 +330,9 @@ sub multiply_intrinsic
 
   my ($S, $a, $b, $c) = @_;
 
-  local $tick = 0;
+  ##################
+  local $tick = 0; # LOCAL
+  ##################
 
   # Counts of use. For a and b to fetch, for c to store
   my @ac, @bc, @cc, @to_store;
@@ -345,10 +347,17 @@ sub multiply_intrinsic
         my $iko = $a->idx($i, $k);
         my $kjo = $b->idx($k, $j);
 
+        ### XXXX Need an intermediate check here for what operation to do.
+        ### Can have:
+        ### - add even for later operations
+        ### - add 1 to all elements (but this should be rare).
+        ### - assign on first operation (also with 1 as argument).
+
         my $areg = $S->load_if_needed($a, $iko, \@ac);
         my $breg = $S->load_if_needed($b, $kjo, \@bc);
         my $creg = $c->reg_name($x);
 
+        ### XXXX Here should check c usage count, not $k. Also, see above.
         my $op = ($k == 0) ? "=" : "+=";
 
         if ($k == 0)
