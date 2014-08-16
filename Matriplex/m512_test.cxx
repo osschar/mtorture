@@ -10,6 +10,9 @@ const int NN = 64;
 #define FMA(a, b, v)  _mm512_fmadd_ps(a, b, v)
 #define ST(a, i, r)   _mm512_store_ps(&a[i*16], r)
 
+// Can even be global!
+__m512 all_ones = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+
 int main()
 {
   float *p = (float*) _mm_malloc(NN*sizeof(float), 64);
@@ -22,6 +25,8 @@ int main()
 
   __m512 a = LD(p, 0);
   __m512 b = { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 };//LD(p, 1);
+
+  b = all_ones;
 
   __m512 c = ADD(a, b);
 
