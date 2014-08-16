@@ -5,8 +5,21 @@
 
 function after_mic_reset()
 {
-    scp /opt/intel/composer_xe_2013_sp1.0.080/compiler/lib/mic/libiomp5.so root@mic0:/usr/lib64
-    scp /opt/intel/composer_xe_2013_sp1.0.080/compiler/lib/mic/libiomp5.so root@mic1:/usr/lib64
+    for mic in mic0 mic1
+    do
+        scp /opt/intel/composer_xe_2013_sp1.0.080/compiler/lib/mic/libiomp5.so root@${mic}:/usr/lib64
+
+        ### Missing stuff for ITAC
+
+        ### XXXX NOT TESTED XXXX
+        ssh ${mic} mkdir /nfsmic
+        ssh ${mic} echo "host:/data/nfsmic /nfsmic nfs rsize=8192,wsize=8192,nolock,intr 0 0" >> /etc/fstab
+        ssh ${mic} mount /nfsmic
+    done
+
+    merge_auth_keys_for_root
+
+    clone_ssh_dirs
 }
 
 ### Turbo setting ###
