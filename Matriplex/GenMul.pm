@@ -191,6 +191,8 @@ package GenMul::Multiply;
 use Carp;
 use Scalar::Util 'blessed';
 
+use warnings;
+
 
 sub new
 {
@@ -228,6 +230,36 @@ sub check_multiply_arguments
 
   croak "Result matrix c should not be symmetric (or implement this case in GenMul code)"
       if $c->isa("GenMul::MatrixSym");
+}
+
+sub push_out
+{
+  my $S = shift;
+
+  push @{$S->{out}}, join "", @_;
+}
+
+sub unshift_out
+{
+  my $S = shift;
+
+  unshift @{$S->{out}}, join "", @_;
+}
+
+sub handle_all_zeros_ones
+{
+  my ($S, $zeros, $ones) = @_;
+
+  if ($zeros or $ones)
+  {
+    $S->unshift_out("");
+
+    $S->unshift_out("$S->{vectype} all_ones  = { ", join(", ", (1) x 16), " };")
+        if $ones;
+
+    $S->unshift_out("$S->{vectype} all_zeros = { ", join(", ", (0) x 16), " };")
+        if $zeros;
+  }
 }
 
 # ----------------------------------------------------------------------
@@ -304,8 +336,8 @@ sub load_if_needed
 
   if ($arc->[$idx] == 0)
   {
-    print "$S->{prefix}$S->{vectype} ${reg} = LD($mat->{name}, $idx);\n";
-    ++$tick;
+    $S->push_out("$S->{vectype} ${reg} = LD($mat->{name}, $idx);");
+    ++$S->{tick};
   }
 
   ++$arc->[$idx];
@@ -319,7 +351,7 @@ sub store
 
   my $reg = $mat->reg_name(${idx});
 
-  print "$S->{prefix}ST($mat->{name}, ${idx}, ${reg});\n";
+  $S->push_out("ST($mat->{name}, ${idx}, ${reg});");
 
   return $reg;
 }
@@ -330,12 +362,20 @@ sub multiply_intrinsic
 
   my ($S, $a, $b, $c) = @_;
 
-  ##################
-  local $tick = 0; # LOCAL
-  ##################
+  $S->{tick} = 0;
 
-  # Counts of use. For a and b to fetch, for c to store
-  my @ac, @bc, @cc, @to_store;
+  $S->{out}  = [];
+
+  # Counts of use. For a and b to fetch, for c to assign / add / mult / fma.
+  # cc is used as tick at which store can be performed afterwards.
+  my (@ac, @bc, @cc, @to_store);
+
+  @ac = (0) x $a->mat_size();
+  @bc = (0) x $b->mat_size();
+  @cc = (0) x $c->mat_size();
+
+  my $need_all_zeros = 0;
+  my $need_all_ones  = 0;
 
   for (my $i = 0; $i < $a->{M}; ++$i)
   {
@@ -352,29 +392,69 @@ sub multiply_intrinsic
         ### - add even for later operations
         ### - add 1 to all elements (but this should be rare).
         ### - assign on first operation (also with 1 as argument).
+        ###
+        ### ! All ones should be declared in the beginning, if needed.
+        ### ! Dump all into a string, than prefix that if needed.
 
-        my $areg = $S->load_if_needed($a, $iko, \@ac);
-        my $breg = $S->load_if_needed($b, $kjo, \@bc);
-        my $creg = $c->reg_name($x);
+        my $apat = defined $a->{pattern} ? $a->{pattern}[$iko] : 'x';
+        my $bpat = defined $b->{pattern} ? $b->{pattern}[$kjo] : 'x';
 
-        ### XXXX Here should check c usage count, not $k. Also, see above.
-        my $op = ($k == 0) ? "=" : "+=";
-
-        if ($k == 0)
+        if ($apat ne '0' and $bpat ne '0')
         {
-          print "$S->{prefix}$S->{vectype} ${creg} = MUL(${areg}, ${breg});\n";
-        }
-        else
-        {
-          print "$S->{prefix}${creg} = FMA(${areg}, ${breg}, ${creg});\n";
-        }
+          my ($areg, $breg, $sreg);
 
-        ++$tick;
+          if ($apat eq '1' and $bpat eq '1')
+          {
+            $need_all_ones = 1;
+            $sreg = "all_ones";
+          }
+          elsif ($bpat eq '1')
+          {
+            $sreg = $S->load_if_needed($a, $iko, \@ac);
+          }
+          elsif ($apat eq '1')
+          {
+            $sreg = $S->load_if_needed($b, $kjo, \@bc);
+          }
+          else
+          {
+            $areg = $S->load_if_needed($a, $iko, \@ac);
+            $breg = $S->load_if_needed($b, $kjo, \@bc);
+          }
+
+          my $creg = $c->reg_name($x);
+
+          if ($cc[$x] == 0)
+          {
+            my $op = defined $sreg ? "${sreg}" : "MUL(${areg}, ${breg})";
+
+            $S->push_out("$S->{vectype} ${creg} = ", $op, ";");
+          }
+          else
+          {
+            my $op = defined $sreg ?
+                "ADD(${sreg}, ${creg})" :
+                "FMA(${areg}, ${breg}, ${creg})";
+
+            $S->push_out("${creg} = ", $op, ");");
+          }
+
+          ++$cc[$x];
+          ++$S->{tick};
+        }
 
         if ($k + 1 == $a->{N})
         {
-          $cc[$x] = $tick + 4; #### Will be ready to store in 4 cycles. Really 4?
-          push @to_store, $x;
+          if ($cc[$x] == 0)
+          {
+            $need_all_zeros = 1;
+            ### XXX emit store all_zeros into creg
+          }
+          else
+          {
+            $cc[$x] = $S->{tick} + 4; #### Will be ready to store in 4 cycles. Really 4?
+            push @to_store, $x;
+          }
         }
 
         # Try to store the finished ones.
@@ -382,23 +462,33 @@ sub multiply_intrinsic
         {
           last unless @to_store;
           my $s = $to_store[0];
-          last if $tick < $cc[$s];
+          last if $S->{tick} < $cc[$s];
 
           $S->store($c, $s);
           shift @to_store;
-          ++$tick;
+          ++$S->{tick};
         }
 
       }
-      print "\n";
+
+      $S->push_out("") unless $i + 1 == $a->{M} and $k + 1 == $a->{N};
     }
   }
 
-  for $s (@to_store)
+  for my $s (@to_store)
   {
     $S->store($c, $s);
 
-    ++$tick;
+    ++$S->{tick};
+  }
+
+  $S->handle_all_zeros_ones($need_all_zeros, $need_all_ones);
+
+  for (@{$S->{out}})
+  {
+    print $S->{prefix} unless /^$/;
+    print;
+    print "\n";
   }
 }
 
