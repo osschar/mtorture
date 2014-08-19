@@ -26,28 +26,35 @@ FNORD
 
 $c = new GenMul::Matrix('name'=>'c', 'M'=>$DIM, 'N'=>$DOM);
 
-$bt = new GenMul::MatrixTranspose($b);
 
+$bt = new GenMul::MatrixTranspose($b);
 $bt->print_info();
 $bt->print_pattern();
+
+$ct = new GenMul::Matrix('name'=>'c', 'M'=>$DOM, 'N'=>$DIM);
 
 # ----------------------------------------------------------------------
 
 $m = new GenMul::Multiply;
 
+$m->dump_multiply_std_and_intrinsic("multify.ah", $a, $b, $c);
 
-open STD, ">multify.ah";
-select STD;
+$m->dump_multiply_std_and_intrinsic("multify-transpose.ah", $bt, $a, $ct);
 
-$m->multiply_standard($a, $b, $c);
+# To separate outputs of each function:
+#
+# open STD, ">multify.ah";
+# select STD;
 
-close STD;
+# $m->multiply_standard($a, $b, $c);
 
-# print "\n", '-' x 80, "\n\n";
+# close STD;
 
-open INT, ">multify_intr.ah";
-select INT;
+# # print "\n", '-' x 80, "\n\n";
 
-$m->multiply_intrinsic($a, $b, $c);
+# open INT, ">multify_intr.ah";
+# select INT;
 
-close INT;
+# $m->multiply_intrinsic($a, $b, $c);
+
+# close INT;
