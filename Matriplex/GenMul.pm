@@ -577,6 +577,45 @@ sub multiply_intrinsic
   }
 }
 
+# ----------------------------------------------------------------------
+
+sub dump_multiply_std_and_intrinsic
+{
+  my ($S, $fname, $a, $b, $c) = @_;
+
+  open FF, ">$fname";
+  select FF;
+
+  print <<"FNORD";
+#ifdef MIC_INTRINSICS
+
+   for (int n = 0; n < N; n += 64 / sizeof(T))
+   {
+FNORD
+
+  $S->multiply_intrinsic($a, $b, $c);
+
+  print <<"FNORD";
+   }
+
+#else
+
+#pragma simd
+   for (int n = 0; n < N; ++n)
+   {
+FNORD
+
+  $S->multiply_standard($a, $b, $c);
+
+  print <<"FNORD";
+   }
+#endif
+FNORD
+
+  close FF;
+  select STDOUT;
+}
+
 ########################################################################
 ########################################################################
 # THE END
