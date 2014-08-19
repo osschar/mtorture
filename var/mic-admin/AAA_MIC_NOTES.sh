@@ -7,13 +7,13 @@ function after_mic_reset()
 {
     for mic in mic0 mic1
     do
-        scp /opt/intel/composer_xe_2013_sp1.0.080/compiler/lib/mic/libiomp5.so root@${mic}:/usr/lib64
+        scp /opt/intel/composer_xe_2013_sp1.3.174/compiler/lib/mic/libiomp5.so root@${mic}:/usr/lib64
 
         ### Missing stuff for ITAC
 
         ### XXXX NOT TESTED XXXX
         ssh ${mic} mkdir /nfsmic
-        ssh ${mic} echo "host:/data/nfsmic /nfsmic nfs rsize=8192,wsize=8192,nolock,intr 0 0" >> /etc/fstab
+        ssh ${mic} 'echo "host:/data/nfsmic /nfsmic nfs rsize=8192,wsize=8192,nolock,intr 0 0" >> /etc/fstab'
         ssh ${mic} mount /nfsmic
     done
 
@@ -103,7 +103,8 @@ function clone_ssh_dir()
 
     for m in root@mic0 root@mic1; do
         ssh $m adduser -D $u
-	scp -r /home/$u/.ssh $m:/home/$u
+        ssh $m mkdir /home/$u/.ssh
+	scp -r /home/$u/.ssh/authorized_keys $m:/home/$u/.ssh/
 	ssh $m chown -R $u:$u /home/$u
 	ssh $m passwd -u $u
     done
