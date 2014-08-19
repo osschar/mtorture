@@ -91,8 +91,7 @@ void updateParameters66(TrackState& propagatedState, MeasurementState& measureme
 
 void updateParametersMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
                            const MPlexHS &msErr,  const MPlexHV& msPar,
-                                 MPlexLS &outErr,       MPlexLV& outPar,
-                                 updateParametersContext &ctx)
+                                 MPlexLS &outErr,       MPlexLV& outPar)
 {
   // const idx_t N = psErr.N;
   // Assert N-s of all parameters are the same.
@@ -101,6 +100,9 @@ void updateParametersMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
   // Can be passed in in a struct, see above.
 
   // Also: resErr could be 3x3, kalmanGain 6x3
+
+  updateParametersContext ctx;
+  //assert((long long)(&updateCtx.propErr.fArray[0]) % 64 == 0);
 
   //MPlexSS propErr(N);
   MPlexLS &propErr = ctx.propErr;

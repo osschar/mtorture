@@ -43,8 +43,8 @@ struct updateParametersContext
 
 void updateParametersMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
                            const MPlexHS &msErr,  const MPlexHV& msPar,
-                                 MPlexLS &outErr,       MPlexLV& outPar,
-                                 updateParametersContext &ctx);
+                                 MPlexLS &outErr,       MPlexLV& outPar);
+
 #endif
 
 #endif

@@ -69,12 +69,10 @@ void MkFitter::FitTracks()
     // XXXX Note, charge is not passed (line propagation). Could be part of ctxt, too.
 
     propagateLineToRMPlex(Err[iC], Par[iC], msErr[hi], msPar[hi],
-                          Err[iP], Par[iP],
-                          updateCtx);
+                          Err[iP], Par[iP]);
 
     updateParametersMPlex(Err[iP], Par[iP], msErr[hi], msPar[hi],
-                          Err[iC], Par[iC],
-                          updateCtx);
+                          Err[iC], Par[iC]);
   }
 
   // XXXXX What's with chi2?

@@ -14,8 +14,6 @@ class MkFitter
 
   MPlexQI Chg;
 
-  updateParametersContext updateCtx;
-
   MPlexHS msErr[MAX_HITS];
   MPlexHV msPar[MAX_HITS];
 
