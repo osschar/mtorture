@@ -46,6 +46,16 @@ sub new
   return $S;
 }
 
+sub mat_size
+{
+  die "max_size() should be overriden in concrete matrix class";
+}
+
+sub idx
+{
+  die "idx() should be overriden in concrete matrix class";
+}
+
 sub set_pattern
 {
   my ($S, $pstr) = @_;
@@ -59,14 +69,11 @@ sub set_pattern
       if grep {$_ !~ /0|1|x/} @{$S->{pattern}};
 }
 
-sub mat_size
+sub pattern
 {
-  die "max_size() should be overriden in concrete matrix class";
-}
+  my ($S, $idx) = @_;
 
-sub idx
-{
-  die "idx() should be overriden in concrete matrix class";
+  return defined $S->{pattern} ? $S->{pattern}[$idx] : 'x';
 }
 
 sub reg_name
@@ -80,7 +87,21 @@ sub print_info
 {
   my ($S) = @_;
 
-  print "Class='$S->{class}', M=$S->{M}, N=$S->{N}\n";
+  print "Class='$S->{class}', M=$S->{M}, N=$S->{N}, name='$S->{name}'\n";
+}
+
+sub print_pattern
+{
+  my ($S) = @_;
+
+  for (my $i = 0; $i < $S->{M}; ++$i)
+  {
+    for (my $j = 0; $j < $S->{N}; ++$j)
+    {
+      print $S->pattern($S->idx($i, $j)), " ";
+    }
+    print "\n";
+  }
 }
 
 ########################################################################
@@ -181,6 +202,70 @@ sub idx
 
 
 ########################################################################
+# MatrixTranspose -- wrapper for transpose of a matrix
+########################################################################
+
+package GenMul::MatrixTranspose; @ISA = ('GenMul::MBase');
+
+use Carp;
+use Scalar::Util 'blessed';
+
+
+sub new
+{
+  my $proto = shift;
+  my $mat   = shift;
+
+  croak "Argument for $S->{class} is not a GenMul::MBase"
+      unless blessed $mat and $mat->isa("GenMul::MBase");
+
+  my $S = $proto->SUPER::new(@_, 'name'=>$mat->{name});
+
+
+  $S->{matrix} = $mat;
+
+  # Hack around dimensions -- these are accessed directly, everything
+  # else goes through methods.
+
+  $S->{M} = $S->{matrix}{N};
+  $S->{N} = $S->{matrix}{M};
+
+  return $S;
+}
+
+sub mat_size
+{
+  my ($S) = @_;
+
+  return $S->{matrix}->mat_size();
+}
+
+sub idx
+{
+  my ($S, $i, $j) = @_;
+
+  return $S->{matrix}->idx($j, $i);
+}
+
+sub pattern
+{
+  my ($S, $idx) = @_;
+
+  return $S->{matrix}->pattern($idx);
+}
+
+sub print_info
+{
+  my ($S) = @_;
+
+  print "Transpose of ";
+  $S->{matrix}->print_info();
+  print "    ";
+  $S->SUPER::print_info();
+}
+
+
+########################################################################
 ########################################################################
 # CODE GENERATION CLASSES
 ########################################################################
@@ -268,8 +353,8 @@ sub generate_addend_standard
 {
   my ($S, $a, $aidx, $b, $bidx) = @_;
 
-  my $apat = defined $a->{pattern} ? $a->{pattern}[$aidx] : 'x';
-  my $bpat = defined $b->{pattern} ? $b->{pattern}[$bidx] : 'x';
+  my $apat = $a->pattern($aidx);
+  my $bpat = $b->pattern($bidx);
 
   return undef if $apat eq '0' or  $bpat eq '0';
   return "1"   if $apat eq '1' and $bpat eq '1';
@@ -396,8 +481,8 @@ sub multiply_intrinsic
         ### ! All ones should be declared in the beginning, if needed.
         ### ! Dump all into a string, than prefix that if needed.
 
-        my $apat = defined $a->{pattern} ? $a->{pattern}[$iko] : 'x';
-        my $bpat = defined $b->{pattern} ? $b->{pattern}[$kjo] : 'x';
+        my $apat = $a->pattern($iko);
+        my $bpat = $b->pattern($kjo);
 
         if ($apat ne '0' and $bpat ne '0')
         {

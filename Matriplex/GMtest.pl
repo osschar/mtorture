@@ -26,6 +26,11 @@ FNORD
 
 $c = new GenMul::Matrix('name'=>'c', 'M'=>$DIM, 'N'=>$DOM);
 
+$bt = new GenMul::MatrixTranspose($b);
+
+$bt->print_info();
+$bt->print_pattern();
+
 # ----------------------------------------------------------------------
 
 $m = new GenMul::Multiply;
