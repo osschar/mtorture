@@ -8,6 +8,14 @@
 
 #include <limits>
 
+#ifndef NUM_THREADS
+#define NUM_THREADS 2
+#endif
+
+#ifndef THREAD_BINDING
+#define THREAD_BINDING spread
+#endif
+
 std::vector<Track> simtracks;
 
 std::vector<Track> smat_tracks;
@@ -15,13 +23,13 @@ std::vector<Track> plex_tracks;
 
 //==============================================================================
 
-MkFitter *mkfp;
+MkFitter *g_mkfp;
 
 const int Nhits = 10; // XXXXX ARGH !!!! What if there's a missing / double layer?
 
-const int Nloop = 1;
+const int Nloop = 100;
 
-long64 single_run(int n_tracks)
+long64 single_run(int n_tracks, MkFitter *mkfp)
 {
   int theEnd = n_tracks;
 
@@ -46,27 +54,37 @@ long64 single_run(int n_tracks)
 #endif
   }
 
-  return long64(Nloop) * n_tracks * 374 * Nhits;
+  // For propagateLine
+  // return long64(Nloop) * n_tracks * (68 + 306) * Nhits;
+
+  return long64(Nloop) * n_tracks * (1200 + 306) * Nhits;
+}
+
+long64 single_run_glob(int n_tracks)
+{
+  return single_run(n_tracks, g_mkfp);
 }
 
 void test_matriplex()
 {
   int Nmin  = 16;
-  int Nmax  = 32*1024; //32 * 1024;
+  int Nmax  = 64 * 1024; // 32 * 1024;
 
   generateTracks(simtracks, Nmax);
 
-  mkfp = new (_mm_malloc(sizeof(MkFitter), 64)) MkFitter(Nhits);
+  g_mkfp = new (_mm_malloc(sizeof(MkFitter), 64)) MkFitter(Nhits);
+
+  g_mkfp->CheckAlignment();
 
   Timing t([&](int n_vec)
            {
-             return single_run(n_vec);
+             return single_run_glob(n_vec);
            });
 
   t.print_tuple_header();
 
   // Warm up
-  t.time_loop(4096, 4);
+  t.time_loop(Nmax, 4);
 
   for (int n = Nmin; n <= Nmax; n *= 2)
   {
@@ -74,33 +92,55 @@ void test_matriplex()
 
     // printf("XXX n=%d, nloop=%d\n", n, Nloop);
 
-    // t.auto_time_loop(n, 2);
+    t.auto_time_loop(n, 2);
     
-    t.time_loop(n, 1);
+    // t.time_loop(n, 1);
 
     t.print(n);
   }
 
-  _mm_free(mkfp);
+  _mm_free(g_mkfp);
+}
+
+//------------------------------------------------------------------------------
+
+void test_vtune()
+{
+  int Nmax  = 512;
+
+  generateTracks(simtracks, Nmax);
+
+#pragma omp parallel for num_threads(NUM_THREADS)
+  for (int i = 0; i < NUM_THREADS; ++i)
+  {
+    MkFitter *mf = new (_mm_malloc(sizeof(MkFitter), 64)) MkFitter(Nhits);
+
+    mf->CheckAlignment();
+
+    for (int i = 0 ; i < 100; ++i) 
+    {
+      single_run(Nmax, mf);
+    }
+
+    _mm_free(mf);
+  }
 }
 
 //------------------------------------------------------------------------------
 
 void test_standard()
 {
-  int  Ntracks  = 16 * 1024;
+  int  Ntracks  = 64 * 1024;
   bool saveTree = false;
 
   generateTracks(simtracks, Ntracks);
 
-  smat_tracks.reserve(simtracks.size());
-  plex_tracks.resize (simtracks.size());
-
-
   double tmp, tsm;
 
+  smat_tracks.reserve(simtracks.size());
   tsm = runFittingTest(simtracks, smat_tracks);
 
+  plex_tracks.resize(simtracks.size());
   tmp = runFittingTestPlex(simtracks, plex_tracks);
 
   printf("SMatrix = %.3f   Matriplex = %.3f   ---   SM/MP = %.3f\n", tsm, tmp, tsm / tmp);
@@ -115,9 +155,11 @@ void test_standard()
 
 int main()
 {
-  test_standard();
-
   // test_matriplex();
+
+  test_vtune();
+
+  // test_standard();
 
   return 0;
 }
