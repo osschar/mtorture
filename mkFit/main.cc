@@ -29,7 +29,12 @@ const int Nhits = 10; // XXXXX ARGH !!!! What if there's a missing / double laye
 
 const int Nloop = 100;
 
-long64 single_run(int n_tracks, MkFitter *mkfp)
+//==============================================================================
+
+long64 single_run(int                 n_tracks,
+                  MkFitter           *mkfp,
+                  std::vector<Track> &trk_in,
+                  std::vector<Track> &trk_out)
 {
   int theEnd = n_tracks;
 
@@ -37,20 +42,20 @@ long64 single_run(int n_tracks, MkFitter *mkfp)
   {
     int end = std::min(itrack + NN, theEnd);
 
-    mkfp->InputTracksAndHits(simtracks, itrack, end);
+    mkfp->InputTracksAndHits(trk_in, itrack, end);
 
     for (int x = 0; x < Nloop; ++x)
     {
       if (x != 0)
       {
-        mkfp->InputTracksOnly(simtracks, itrack, end);
+        mkfp->InputTracksOnly(trk_in, itrack, end);
       }
 
       mkfp->FitTracks();
     }
 
 #ifndef NO_ROOT
-    mkfp->OutputFittedTracks(rectracks, itrack, end);
+    mkfp->OutputFittedTracks(trk_out, itrack, end);
 #endif
   }
 
@@ -60,10 +65,14 @@ long64 single_run(int n_tracks, MkFitter *mkfp)
   return long64(Nloop) * n_tracks * (1200 + 306) * Nhits;
 }
 
+//------------------------------------------------------------------------------
+
 long64 single_run_glob(int n_tracks)
 {
-  return single_run(n_tracks, g_mkfp);
+  return single_run(n_tracks, g_mkfp, simtracks, plex_tracks);
 }
+
+//==============================================================================
 
 void test_matriplex()
 {
@@ -102,31 +111,35 @@ void test_matriplex()
   _mm_free(g_mkfp);
 }
 
-//------------------------------------------------------------------------------
+//==============================================================================
 
 void test_vtune()
 {
   int Nmax  = 512;
 
-  generateTracks(simtracks, Nmax);
-
 #pragma omp parallel for num_threads(NUM_THREADS)
   for (int i = 0; i < NUM_THREADS; ++i)
   {
+    std::vector<Track> sim_trk;
+    std::vector<Track> rec_trk;
+
+    generateTracks(sim_trk, Nmax);
+    rec_trk.resize(Nmax);
+
     MkFitter *mf = new (_mm_malloc(sizeof(MkFitter), 64)) MkFitter(Nhits);
 
     mf->CheckAlignment();
 
-    for (int i = 0 ; i < 100; ++i) 
+    for (int i = 0 ; i < 200; ++i) 
     {
-      single_run(Nmax, mf);
+      single_run(Nmax, mf, sim_trk, rec_trk);
     }
 
     _mm_free(mf);
   }
 }
 
-//------------------------------------------------------------------------------
+//==============================================================================
 
 void test_standard()
 {
