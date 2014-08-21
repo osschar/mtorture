@@ -44,9 +44,16 @@ public:
    T  operator[](idx_t xx) const { return fArray[xx]; }
    T& operator[](idx_t xx)       { return fArray[xx]; }
 
+   const T& ConstAt(idx_t n, idx_t i, idx_t j) const { return fArray[(i * D2 + j) * N + n]; }
+
    T& At(idx_t n, idx_t i, idx_t j) { return fArray[(i * D2 + j) * N + n]; }
 
    T& operator()(idx_t n, idx_t i, idx_t j) { return fArray[(i * D2 + j) * N + n]; }
+
+   Matriplex& operator=(const Matriplex& m)
+   {
+      memcpy(fArray, m.fArray, sizeof(T) * kTotSize); return *this;
+   }
 
    void CopyIn(idx_t n, T *arr)
    {

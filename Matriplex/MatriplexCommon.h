@@ -2,6 +2,7 @@
 #define MatriplexCommon_H
 
 #include <cmath>
+#include <cstring>
 #include <stdexcept>
 
 // Use intrinsics version of code when available

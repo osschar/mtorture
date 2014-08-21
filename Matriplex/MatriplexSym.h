@@ -86,6 +86,11 @@ public:
 
    T& operator()(idx_t n, idx_t i, idx_t j) { return At(n, i, j); }
 
+   MatriplexSym& operator=(const MatriplexSym& m)
+   {
+      memcpy(fArray, m.fArray, sizeof(T) * kTotSize); return *this;
+   }
+
    void CopyIn(idx_t n, T *arr)
    {
       for (idx_t i = n; i < kTotSize; i += N)
