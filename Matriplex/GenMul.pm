@@ -313,7 +313,10 @@ sub check_multiply_arguments
   croak "Result matrix c of wrong dimensions"
       unless $c->{M} == $a->{M} and $c->{N} == $b->{N};
 
-  croak "Result matrix c should not be symmetric (or implement this case in GenMul code)"
+  croak "Result matrix c should not be a transpose (or check & implement this case in GenMul code)"
+      if $c->isa("GenMul::MatrixTranspose");
+
+  carp "Result matrix c is symmetric, GenMul hopes you know what you're doing"
       if $c->isa("GenMul::MatrixSym");
 }
 
@@ -379,9 +382,13 @@ sub multiply_standard
 
   my ($S, $a, $b, $c) = @_;
 
+  my $is_c_symmetric = $c->isa("GenMul::MatrixSym");
+
   for (my $i = 0; $i < $a->{M}; ++$i)
   {
-    for (my $j = 0; $j < $b->{N}; ++$j)
+    my $j_max = $is_c_symmetric ?  $i + 1 : $b->{N};
+
+    for (my $j = 0; $j < $j_max; ++$j)
     {
       my $x = $c->idx($i, $j);
 
@@ -462,11 +469,15 @@ sub multiply_intrinsic
   my $need_all_zeros = 0;
   my $need_all_ones  = 0;
 
+  my $is_c_symmetric = $c->isa("GenMul::MatrixSym");
+
   for (my $i = 0; $i < $a->{M}; ++$i)
   {
+    my $j_max = $is_c_symmetric ?  $i + 1 : $b->{N};
+
     for (my $k = 0; $k < $a->{N}; ++$k)
     {
-      for (my $j = 0; $j < $b->{N}; ++$j)
+      for (my $j = 0; $j < $j_max; ++$j)
       {
         my $x   = $c->idx($i, $j);
         my $iko = $a->idx($i, $k);
@@ -583,8 +594,11 @@ sub dump_multiply_std_and_intrinsic
 {
   my ($S, $fname, $a, $b, $c) = @_;
 
-  open FF, ">$fname";
-  select FF;
+  unless ($fname eq '-')
+  {
+    open FF, ">$fname";
+    select FF;
+  }
 
   print <<"FNORD";
 #ifdef MIC_INTRINSICS
@@ -612,8 +626,12 @@ FNORD
 #endif
 FNORD
 
-  close FF;
-  select STDOUT;
+  
+  unless ($fname eq '-')
+  {
+    close FF;
+    select STDOUT;
+  }
 }
 
 ########################################################################
