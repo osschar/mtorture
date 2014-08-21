@@ -117,7 +117,8 @@ double runFittingTest(std::vector<Track>& simtracks, std::vector<Track>& rectrac
          // TrackState propState = propagateHelixToR(updatedState,hit->r());
 
          // XXXXXX Changed to Line ... to compare with Matriplex
-         TrackState propState = propagateHelixToR(updatedState,hit->r());
+         TrackState propState;
+         propagateHelixToR(updatedState, hit->r(), propState);
 
          MeasurementState measState = hit->measurementState();
          updatedState = updateParameters(propState, measState,projMatrix36,projMatrix36T);

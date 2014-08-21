@@ -49,7 +49,8 @@ void setupTrackByToyMC(SVector3& pos, SVector3& mom, SMatrixSym66& covtrk, std::
 
   //do 4 cm in radius using propagation.h
   for (unsigned int nhit=1;nhit<=nTotHit;++nhit) {
-    TrackState propState = propagateHelixToR(tmpState,4.*float(nhit));//radius of 4*nhit
+    TrackState propState;
+    propagateHelixToR(tmpState,4.*float(nhit), propState);//radius of 4*nhit
 
     float hitx = hitposerrXY*g_gaus(g_gen)+propState.parameters.At(0);
     float hity = hitposerrXY*g_gaus(g_gen)+propState.parameters.At(1);

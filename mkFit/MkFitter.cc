@@ -68,8 +68,11 @@ void MkFitter::FitTracks()
   {
     // XXXX Note, charge is not passed (line propagation). Could be part of ctxt, too.
 
-    propagateLineToRMPlex(Err[iC], Par[iC], msErr[hi], msPar[hi],
-                          Err[iP], Par[iP]);
+    // propagateLineToRMPlex(Err[iC], Par[iC], msErr[hi], msPar[hi],
+    //                       Err[iP], Par[iP]);
+
+    propagateHelixToRMPlex(Err[iC], Par[iC], Chg, msPar[hi],
+                           Err[iP], Par[iP]);
 
     updateParametersMPlex(Err[iP], Par[iP], msErr[hi], msPar[hi],
                           Err[iC], Par[iC]);
