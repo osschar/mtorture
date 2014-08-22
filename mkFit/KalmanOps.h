@@ -10,11 +10,11 @@ namespace Matriplex
 
 typedef float T; // XXXXX This is horrible!!!
 
-
+/*
 inline
 void MultForKalmanGain(const MPlexLS& A,
                        const MPlexLS& B,
-                             MPlexLL& C)
+                             MPlexLH& C)
 {
    // calculate Kalman gain -- multiplication where B / resErr is only populated
    // in upper-left 3x3
@@ -52,11 +52,12 @@ void MultForKalmanGain(const MPlexLS& A,
       C.fArray[32 * N + n] = A.fArray[15 * N + n] * B.fArray[3 * N + n] + A.fArray[16 * N + n] * B.fArray[4 * N + n] + A.fArray[17 * N + n] * B.fArray[5 * N + n];
    }
 }
+*/
 
 //------------------------------------------------------------------------------
 
 inline
-void MultResidualsAdd(const MPlexLL& A,
+void MultResidualsAdd(const MPlexLH& A,
                       const MPlexLV& B,
                       const MPlexHV& C,
                             MPlexLV& D)
@@ -79,11 +80,11 @@ void MultResidualsAdd(const MPlexLL& A,
 
       // generate loop (can also write it manually this time, it's not much)
       D.fArray[0 * N + n] = B.fArray[0 * N + n] + A.fArray[ 0 * N + n] * d0 + A.fArray[ 1 * N + n] * d1 + A.fArray[ 2 * N + n] * d2;
-      D.fArray[1 * N + n] = B.fArray[1 * N + n] + A.fArray[ 6 * N + n] * d0 + A.fArray[ 7 * N + n] * d1 + A.fArray[ 8 * N + n] * d2;
-      D.fArray[2 * N + n] = B.fArray[2 * N + n] + A.fArray[12 * N + n] * d0 + A.fArray[13 * N + n] * d1 + A.fArray[14 * N + n] * d2;
-      D.fArray[3 * N + n] = B.fArray[3 * N + n] + A.fArray[18 * N + n] * d0 + A.fArray[19 * N + n] * d1 + A.fArray[20 * N + n] * d2;
-      D.fArray[4 * N + n] = B.fArray[4 * N + n] + A.fArray[24 * N + n] * d0 + A.fArray[25 * N + n] * d1 + A.fArray[26 * N + n] * d2;
-      D.fArray[5 * N + n] = B.fArray[5 * N + n] + A.fArray[30 * N + n] * d0 + A.fArray[31 * N + n] * d1 + A.fArray[32 * N + n] * d2;
+      D.fArray[1 * N + n] = B.fArray[1 * N + n] + A.fArray[ 3 * N + n] * d0 + A.fArray[ 4 * N + n] * d1 + A.fArray[ 5 * N + n] * d2;
+      D.fArray[2 * N + n] = B.fArray[2 * N + n] + A.fArray[ 6 * N + n] * d0 + A.fArray[ 7 * N + n] * d1 + A.fArray[ 8 * N + n] * d2;
+      D.fArray[3 * N + n] = B.fArray[3 * N + n] + A.fArray[ 9 * N + n] * d0 + A.fArray[10 * N + n] * d1 + A.fArray[11 * N + n] * d2;
+      D.fArray[4 * N + n] = B.fArray[4 * N + n] + A.fArray[12 * N + n] * d0 + A.fArray[13 * N + n] * d1 + A.fArray[14 * N + n] * d2;
+      D.fArray[5 * N + n] = B.fArray[5 * N + n] + A.fArray[15 * N + n] * d0 + A.fArray[16 * N + n] * d1 + A.fArray[17 * N + n] * d2;
    }
 }
 
@@ -132,7 +133,7 @@ void FinalKalmanErr(const MPlexLS& A,
 //------------------------------------------------------------------------------
 
 inline
-void AddIntoUpperLeft3x3(const MPlexLS& A, const MPlexHS& B, MPlexLS& C)
+void AddIntoUpperLeft3x3(const MPlexLS& A, const MPlexHS& B, MPlexHS& C)
 {
    // The rest of matrix is left untouched.
 

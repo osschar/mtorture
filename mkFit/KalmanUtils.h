@@ -28,8 +28,8 @@ struct updateParametersContext
 
   // Temporaries
   MPlexLS propErr;
-  MPlexLS resErr;
-  MPlexLL kalmanGain;
+  MPlexHS resErr;
+  MPlexLH kalmanGain;
   MPlexQF pathLen;
 
   // XXX The constructor could (should?) take size argument???

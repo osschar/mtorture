@@ -147,8 +147,7 @@ void updateParametersMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
   updateParametersContext ctx;
   //assert((long long)(&updateCtx.propErr.fArray[0]) % 64 == 0);
 
-  //MPlexSS propErr(N);
-  MPlexLS &propErr = ctx.propErr;
+  MPlexLS propErr;
   propErr = psErr;       // could use/overwrite psErr?
   propErr.AddNoiseIntoUpperLeft3x3(0.0); // e.g. ?
 
@@ -162,8 +161,7 @@ void updateParametersMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
   //     printf("%8f ", msErr.At(0,i,j)); printf("\n");
   // } printf("\n");
 
-  //MPlexSS resErr(N);
-  MPlexLS &resErr = ctx.resErr;
+  MPlexHS resErr;
   AddIntoUpperLeft3x3(propErr, msErr, resErr);
   // Do not really need to zero the rest ... it is not used.
 
@@ -172,7 +170,7 @@ void updateParametersMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
   //     printf("%8f ", resErr.At(0,i,j)); printf("\n");
   // } printf("\n");
 
-  resErr.InvertUpperLeft3x3();
+  Matriplex::InvertCramer(resErr);
   // resErr is now resErrInv
   // XXX Both could be done in one operation.
 
@@ -181,16 +179,11 @@ void updateParametersMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
   //     printf("%8f ", resErr.At(0,i,j)); printf("\n");
   // } printf("\n");
 
-  //MPlexMM kalmanGain(N);
-  MPlexLL &kalmanGain = ctx.kalmanGain;
-  MultForKalmanGain(propErr, resErr, kalmanGain);
-
-
-
-  // Do not need the right part, leave it unitialized.
+  MPlexLH kalmanGain;
+  MultKalmanGain(propErr, resErr, kalmanGain);
 
   // printf("kalmanGain:\n");
-  // for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
+  // for (int i = 0; i < 6; ++i) { for (int j = 0; j < 3; ++j)
   //     printf("%8f ", kalmanGain.At(0,i,j)); printf("\n");
   // } printf("\n");
 
@@ -232,17 +225,22 @@ TrackState updateParameters(TrackState& propagatedState, MeasurementState& measu
   //noise(2,2)=noiseVal;
   SMatrixSym66 propErr = propagatedState.errors + noise;
   SMatrixSym33 propErr33 = ROOT::Math::Similarity(projMatrix,propErr);
-  SVector3 residual = measurementState.parameters-projMatrix*propagatedState.parameters;
+
   SMatrixSym33 resErr = measurementState.errors+propErr33;
   SMatrixSym33 resErrInv = resErr;
+
   bool invResult =
     //resErrInv.Invert();//fixme
     resErrInv.InvertFast();//fixme
     //resErrInv.InvertChol();//fixme
   if (invResult==false) std::cout << "FAILED INVERSION" << std::endl;
+
   SMatrix63 pMTrEI = projMatrixT*resErrInv;
+
   SMatrix63 kalmanGain = propErr*pMTrEI;
+  SVector3 residual = measurementState.parameters-projMatrix*propagatedState.parameters;
   SVector6 kGr = kalmanGain*residual;
+
   SVector6 updatedParams = propagatedState.parameters + kGr;
   SMatrixSym66 simil = ROOT::Math::SimilarityT(projMatrix,resErrInv);//fixme check T
   SMatrixSym66 updatedErrs = propErr - ROOT::Math::SimilarityT(propErr,simil);
