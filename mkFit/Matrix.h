@@ -53,6 +53,7 @@ const idx_t HH =  3; // Dimension of small/short MPlex entities
 typedef Matriplex::Matriplex<float, LL, LL, NN>   MPlexLL;
 typedef Matriplex::Matriplex<float, LL,  1, NN>   MPlexLV;
 typedef Matriplex::MatriplexSym<float, LL,  NN>   MPlexLS;
+typedef Matriplex::Matriplex<float, LL,  HH, NN>   MPlexLH;
 
 typedef Matriplex::Matriplex<float, HH, HH, NN>   MPlexHH;
 typedef Matriplex::Matriplex<float, HH,  1, NN>   MPlexHV;

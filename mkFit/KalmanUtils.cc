@@ -89,6 +89,49 @@ void updateParameters66(TrackState& propagatedState, MeasurementState& measureme
 
 #ifndef __APPLE__
 
+void MultKalmanGain(const MPlexLH& A, const MPlexLS& B, MPlexLH& C)
+{
+  // C = A * B, C is 6x3, A is 6x6, B is 6x3
+
+  typedef float T;
+  const idx_t N = NN;
+  
+  const T *a = A.fArray; __assume_aligned(a, 64);
+  const T *b = B.fArray; __assume_aligned(b, 64);
+        T *c = C.fArray; __assume_aligned(c, 64);
+
+#include "upParam_MultKalmanGain.ah"
+
+}
+
+void simil_x_propErr(const MPlexHS& A, const MPlexLS& B, MPlexLL& C)
+{
+  // C = A * B, C is 6x6, A is 3x3 sym, B is 6x6 sym, yes we're cheating with the math by making a copy of 3x3 into 6x6 at the same time as doing the actual multiplication
+ 
+  typedef float T;
+  const idx_t N = NN;
+  
+  const T *a = A.fArray; __assume_aligned(a, 64);
+  const T *b = B.fArray; __assume_aligned(b, 64);
+        T *c = C.fArray; __assume_aligned(c, 64);
+
+#include "upParam_simil_x_propErr.ah"
+}
+
+void propErrT_x_simil_propErr(const MPlexLS& A, const MPlexLL& B, MPlexLS& C)
+{
+  // C = A * B, C is 6x6 sym, A is 6x6 sym, B is 6x6
+ 
+  typedef float T;
+  const idx_t N = NN;
+  
+  const T *a = A.fArray; __assume_aligned(a, 64);
+  const T *b = B.fArray; __assume_aligned(b, 64);
+        T *c = C.fArray; __assume_aligned(c, 64);
+
+#include "upParam_propErrT_x_simil_propErr.ah"
+}
+
 void updateParametersMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
                            const MPlexHS &msErr,  const MPlexHV& msPar,
                                  MPlexLS &outErr,       MPlexLV& outPar)
@@ -141,6 +184,9 @@ void updateParametersMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
   //MPlexMM kalmanGain(N);
   MPlexLL &kalmanGain = ctx.kalmanGain;
   MultForKalmanGain(propErr, resErr, kalmanGain);
+
+
+
   // Do not need the right part, leave it unitialized.
 
   // printf("kalmanGain:\n");
@@ -161,6 +207,7 @@ void updateParametersMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
   // == propErr - kalmanGain*propErr
   outErr = propErr;
   FinalKalmanErr(propErr, kalmanGain, outErr);
+
 
   // printf("outErr:\n");
   // for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)

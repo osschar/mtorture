@@ -123,7 +123,8 @@ x x x x x x
 FNORD
 
 #? This one is symmetric but the output can't handle it... need to fix
-$temp_propErrT_x_simil_propErr = new GenMul::MatrixSym('name'=>'c', 'M'=>$propErrT_M, 'N'=>$temp_simil_x_propErr_N);
+#$temp_propErrT_x_simil_propErr = new GenMul::MatrixSym('name'=>'c', 'M'=>$propErrT_M, 'N'=>$temp_simil_x_propErr_N);
+$temp_propErrT_x_simil_propErr = new GenMul::MatrixSym('name'=>'c', 'M'=>$propErrT_M);
 
 $m->dump_multiply_std_and_intrinsic("upParam_propErrT_x_simil_propErr.ah",
 									$propErrT, $temp_simil_x_propErr, $temp_propErrT_x_simil_propErr);
