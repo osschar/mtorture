@@ -44,11 +44,21 @@ long64 single_run(int                 n_tracks,
 
     mkfp->InputTracksAndHits(trk_in, itrack, end);
 
+    // Store input track params into a stash for faster reinitialization.
+    // Charge doesn't get changed.
+    // If you activate this, also swap the reinit in the loop below.
+    // This doesn't really help all that much, it seems.
+    //
+    // MPlexLS err; err = mkfp->GetErr0();
+    // MPlexLV par; par = mkfp->GetPar0();
+
     for (int x = 0; x < Nloop; ++x)
     {
       if (x != 0)
       {
         mkfp->InputTracksOnly(trk_in, itrack, end);
+        // mkfp->GetErr0() = err;
+        // mkfp->GetPar0() = par;
       }
 
       mkfp->FitTracks();
@@ -93,7 +103,7 @@ void test_matriplex()
   t.print_tuple_header();
 
   // Warm up
-  t.time_loop(Nmax, 4);
+  t.time_loop(512, 4);
 
   for (int n = Nmin; n <= Nmax; n *= 2)
   {
@@ -116,9 +126,14 @@ void test_matriplex()
 void test_vtune()
 {
   int Nmax  = 512;
+  // 512 here is calculated so the whole thing fits into L2 cache.
+  // For single thread per core one could go to twice that.
 
-#pragma omp parallel for num_threads(NUM_THREADS)
-  for (int i = 0; i < NUM_THREADS; ++i)
+  // KMP_AFFINITY=scatter KMP_PLACE_THREADS=1T
+  // KMP_AFFINITY=compact KMP_PLACE_THREADS=2T
+
+  // #pragma omp parallel for num_threads(NUM_THREADS)
+  // for (int i = 0; i < NUM_THREADS; ++i)
   {
     std::vector<Track> sim_trk;
     std::vector<Track> rec_trk;
