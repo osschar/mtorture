@@ -31,6 +31,10 @@ public:
     // XXXX std::vector is no good, not aligned!
   }
 
+  // Copy-in timing tests.
+  MPlexLS& GetErr0() { return Err[0]; }
+  MPlexLV& GetPar0() { return Par[0]; }
+
   void CheckAlignment();
 
   void InputTracksAndHits(std::vector<Track>& tracks, int beg, int end);
