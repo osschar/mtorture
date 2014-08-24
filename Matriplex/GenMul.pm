@@ -56,6 +56,13 @@ sub idx
   die "idx() should be overriden in concrete matrix class";
 }
 
+sub row_col_in_range
+{
+  my ($S, $i, $j) = @_;
+
+  return $i >= 0 and $i < $S->{M} and $j >= 0 and $j < $S->{N};
+}
+
 sub set_pattern
 {
   my ($S, $pstr) = @_;
@@ -73,12 +80,18 @@ sub pattern
 {
   my ($S, $idx) = @_;
 
+  die "pattern called with bad index."
+      unless $idx >=0 and $idx < $S->mat_size();
+
   return defined $S->{pattern} ? $S->{pattern}[$idx] : 'x';
 }
 
 sub reg_name
 {
   my ($S, $idx) = @_;
+
+  die "reg_name called with bad index."
+      unless $idx >=0 and $idx < $S->mat_size();
 
   return "$S->{name}_${idx}";
 }
@@ -135,10 +148,10 @@ sub idx
 {
   my ($S, $i, $j) = @_;
 
-  die "$S->{class}::idx() i out of range"
+  confess "$S->{class}::idx() i out of range"
       if $i < 0 or $i >= $S->{M};
 
-  die "$S->{class}::idx() j out of range"
+  confess "$S->{class}::idx() j out of range"
       if $j < 0 or $j >= $S->{N};
 
   return $i * $S->{N} + $j;
@@ -191,10 +204,10 @@ sub idx
 {
   my ($S, $i, $j) = @_;
 
-  die "$S->{class}::idx() i out of range"
+  confess "$S->{class}::idx() i out of range"
       if $i < 0 or $i >= $S->{M};
 
-  die "$S->{class}::idx() j out of range"
+  confess "$S->{class}::idx() j out of range"
       if $j < 0 or $j >= $S->{N};
 
   return $Offs[$S->{M}][$i * $S->{N} + $j];
@@ -278,6 +291,8 @@ use Scalar::Util 'blessed';
 
 use warnings;
 
+# Optional arguments:
+# - no_size_check: elements out of range are assumed to be 0
 
 sub new
 {
@@ -307,17 +322,34 @@ sub check_multiply_arguments
   croak "Input c is not a GenMul::MBase"
       unless blessed $c and $c->isa("GenMul::MBase");
 
-  croak "Input matrices a and b not compatible"
-      unless $a->{N} == $b->{M};
+  unless ($S->{no_size_check})
+  {
+    croak "Input matrices a and b not compatible"
+        unless $a->{N} == $b->{M};
 
-  croak "Result matrix c of wrong dimensions"
-      unless $c->{M} == $a->{M} and $c->{N} == $b->{N};
+    croak "Result matrix c of wrong dimensions"
+        unless $c->{M} == $a->{M} and $c->{N} == $b->{N};
+  }
+  else
+  {
+    carp "Input matrices a and b not compatible -- running with no_size_check"
+        unless $a->{N} == $b->{M};
+
+    carp "Result matrix c of wrong dimensions -- running with no_size_check"
+        unless $c->{M} == $a->{M} and $c->{N} == $b->{N};
+  }
 
   croak "Result matrix c should not be a transpose (or check & implement this case in GenMul code)"
       if $c->isa("GenMul::MatrixTranspose");
 
+  croak "Result matrix c has a pattern defined, this is not yet supported (but shouldn't be too hard)."
+      if defined $c->{pattern};
+
   carp "Result matrix c is symmetric, GenMul hopes you know what you're doing"
       if $c->isa("GenMul::MatrixSym");
+
+  $S->{a}{mat} = $a;
+  $S->{b}{mat} = $b;
 }
 
 sub push_out
@@ -350,25 +382,71 @@ sub handle_all_zeros_ones
   }
 }
 
+sub delete_temporaries
+{
+  my ($S) = @_;
+
+  for $k ('idx', 'pat')
+  {
+    delete $S->{a};
+    delete $S->{b};
+  }
+}
+
+sub delete_loop_temporaries
+{
+  my ($S) = @_;
+
+  for $k ('idx', 'pat')
+  {
+    delete $S->{a}{$k};
+    delete $S->{b}{$k};
+  }
+}
+
+sub generate_index_and_pattern
+{
+  my ($S, $x, $i1, $i2) = @_;
+
+  if ($S->{no_size_check} and not $S->{$x}{mat}->row_col_in_range($i, $k))
+  {
+    $S->{$x}{pat} = '0';
+  }
+  else
+  {
+    $S->{$x}{idx} = $S->{$x}{mat}->idx($i1, $i2);
+    $S->{$x}{pat} = $S->{$x}{mat}->pattern ($S->{$x}{idx});
+  }
+}
+
+sub generate_indices_and_patterns_for_multiplication
+{
+  # Provide idcs and patterns for given indices
+
+  my ($S, $i, $j, $k) = @_;
+
+  $S->delete_loop_temporaries();
+
+  $S->generate_index_and_pattern('a', $i, $k);
+  $S->generate_index_and_pattern('b', $k, $j);
+}
+
 # ----------------------------------------------------------------------
 
 sub generate_addend_standard
 {
-  my ($S, $a, $aidx, $b, $bidx) = @_;
+  my ($S, $x, $y) = @_;
 
-  my $apat = $a->pattern($aidx);
-  my $bpat = $b->pattern($bidx);
+  return undef if $S->{$x}{pat} eq '0' or  $S->{$y}{pat} eq '0';
+  return "1"   if $S->{$x}{pat} eq '1' and $S->{$y}{pat} eq '1';
 
-  return undef if $apat eq '0' or  $bpat eq '0';
-  return "1"   if $apat eq '1' and $bpat eq '1';
+  my $xstr = sprintf "$S->{$x}{mat}{name}\[%2d*N+n]", $S->{$x}{idx};
+  my $ystr = sprintf "$S->{$y}{mat}{name}\[%2d*N+n]", $S->{$y}{idx};
 
-  my $astr = sprintf "$a->{name}\[%2d*N+n]", $aidx;
-  my $bstr = sprintf "$b->{name}\[%2d*N+n]", $bidx;
+  return $xstr if $S->{$y}{pat} eq '1';
+  return $ystr if $S->{$x}{pat} eq '1';
 
-  return $astr if $bpat eq '1';
-  return $bstr if $apat eq '1';
-
-  return "${astr}*${bstr}";
+  return "${xstr}*${ystr}";
 }
 
 sub multiply_standard
@@ -384,9 +462,12 @@ sub multiply_standard
 
   my $is_c_symmetric = $c->isa("GenMul::MatrixSym");
 
-  for (my $i = 0; $i < $a->{M}; ++$i)
+  # With no_size_check matrices do not have to be compatible.
+  my $k_max = $a->{N} <= $b->{M} ? $a->{N} : $b->{M};
+
+  for (my $i = 0; $i < $c->{M}; ++$i)
   {
-    my $j_max = $is_c_symmetric ?  $i + 1 : $b->{N};
+    my $j_max = $is_c_symmetric ?  $i + 1 : $c->{N};
 
     for (my $j = 0; $j < $j_max; ++$j)
     {
@@ -396,12 +477,11 @@ sub multiply_standard
 
       my @sum;
 
-      for (my $k = 0; $k < $a->{N}; ++$k)
+      for (my $k = 0; $k < $k_max; ++$k)
       {
-        my $iko = $a->idx($i, $k);
-        my $kjo = $b->idx($k, $j);
+        $S->generate_indices_and_patterns_for_multiplication($i, $j, $k);
 
-        my $addend = $S->generate_addend_standard($a, $iko, $b, $kjo);
+        my $addend = $S->generate_addend_standard('a', 'b');
 
         push @sum, $addend if defined $addend;
       }
@@ -416,23 +496,27 @@ sub multiply_standard
       print "\n";
     }
   }
+
+  $S->delete_temporaries();
 }
 
 # ----------------------------------------------------------------------
 
 sub load_if_needed
 {
-  my ($S, $mat, $idx, $arc) = @_;
+  my ($S, $x) = @_;
 
-  my $reg = $mat->reg_name(${idx});
+  my $idx = $S->{$x}{idx};
 
-  if ($arc->[$idx] == 0)
+  my $reg = $S->{$x}{mat}->reg_name($idx);
+
+  if ($S->{$x}{cnt}[$idx] == 0)
   {
-    $S->push_out("$S->{vectype} ${reg} = LD($mat->{name}, $idx);");
+    $S->push_out("$S->{vectype} ${reg} = LD($S->{$x}{mat}{name}, $idx);");
     ++$S->{tick};
   }
 
-  ++$arc->[$idx];
+  ++$S->{$x}{cnt}[$idx];
 
   return $reg;
 }
@@ -460,62 +544,53 @@ sub multiply_intrinsic
 
   # Counts of use. For a and b to fetch, for c to assign / add / mult / fma.
   # cc is used as tick at which store can be performed afterwards.
-  my (@ac, @bc, @cc, @to_store);
-
-  @ac = (0) x $a->mat_size();
-  @bc = (0) x $b->mat_size();
+  my (@cc, @to_store);
   @cc = (0) x $c->mat_size();
+
+  $S->{a}{cnt} = [ (0) x $a->mat_size() ];
+  $S->{b}{cnt} = [ (0) x $b->mat_size() ];
 
   my $need_all_zeros = 0;
   my $need_all_ones  = 0;
 
   my $is_c_symmetric = $c->isa("GenMul::MatrixSym");
 
-  for (my $i = 0; $i < $a->{M}; ++$i)
-  {
-    my $j_max = $is_c_symmetric ?  $i + 1 : $b->{N};
+  # With no_size_check matrices do not have to be compatible.
+  my $k_max = $a->{N} <= $b->{M} ? $a->{N} : $b->{M};
 
-    for (my $k = 0; $k < $a->{N}; ++$k)
+  for (my $i = 0; $i < $c->{M}; ++$i)
+  {
+    my $j_max = $is_c_symmetric ?  $i + 1 : $c->{N};
+
+    for (my $k = 0; $k < $k_max; ++$k)
     {
       for (my $j = 0; $j < $j_max; ++$j)
       {
-        my $x   = $c->idx($i, $j);
-        my $iko = $a->idx($i, $k);
-        my $kjo = $b->idx($k, $j);
+        my $x = $c->idx($i, $j);
 
-        ### XXXX Need an intermediate check here for what operation to do.
-        ### Can have:
-        ### - add even for later operations
-        ### - add 1 to all elements (but this should be rare).
-        ### - assign on first operation (also with 1 as argument).
-        ###
-        ### ! All ones should be declared in the beginning, if needed.
-        ### ! Dump all into a string, than prefix that if needed.
+        $S->generate_indices_and_patterns_for_multiplication($i, $j, $k);
 
-        my $apat = $a->pattern($iko);
-        my $bpat = $b->pattern($kjo);
-
-        if ($apat ne '0' and $bpat ne '0')
+        if ($S->{a}{pat} ne '0' and $S->{b}{pat} ne '0')
         {
           my ($areg, $breg, $sreg);
 
-          if ($apat eq '1' and $bpat eq '1')
+          if ($S->{a}{pat} eq '1' and $S->{b}{pat} eq '1')
           {
             $need_all_ones = 1;
             $sreg = "all_ones";
           }
-          elsif ($bpat eq '1')
+          elsif ($S->{b}{pat} eq '1')
           {
-            $sreg = $S->load_if_needed($a, $iko, \@ac);
+            $sreg = $S->load_if_needed('a');
           }
-          elsif ($apat eq '1')
+          elsif ($S->{a}{pat} eq '1')
           {
-            $sreg = $S->load_if_needed($b, $kjo, \@bc);
+            $sreg = $S->load_if_needed('b');
           }
           else
           {
-            $areg = $S->load_if_needed($a, $iko, \@ac);
-            $breg = $S->load_if_needed($b, $kjo, \@bc);
+            $areg = $S->load_if_needed('a');
+            $breg = $S->load_if_needed('b');
           }
 
           my $creg = $c->reg_name($x);
@@ -539,12 +614,13 @@ sub multiply_intrinsic
           ++$S->{tick};
         }
 
-        if ($k + 1 == $a->{N})
+        if ($k + 1 == $k_max)
         {
           if ($cc[$x] == 0)
           {
             $need_all_zeros = 1;
-            ### XXX emit store all_zeros into creg
+
+            $S->push_out("ST($c->{name}, $x, all_zeros);");
           }
           else
           {
@@ -586,6 +662,8 @@ sub multiply_intrinsic
     print;
     print "\n";
   }
+
+  $S->delete_temporaries();
 }
 
 # ----------------------------------------------------------------------
