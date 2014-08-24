@@ -35,6 +35,11 @@ $ct = new GenMul::Matrix('name'=>'c', 'M'=>$DOM, 'N'=>$DIM);
 
 # ----------------------------------------------------------------------
 
+# E.g. to skip matrix size check:
+#   $m = new GenMul::Multiply('no_size_check'=>1);
+# Note that matrix dimensions that you pass into auto-generated
+# function still has to match matrix dimensions set here.
+
 $m = new GenMul::Multiply;
 
 $m->dump_multiply_std_and_intrinsic("multify.ah", $a, $b, $c);
