@@ -129,3 +129,18 @@ $temp_propErrT_x_simil_propErr = new GenMul::MatrixSym('name'=>'c', 'M'=>$propEr
 $m->dump_multiply_std_and_intrinsic("upParam_propErrT_x_simil_propErr.ah",
 									$propErrT, $temp_simil_x_propErr, $temp_propErrT_x_simil_propErr);
 									
+
+$kalmanGain66 = new GenMul::Matrix('name'=>'a', 'M'=>$propErr_M, 'N'=>$propErr_M);
+$kalmanGain66->set_pattern(<<"FNORD");
+x x x 0 0 0
+x x x 0 0 0
+x x x 0 0 0
+x x x 0 0 0
+x x x 0 0 0
+x x x 0 0 0
+FNORD
+
+$temp_kalmanGain_x_propErr = new GenMul::MatrixSym('name'=>'c', 'M'=>$propErrT_M);
+
+$m->dump_multiply_std_and_intrinsic("upParam_kalmanGain_x_propErr.ah",
+									$kalmanGain66, $propErr, $temp_kalmanGain_x_propErr);

@@ -89,7 +89,7 @@ void updateParameters66(TrackState& propagatedState, MeasurementState& measureme
 
 #ifndef __APPLE__
 
-void MultKalmanGain(const MPlexLH& A, const MPlexLS& B, MPlexLH& C)
+void MultKalmanGain(const MPlexLS& A, const MPlexHS& B, MPlexLH& C)
 {
   // C = A * B, C is 6x3, A is 6x6, B is 6x3
 
@@ -130,6 +130,20 @@ void propErrT_x_simil_propErr(const MPlexLS& A, const MPlexLL& B, MPlexLS& C)
         T *c = C.fArray; __assume_aligned(c, 64);
 
 #include "upParam_propErrT_x_simil_propErr.ah"
+}
+
+void kalmanGain_x_propErr(const MPlexLH& A, const MPlexLS& B, MPlexLS& C)
+{
+  // C = A * B, C is 6x6 sym, A is 6x6 , B is 6x6 sym
+ 
+  typedef float T;
+  const idx_t N = NN;
+  
+  const T *a = A.fArray; __assume_aligned(a, 64);
+  const T *b = B.fArray; __assume_aligned(b, 64);
+        T *c = C.fArray; __assume_aligned(c, 64);
+
+#include "upParam_kalmanGain_x_propErr.ah"
 }
 
 void updateParametersMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
@@ -198,8 +212,12 @@ void updateParametersMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
 
   // result.errors     = propErr - ROOT::Math::SimilarityT(propErr,resErrInv);
   // == propErr - kalmanGain*propErr
-  outErr = propErr;
-  FinalKalmanErr(propErr, kalmanGain, outErr);
+  //  outErr = propErr;
+  //  FinalKalmanErr(propErr, kalmanGain, outErr);
+
+  MPlexLS outErrTemp;
+  kalmanGain_x_propErr(kalmanGain, propErr, outErrTemp);
+  outErr = propErr - outErrTemp;
 
 
   // printf("outErr:\n");
