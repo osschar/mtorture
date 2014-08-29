@@ -1,0 +1,19 @@
+NVEC=1 SMatrix = 0.000   Matriplex = 40.290   ---   SM/MP = 0.000
+NVEC=2 SMatrix = 0.000   Matriplex = 30.105   ---   SM/MP = 0.000
+NVEC=4 SMatrix = 0.000   Matriplex = 15.754   ---   SM/MP = 0.000
+NVEC=8 SMatrix = 0.000   Matriplex = 9.969   ---   SM/MP = 0.000
+NVEC=16 SMatrix = 0.000   Matriplex = 5.519   ---   SM/MP = 0.000
+NVEC=32 SMatrix = 0.000   Matriplex = 5.485   ---   SM/MP = 0.000
+NVEC=64 SMatrix = 0.000   Matriplex = 5.974   ---   SM/MP = 0.000
+
+
+NVEC=1 NHIT=5 SMatrix = 0.000   Matriplex = 20.428   ---   SM/MP = 0.000
+NVEC=16 NHIT=5 SMatrix = 0.000   Matriplex = 3.017   ---   SM/MP = 0.000
+NVEC=1 NHIT=10 SMatrix = 0.000   Matriplex = 40.285   ---   SM/MP = 0.000
+NVEC=16 NHIT=10 SMatrix = 0.000   Matriplex = 5.515   ---   SM/MP = 0.000
+NVEC=1 NHIT=20 SMatrix = 0.000   Matriplex = 80.152   ---   SM/MP = 0.000
+NVEC=16 NHIT=20 SMatrix = 0.000   Matriplex = 10.585   ---   SM/MP = 0.000
+NVEC=1 NHIT=50 SMatrix = 0.000   Matriplex = 199.618   ---   SM/MP = 0.000
+NVEC=16 NHIT=50 SMatrix = 0.000   Matriplex = 27.890   ---   SM/MP = 0.000
+NVEC=1 NHIT=100 SMatrix = 0.000   Matriplex = 398.072   ---   SM/MP = 0.000
+NVEC=16 NHIT=100 SMatrix = 0.000   Matriplex = 67.783   ---   SM/MP = 0.000

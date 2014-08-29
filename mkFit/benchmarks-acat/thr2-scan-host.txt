@@ -1,0 +1,215 @@
+NTHR=1 SMatrix = 0.000   Matriplex = 1.570   ---   SM/MP = 0.000
+NTHR=2 SMatrix = 0.000   Matriplex = 1.394   ---   SM/MP = 0.000
+NTHR=4 SMatrix = 0.000   Matriplex = 0.701   ---   SM/MP = 0.000
+NTHR=6 SMatrix = 0.000   Matriplex = 0.463   ---   SM/MP = 0.000
+NTHR=8 SMatrix = 0.000   Matriplex = 0.363   ---   SM/MP = 0.000
+NTHR=10 SMatrix = 0.000   Matriplex = 0.309   ---   SM/MP = 0.000
+NTHR=12 SMatrix = 0.000   Matriplex = 0.252   ---   SM/MP = 0.000
+NTHR=14 SMatrix = 0.000   Matriplex = 0.203   ---   SM/MP = 0.000
+NTHR=16 SMatrix = 0.000   Matriplex = 0.197   ---   SM/MP = 0.000
+NTHR=18 SMatrix = 0.000   Matriplex = 0.185   ---   SM/MP = 0.000
+NTHR=20 SMatrix = 0.000   Matriplex = 0.172   ---   SM/MP = 0.000
+NTHR=22 SMatrix = 0.000   Matriplex = 0.145   ---   SM/MP = 0.000
+NTHR=24 SMatrix = 0.000   Matriplex = 0.155   ---   SM/MP = 0.000
+NTHR=30 SMatrix = 0.000   Matriplex = 0.189   ---   SM/MP = 0.000
+NTHR=45 SMatrix = 0.000   Matriplex = 0.132   ---   SM/MP = 0.000
+NTHR=60 SMatrix = 0.000   Matriplex = 0.142   ---   SM/MP = 0.000
+NTHR=75 SMatrix = 0.000   Matriplex = 0.183   ---   SM/MP = 0.000
+NTHR=90 SMatrix = 0.000   Matriplex = 0.138   ---   SM/MP = 0.000
+NTHR=105 SMatrix = 0.000   Matriplex = 0.137   ---   SM/MP = 0.000
+NTHR=120 SMatrix = 0.000   Matriplex = 0.137   ---   SM/MP = 0.000
+
+
+NTHR=8 VEC=8 SMatrix = 0.000   Matriplex = 0.391   ---   SM/MP = 0.000
+NTHR=10 VEC=8 SMatrix = 0.000   Matriplex = 0.314   ---   SM/MP = 0.000
+NTHR=12 VEC=8 SMatrix = 0.000   Matriplex = 0.262   ---   SM/MP = 0.000
+NTHR=8 VEC=8 SMatrix = 0.000   Matriplex = 0.369   ---   SM/MP = 0.000
+NTHR=10 VEC=8 SMatrix = 0.000   Matriplex = 0.271   ---   SM/MP = 0.000
+NTHR=12 VEC=8 SMatrix = 0.000   Matriplex = 0.238   ---   SM/MP = 0.000
+
+
+NTHR=1 VEC=8 SMatrix = 0.000   Matriplex = 1.577   ---   SM/MP = 0.000
+NTHR=1 VEC=8 SMatrix = 0.000   Matriplex = 1.575   ---   SM/MP = 0.000
+NTHR=1 VEC=8 SMatrix = 0.000   Matriplex = 1.571   ---   SM/MP = 0.000
+NTHR=1 VEC=8 SMatrix = 0.000   Matriplex = 1.582   ---   SM/MP = 0.000
+NTHR=1 VEC=8 SMatrix = 0.000   Matriplex = 1.568   ---   SM/MP = 0.000
+NTHR=1 VEC=8 SMatrix = 0.000   Matriplex = 1.581   ---   SM/MP = 0.000
+NTHR=1 VEC=8 SMatrix = 0.000   Matriplex = 1.590   ---   SM/MP = 0.000
+NTHR=1 VEC=8 SMatrix = 0.000   Matriplex = 1.607   ---   SM/MP = 0.000
+NTHR=1 VEC=8 SMatrix = 0.000   Matriplex = 1.582   ---   SM/MP = 0.000
+NTHR=1 VEC=8 SMatrix = 0.000   Matriplex = 1.600   ---   SM/MP = 0.000
+
+NTHR=2 VEC=8 SMatrix = 0.000   Matriplex = 1.341   ---   SM/MP = 0.000
+NTHR=2 VEC=8 SMatrix = 0.000   Matriplex = 1.340   ---   SM/MP = 0.000
+NTHR=2 VEC=8 SMatrix = 0.000   Matriplex = 1.339   ---   SM/MP = 0.000
+NTHR=2 VEC=8 SMatrix = 0.000   Matriplex = 1.352   ---   SM/MP = 0.000
+NTHR=2 VEC=8 SMatrix = 0.000   Matriplex = 1.344   ---   SM/MP = 0.000
+NTHR=2 VEC=8 SMatrix = 0.000   Matriplex = 1.341   ---   SM/MP = 0.000
+NTHR=2 VEC=8 SMatrix = 0.000   Matriplex = 1.342   ---   SM/MP = 0.000
+NTHR=2 VEC=8 SMatrix = 0.000   Matriplex = 1.334   ---   SM/MP = 0.000 x
+NTHR=2 VEC=8 SMatrix = 0.000   Matriplex = 1.378   ---   SM/MP = 0.000
+NTHR=2 VEC=8 SMatrix = 0.000   Matriplex = 1.341   ---   SM/MP = 0.000
+
+NTHR=4 VEC=8 SMatrix = 0.000   Matriplex = 0.671   ---   SM/MP = 0.000
+NTHR=4 VEC=8 SMatrix = 0.000   Matriplex = 0.672   ---   SM/MP = 0.000
+NTHR=4 VEC=8 SMatrix = 0.000   Matriplex = 0.795   ---   SM/MP = 0.000
+NTHR=4 VEC=8 SMatrix = 0.000   Matriplex = 0.682   ---   SM/MP = 0.000
+NTHR=4 VEC=8 SMatrix = 0.000   Matriplex = 0.673   ---   SM/MP = 0.000
+NTHR=4 VEC=8 SMatrix = 0.000   Matriplex = 0.675   ---   SM/MP = 0.000
+NTHR=4 VEC=8 SMatrix = 0.000   Matriplex = 0.672   ---   SM/MP = 0.000
+NTHR=4 VEC=8 SMatrix = 0.000   Matriplex = 0.775   ---   SM/MP = 0.000
+NTHR=4 VEC=8 SMatrix = 0.000   Matriplex = 0.671   ---   SM/MP = 0.000
+NTHR=4 VEC=8 SMatrix = 0.000   Matriplex = 0.678   ---   SM/MP = 0.000
+
+NTHR=8 VEC=8 SMatrix = 0.000   Matriplex = 0.373   ---   SM/MP = 0.000
+NTHR=8 VEC=8 SMatrix = 0.000   Matriplex = 0.364   ---   SM/MP = 0.000
+NTHR=8 VEC=8 SMatrix = 0.000   Matriplex = 0.356   ---   SM/MP = 0.000
+NTHR=8 VEC=8 SMatrix = 0.000   Matriplex = 0.381   ---   SM/MP = 0.000
+NTHR=8 VEC=8 SMatrix = 0.000   Matriplex = 0.339   ---   SM/MP = 0.000
+NTHR=8 VEC=8 SMatrix = 0.000   Matriplex = 0.344   ---   SM/MP = 0.000
+NTHR=8 VEC=8 SMatrix = 0.000   Matriplex = 0.336   ---   SM/MP = 0.000
+NTHR=8 VEC=8 SMatrix = 0.000   Matriplex = 0.390   ---   SM/MP = 0.000
+NTHR=8 VEC=8 SMatrix = 0.000   Matriplex = 0.390   ---   SM/MP = 0.000
+NTHR=8 VEC=8 SMatrix = 0.000   Matriplex = 0.348   ---   SM/MP = 0.000
+
+NTHR=10 VEC=8 SMatrix = 0.000   Matriplex = 0.280   ---   SM/MP = 0.000
+NTHR=10 VEC=8 SMatrix = 0.000   Matriplex = 0.295   ---   SM/MP = 0.000
+NTHR=10 VEC=8 SMatrix = 0.000   Matriplex = 0.282   ---   SM/MP = 0.000
+NTHR=10 VEC=8 SMatrix = 0.000   Matriplex = 0.283   ---   SM/MP = 0.000
+NTHR=10 VEC=8 SMatrix = 0.000   Matriplex = 0.271   ---   SM/MP = 0.000
+NTHR=10 VEC=8 SMatrix = 0.000   Matriplex = 0.272   ---   SM/MP = 0.000
+NTHR=10 VEC=8 SMatrix = 0.000   Matriplex = 0.276   ---   SM/MP = 0.000
+NTHR=10 VEC=8 SMatrix = 0.000   Matriplex = 0.301   ---   SM/MP = 0.000
+NTHR=10 VEC=8 SMatrix = 0.000   Matriplex = 0.314   ---   SM/MP = 0.000
+NTHR=10 VEC=8 SMatrix = 0.000   Matriplex = 0.311   ---   SM/MP = 0.000
+
+NTHR=12 VEC=8 SMatrix = 0.000   Matriplex = 0.241   ---   SM/MP = 0.000
+NTHR=12 VEC=8 SMatrix = 0.000   Matriplex = 0.232   ---   SM/MP = 0.000
+NTHR=12 VEC=8 SMatrix = 0.000   Matriplex = 0.259   ---   SM/MP = 0.000
+NTHR=12 VEC=8 SMatrix = 0.000   Matriplex = 0.252   ---   SM/MP = 0.000
+NTHR=12 VEC=8 SMatrix = 0.000   Matriplex = 0.261   ---   SM/MP = 0.000
+NTHR=12 VEC=8 SMatrix = 0.000   Matriplex = 0.226   ---   SM/MP = 0.000 x
+NTHR=12 VEC=8 SMatrix = 0.000   Matriplex = 0.267   ---   SM/MP = 0.000
+NTHR=12 VEC=8 SMatrix = 0.000   Matriplex = 0.227   ---   SM/MP = 0.000
+NTHR=12 VEC=8 SMatrix = 0.000   Matriplex = 0.232   ---   SM/MP = 0.000
+NTHR=12 VEC=8 SMatrix = 0.000   Matriplex = 0.227   ---   SM/MP = 0.000
+
+NTHR=14 VEC=8 SMatrix = 0.000   Matriplex = 0.223   ---   SM/MP = 0.000
+NTHR=14 VEC=8 SMatrix = 0.000   Matriplex = 0.193   ---   SM/MP = 0.000 x
+NTHR=14 VEC=8 SMatrix = 0.000   Matriplex = 0.194   ---   SM/MP = 0.000
+NTHR=14 VEC=8 SMatrix = 0.000   Matriplex = 0.223   ---   SM/MP = 0.000
+NTHR=14 VEC=8 SMatrix = 0.000   Matriplex = 0.224   ---   SM/MP = 0.000
+NTHR=14 VEC=8 SMatrix = 0.000   Matriplex = 0.194   ---   SM/MP = 0.000
+NTHR=14 VEC=8 SMatrix = 0.000   Matriplex = 0.222   ---   SM/MP = 0.000
+NTHR=14 VEC=8 SMatrix = 0.000   Matriplex = 0.209   ---   SM/MP = 0.000
+NTHR=14 VEC=8 SMatrix = 0.000   Matriplex = 0.240   ---   SM/MP = 0.000
+NTHR=14 VEC=8 SMatrix = 0.000   Matriplex = 0.210   ---   SM/MP = 0.000
+
+NTHR=16 VEC=8 SMatrix = 0.000   Matriplex = 0.208   ---   SM/MP = 0.000
+NTHR=16 VEC=8 SMatrix = 0.000   Matriplex = 0.195   ---   SM/MP = 0.000
+NTHR=16 VEC=8 SMatrix = 0.000   Matriplex = 0.179   ---   SM/MP = 0.000
+NTHR=16 VEC=8 SMatrix = 0.000   Matriplex = 0.177   ---   SM/MP = 0.000 x
+NTHR=16 VEC=8 SMatrix = 0.000   Matriplex = 0.200   ---   SM/MP = 0.000
+NTHR=16 VEC=8 SMatrix = 0.000   Matriplex = 0.194   ---   SM/MP = 0.000
+NTHR=16 VEC=8 SMatrix = 0.000   Matriplex = 0.240   ---   SM/MP = 0.000
+NTHR=16 VEC=8 SMatrix = 0.000   Matriplex = 0.198   ---   SM/MP = 0.000
+NTHR=16 VEC=8 SMatrix = 0.000   Matriplex = 0.194   ---   SM/MP = 0.000
+NTHR=16 VEC=8 SMatrix = 0.000   Matriplex = 0.194   ---   SM/MP = 0.000
+
+NTHR=18 VEC=8 SMatrix = 0.000   Matriplex = 0.200   ---   SM/MP = 0.000
+NTHR=18 VEC=8 SMatrix = 0.000   Matriplex = 0.178   ---   SM/MP = 0.000
+NTHR=18 VEC=8 SMatrix = 0.000   Matriplex = 0.151   ---   SM/MP = 0.000 x
+NTHR=18 VEC=8 SMatrix = 0.000   Matriplex = 0.194   ---   SM/MP = 0.000
+NTHR=18 VEC=8 SMatrix = 0.000   Matriplex = 0.175   ---   SM/MP = 0.000
+NTHR=18 VEC=8 SMatrix = 0.000   Matriplex = 0.185   ---   SM/MP = 0.000
+NTHR=18 VEC=8 SMatrix = 0.000   Matriplex = 0.180   ---   SM/MP = 0.000
+NTHR=18 VEC=8 SMatrix = 0.000   Matriplex = 0.152   ---   SM/MP = 0.000
+NTHR=18 VEC=8 SMatrix = 0.000   Matriplex = 0.174   ---   SM/MP = 0.000
+NTHR=18 VEC=8 SMatrix = 0.000   Matriplex = 0.196   ---   SM/MP = 0.000
+
+NTHR=20 VEC=8 SMatrix = 0.000   Matriplex = 0.158   ---   SM/MP = 0.000
+NTHR=20 VEC=8 SMatrix = 0.000   Matriplex = 0.171   ---   SM/MP = 0.000
+NTHR=20 VEC=8 SMatrix = 0.000   Matriplex = 0.170   ---   SM/MP = 0.000
+NTHR=20 VEC=8 SMatrix = 0.000   Matriplex = 0.158   ---   SM/MP = 0.000
+NTHR=20 VEC=8 SMatrix = 0.000   Matriplex = 0.169   ---   SM/MP = 0.000
+NTHR=20 VEC=8 SMatrix = 0.000   Matriplex = 0.172   ---   SM/MP = 0.000
+NTHR=20 VEC=8 SMatrix = 0.000   Matriplex = 0.159   ---   SM/MP = 0.000
+NTHR=20 VEC=8 SMatrix = 0.000   Matriplex = 0.180   ---   SM/MP = 0.000
+NTHR=20 VEC=8 SMatrix = 0.000   Matriplex = 0.176   ---   SM/MP = 0.000
+NTHR=20 VEC=8 SMatrix = 0.000   Matriplex = 0.174   ---   SM/MP = 0.000
+
+NTHR=22 VEC=8 SMatrix = 0.000   Matriplex = 0.153   ---   SM/MP = 0.000
+NTHR=22 VEC=8 SMatrix = 0.000   Matriplex = 0.172   ---   SM/MP = 0.000
+NTHR=22 VEC=8 SMatrix = 0.000   Matriplex = 0.152   ---   SM/MP = 0.000
+NTHR=22 VEC=8 SMatrix = 0.000   Matriplex = 0.154   ---   SM/MP = 0.000
+NTHR=22 VEC=8 SMatrix = 0.000   Matriplex = 0.168   ---   SM/MP = 0.000
+NTHR=22 VEC=8 SMatrix = 0.000   Matriplex = 0.153   ---   SM/MP = 0.000
+NTHR=22 VEC=8 SMatrix = 0.000   Matriplex = 0.139   ---   SM/MP = 0.000
+NTHR=22 VEC=8 SMatrix = 0.000   Matriplex = 0.165   ---   SM/MP = 0.000
+NTHR=22 VEC=8 SMatrix = 0.000   Matriplex = 0.153   ---   SM/MP = 0.000
+NTHR=22 VEC=8 SMatrix = 0.000   Matriplex = 0.138   ---   SM/MP = 0.000
+
+NTHR=24 VEC=8 SMatrix = 0.000   Matriplex = 0.136   ---   SM/MP = 0.000
+NTHR=24 VEC=8 SMatrix = 0.000   Matriplex = 0.180   ---   SM/MP = 0.000
+NTHR=24 VEC=8 SMatrix = 0.000   Matriplex = 0.136   ---   SM/MP = 0.000
+NTHR=24 VEC=8 SMatrix = 0.000   Matriplex = 0.130   ---   SM/MP = 0.000
+NTHR=24 VEC=8 SMatrix = 0.000   Matriplex = 0.137   ---   SM/MP = 0.000
+NTHR=24 VEC=8 SMatrix = 0.000   Matriplex = 0.131   ---   SM/MP = 0.000
+NTHR=24 VEC=8 SMatrix = 0.000   Matriplex = 0.137   ---   SM/MP = 0.000
+NTHR=24 VEC=8 SMatrix = 0.000   Matriplex = 0.179   ---   SM/MP = 0.000
+NTHR=24 VEC=8 SMatrix = 0.000   Matriplex = 0.142   ---   SM/MP = 0.000
+NTHR=24 VEC=8 SMatrix = 0.000   Matriplex = 0.179   ---   SM/MP = 0.000
+
+
+NTHR=11 VEC=8 SMatrix = 0.000   Matriplex = 0.272   ---   SM/MP = 0.000
+NTHR=11 VEC=8 SMatrix = 0.000   Matriplex = 0.285   ---   SM/MP = 0.000
+NTHR=11 VEC=8 SMatrix = 0.000   Matriplex = 0.286   ---   SM/MP = 0.000
+NTHR=11 VEC=8 SMatrix = 0.000   Matriplex = 0.289   ---   SM/MP = 0.000
+NTHR=11 VEC=8 SMatrix = 0.000   Matriplex = 0.286   ---   SM/MP = 0.000
+NTHR=11 VEC=8 SMatrix = 0.000   Matriplex = 0.248   ---   SM/MP = 0.000
+NTHR=11 VEC=8 SMatrix = 0.000   Matriplex = 0.246   ---   SM/MP = 0.000
+NTHR=11 VEC=8 SMatrix = 0.000   Matriplex = 0.271   ---   SM/MP = 0.000
+NTHR=11 VEC=8 SMatrix = 0.000   Matriplex = 0.249   ---   SM/MP = 0.000
+NTHR=11 VEC=8 SMatrix = 0.000   Matriplex = 0.256   ---   SM/MP = 0.000
+
+
+NTHR=20 VEC=8 SMatrix = 0.000   Matriplex = 0.157   ---   SM/MP = 0.000
+NTHR=20 VEC=8 SMatrix = 0.000   Matriplex = 0.194   ---   SM/MP = 0.000
+NTHR=20 VEC=8 SMatrix = 0.000   Matriplex = 0.162   ---   SM/MP = 0.000
+NTHR=20 VEC=8 SMatrix = 0.000   Matriplex = 0.142   ---   SM/MP = 0.000
+NTHR=20 VEC=8 SMatrix = 0.000   Matriplex = 0.161   ---   SM/MP = 0.000
+NTHR=20 VEC=8 SMatrix = 0.000   Matriplex = 0.158   ---   SM/MP = 0.000
+NTHR=20 VEC=8 SMatrix = 0.000   Matriplex = 0.158   ---   SM/MP = 0.000
+NTHR=20 VEC=8 SMatrix = 0.000   Matriplex = 0.159   ---   SM/MP = 0.000
+NTHR=20 VEC=8 SMatrix = 0.000   Matriplex = 0.175   ---   SM/MP = 0.000
+NTHR=20 VEC=8 SMatrix = 0.000   Matriplex = 0.159   ---   SM/MP = 0.000
+NTHR=20 VEC=8 SMatrix = 0.000   Matriplex = 0.166   ---   SM/MP = 0.000
+NTHR=20 VEC=8 SMatrix = 0.000   Matriplex = 0.158   ---   SM/MP = 0.000
+NTHR=20 VEC=8 SMatrix = 0.000   Matriplex = 0.159   ---   SM/MP = 0.000
+NTHR=20 VEC=8 SMatrix = 0.000   Matriplex = 0.159   ---   SM/MP = 0.000
+NTHR=20 VEC=8 SMatrix = 0.000   Matriplex = 0.208   ---   SM/MP = 0.000
+NTHR=20 VEC=8 SMatrix = 0.000   Matriplex = 0.159   ---   SM/MP = 0.000
+NTHR=20 VEC=8 SMatrix = 0.000   Matriplex = 0.159   ---   SM/MP = 0.000
+NTHR=20 VEC=8 SMatrix = 0.000   Matriplex = 0.191   ---   SM/MP = 0.000
+NTHR=20 VEC=8 SMatrix = 0.000   Matriplex = 0.166   ---   SM/MP = 0.000
+NTHR=20 VEC=8 SMatrix = 0.000   Matriplex = 0.188   ---   SM/MP = 0.000
+NTHR=2 VEC=8 SMatrix = 0.000   Matriplex = 1.404   ---   SM/MP = 0.000
+NTHR=2 VEC=8 SMatrix = 0.000   Matriplex = 1.392   ---   SM/MP = 0.000
+NTHR=2 VEC=8 SMatrix = 0.000   Matriplex = 1.393   ---   SM/MP = 0.000
+NTHR=2 VEC=8 SMatrix = 0.000   Matriplex = 1.402   ---   SM/MP = 0.000
+NTHR=2 VEC=8 SMatrix = 0.000   Matriplex = 1.398   ---   SM/MP = 0.000
+NTHR=2 VEC=8 SMatrix = 0.000   Matriplex = 1.395   ---   SM/MP = 0.000
+NTHR=2 VEC=8 SMatrix = 0.000   Matriplex = 1.404   ---   SM/MP = 0.000
+NTHR=2 VEC=8 SMatrix = 0.000   Matriplex = 1.396   ---   SM/MP = 0.000
+NTHR=2 VEC=8 SMatrix = 0.000   Matriplex = 1.399   ---   SM/MP = 0.000
+NTHR=2 VEC=8 SMatrix = 0.000   Matriplex = 1.396   ---   SM/MP = 0.000
+NTHR=2 VEC=8 SMatrix = 0.000   Matriplex = 1.407   ---   SM/MP = 0.000
+NTHR=2 VEC=8 SMatrix = 0.000   Matriplex = 1.398   ---   SM/MP = 0.000
+NTHR=2 VEC=8 SMatrix = 0.000   Matriplex = 1.397   ---   SM/MP = 0.000
+NTHR=2 VEC=8 SMatrix = 0.000   Matriplex = 1.393   ---   SM/MP = 0.000
+NTHR=2 VEC=8 SMatrix = 0.000   Matriplex = 1.392   ---   SM/MP = 0.000
+NTHR=2 VEC=8 SMatrix = 0.000   Matriplex = 1.416   ---   SM/MP = 0.000
+NTHR=2 VEC=8 SMatrix = 0.000   Matriplex = 1.402   ---   SM/MP = 0.000
+NTHR=2 VEC=8 SMatrix = 0.000   Matriplex = 1.395   ---   SM/MP = 0.000
+NTHR=2 VEC=8 SMatrix = 0.000   Matriplex = 1.395   ---   SM/MP = 0.000
+NTHR=2 VEC=8 SMatrix = 0.000   Matriplex = 1.419   ---   SM/MP = 0.000
