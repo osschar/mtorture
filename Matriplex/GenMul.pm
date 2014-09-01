@@ -607,7 +607,7 @@ sub multiply_intrinsic
                 "ADD(${sreg}, ${creg})" :
                 "FMA(${areg}, ${breg}, ${creg})";
 
-            $S->push_out("${creg} = ", $op, ");");
+            $S->push_out("${creg} = ", $op, ";");
           }
 
           ++$cc[$x];
