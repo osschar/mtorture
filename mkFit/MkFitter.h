@@ -4,8 +4,6 @@
 #include "Matrix.h"
 #include "KalmanUtils.h"
 
-#define MAX_HITS 10
-
 
 class MkFitter
 {
@@ -29,6 +27,7 @@ public:
   {
     // XXXX Eventually dynamically allocate measurement arrays.
     // XXXX std::vector is no good, not aligned!
+    // XXXX Hmmh, should really copy them in layer by layer.
   }
 
   // Copy-in timing tests.
@@ -36,6 +35,8 @@ public:
   MPlexLV& GetPar0() { return Par[0]; }
 
   void CheckAlignment();
+
+  void PrintPt(int idx);
 
   void InputTracksAndHits(std::vector<Track>& tracks, int beg, int end);
   void InputTracksOnly   (std::vector<Track>& tracks, int beg, int end);

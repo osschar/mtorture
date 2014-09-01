@@ -2,6 +2,11 @@
 
 #include "Propagation.h"
 
+namespace
+{
+   inline float hipo(float x, float y) { return sqrt(x*x + y*y); }
+}
+
 void MkFitter::CheckAlignment()
 {
   printf("MkFitter alignment check:\n");
@@ -12,6 +17,16 @@ void MkFitter::CheckAlignment()
   Matriplex::align_check("  msErr[0] =", &msErr[0].fArray[0]);
   Matriplex::align_check("  msPar[0] =", &msPar[0].fArray[0]);
 }
+
+void MkFitter::PrintPt(int idx)
+{
+  for (int i = 0; i < NN; ++i)
+  {
+    printf("%5.2f  ", hipo(Par[idx].At(i, 3, 0), Par[idx].At(i, 4, 0)));
+  }
+}
+
+//==============================================================================
 
 void MkFitter::InputTracksAndHits(std::vector<Track>& tracks, int beg, int end)
 {
@@ -66,8 +81,7 @@ void MkFitter::FitTracks()
 
   for (int hi = 0; hi < Nhits; ++hi)
   {
-    // XXXX Note, charge is not passed (line propagation). Could be part of ctxt, too.
-
+    // Note, charge is not passed (line propagation).
     // propagateLineToRMPlex(Err[iC], Par[iC], msErr[hi], msPar[hi],
     //                       Err[iP], Par[iP]);
 
@@ -89,8 +103,8 @@ void MkFitter::OutputFittedTracks(std::vector<Track>& tracks, int beg, int end)
   int itrack = 0;
   for (int i = beg; i < end; ++i, ++itrack)
   {
-    Err[iP].CopyOut(itrack, tracks[i].errors().Array());
-    Par[iP].CopyOut(itrack, tracks[i].parameters().Array());
+    Err[iC].CopyOut(itrack, tracks[i].errors().Array());
+    Par[iC].CopyOut(itrack, tracks[i].parameters().Array());
 
     tracks[i].charge() = Chg(itrack, 0, 0);
 
