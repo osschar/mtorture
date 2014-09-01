@@ -200,16 +200,16 @@ double runFittingTest(std::vector<Track>& simtracks, std::vector<Track>& rectrac
 
 double runFittingTestPlex(std::vector<Track>& simtracks, std::vector<Track>& rectracks)
 {
-   const int Nhits = MAX_HITS; // XXXXX ARGH !!!! What if there's a missing / double layer?
+   const int Nhits = MAX_HITS;
+   // XXX What if there's a missing / double layer?
    // Eventually, should sort track vector by number of hits!
    // And pass the number in on each "setup" call.
    // Reserves should be made for maximum possible number (but this is just
    // measurments errors, params).
 
-   // NOTE: This *MUST* be on heap, not on stack!
-   // Further, normal new screws up alignment of ALL MPlex memebrs of MkFitter,
+   // NOTE: MkFitter *MUST* be on heap, not on stack!
+   // Standard operator new screws up alignment of ALL MPlex memebrs of MkFitter,
    // even if one adds attr(aligned(64)) thingy to every possible place.
-   //
 
    // MkFitter *mkfp = new (_mm_malloc(sizeof(MkFitter), 64)) MkFitter(Nhits);
 
