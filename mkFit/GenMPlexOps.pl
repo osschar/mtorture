@@ -3,6 +3,7 @@
 use lib "../Matriplex";
 
 use GenMul;
+use warnings;
 
 my $DIM = 6;
 
@@ -55,15 +56,8 @@ $m->dump_multiply_std_and_intrinsic("MultHelixPropTransp.ah",
 
 #declared first on its own because propErr sees many uses
 my $propErr_M = 6;
-$propErr = new GenMul::MatrixSym('name'=>'a', 'M'=>$propErr_M); #will have to remember to re'name' it based on location in function
-$propErr->set_pattern(<<"FNORD");
-x
-x x
-x x x
-x x x x
-x x x x x
-x x x x x x
-FNORD
+$propErr = new GenMul::MatrixSym('name' => 'a',
+                                 'M'    => $propErr_M); #will have to remember to re'name' it based on location in function
 
 my $propErrT_M = 6;
 $propErrT = new GenMul::MatrixTranspose($propErr); #will have to remember to re'name' it based on location in function
@@ -71,23 +65,16 @@ $propErrT = new GenMul::MatrixTranspose($propErr); #will have to remember to re'
 
 
 ### kalmanGain =  = propErr * (projMatrixT * resErrInv)
-my $resErrInv_proj63_M = 6;
-my $resErrInv_proj63_N = 3;
-$resErrInv_proj63 = new GenMul::Matrix('name'=>'b', 'M'=>$resErrInv_proj63_M, 'N'=>$resErrInv_proj63_N);
-# this pattern is just right that because of the zeroes you should be able to just feed in the 3x3 without first converting to a 6x3????
-$resErrInv_proj63->set_pattern(<<"FNORD");
-x x x
-x x x
-x x x
-0 0 0
-0 0 0
-0 0 0
-FNORD
+$resErrInv = new GenMul::MatrixSym('name'=>'b', 'M'=>3, 'N'=>3);
 
-$kalmanGain = new GenMul::Matrix('name'=>'c', 'M'=>$propErr_M, 'N'=>$resErrInv_proj63_N);
+$kalmanGain = new GenMul::Matrix('name'=>'c', 'M' => 6, 'N' => 3);
 
-$m->dump_multiply_std_and_intrinsic("upParam_MultKalmanGain.ah",
-									$propErr, $resErrInv_proj63, $kalmanGain);
+{
+  my $m_kg = new GenMul::Multiply('no_size_check' => 1);
+
+  $m_kg->dump_multiply_std_and_intrinsic("upParam_MultKalmanGain.ah",
+                                         $propErr, $resErrInv, $kalmanGain);
+}
 
 
 ### updatedErrs = propErr - propErr^T * simil * propErr
@@ -107,10 +94,12 @@ $propErr->{name} = 'b';
 
 my $temp_simil_x_propErr_M = 6;
 my $temp_simil_x_propErr_N = 6;
-$temp_simil_x_propErr = new GenMul::Matrix('name'=>'c', 'M'=>$temp_simil_x_propErr_M, 'N'=>$temp_simil_x_propErr_N);
+$temp_simil_x_propErr = new GenMul::Matrix('name'=>'c',
+                                           'M'=>$temp_simil_x_propErr_M,
+                                           'N'=>$temp_simil_x_propErr_N);
 
 $m->dump_multiply_std_and_intrinsic("upParam_simil_x_propErr.ah",
-									 $simil, $propErr, $temp_simil_x_propErr);
+                                    $simil, $propErr, $temp_simil_x_propErr);
 
 $temp_simil_x_propErr->{name} = 'b';									 
 $temp_simil_x_propErr->set_pattern(<<"FNORD");
@@ -124,23 +113,21 @@ FNORD
 
 #? This one is symmetric but the output can't handle it... need to fix
 #$temp_propErrT_x_simil_propErr = new GenMul::MatrixSym('name'=>'c', 'M'=>$propErrT_M, 'N'=>$temp_simil_x_propErr_N);
+
+
 $temp_propErrT_x_simil_propErr = new GenMul::MatrixSym('name'=>'c', 'M'=>$propErrT_M);
 
 $m->dump_multiply_std_and_intrinsic("upParam_propErrT_x_simil_propErr.ah",
-									$propErrT, $temp_simil_x_propErr, $temp_propErrT_x_simil_propErr);
+                                    $propErrT, $temp_simil_x_propErr, $temp_propErrT_x_simil_propErr);
 									
 
-$kalmanGain66 = new GenMul::Matrix('name'=>'a', 'M'=>$propErr_M, 'N'=>$propErr_M);
-$kalmanGain66->set_pattern(<<"FNORD");
-x x x 0 0 0
-x x x 0 0 0
-x x x 0 0 0
-x x x 0 0 0
-x x x 0 0 0
-x x x 0 0 0
-FNORD
+{
+  my $temp = new GenMul::MatrixSym('name' => 'c', 'M' => 6);
 
-$temp_kalmanGain_x_propErr = new GenMul::MatrixSym('name'=>'c', 'M'=>$propErrT_M);
+  my $m_kg = new GenMul::Multiply('no_size_check' => 1);
 
-$m->dump_multiply_std_and_intrinsic("upParam_kalmanGain_x_propErr.ah",
-									$kalmanGain66, $propErr, $temp_kalmanGain_x_propErr);
+  $kalmanGain->{name} = 'a';
+
+  $m_kg->dump_multiply_std_and_intrinsic("upParam_kalmanGain_x_propErr.ah",
+                                         $kalmanGain, $propErr, $temp);
+}
