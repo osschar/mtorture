@@ -39,7 +39,20 @@ TrackState propagateLineToR(TrackState& inputState, float r) {
 namespace
 {
    inline float hipo(float x, float y) { return sqrt(x*x + y*y); }
+
+   inline void sincos4(float x, float& sin, float& cos)
+   {
+      // Had this writen with explicit division by factorial.
+      // The *whole* fitting test ran like 2.5% slower on MIC, sigh.
+
+      cos  = 1;
+      sin  = x;   x *= x * 0.5f;
+      cos -= x;   x *= x * 0.33333333f;
+      sin -= x;   x *= x * 0.25f;
+      cos += x;
+   }
 }
+
 
 void propagateLineToRMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
                            const MPlexHS &msErr,  const MPlexHV& msPar,
@@ -103,7 +116,8 @@ void propagateLineToRMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
 // derivatives need to be updated at each iteration
 void propagateHelixToR(TrackState& inputState, float r, TrackState& result)
 {
-   bool dump = false;
+   const bool dump = false;
+
    float& xin = inputState.parameters.At(0);
    float& yin = inputState.parameters.At(1);
    float& pxin = inputState.parameters.At(3);
@@ -117,12 +131,16 @@ void propagateHelixToR(TrackState& inputState, float r, TrackState& result)
    //rename so that it is short
    SVector6& par = result.parameters;
    SMatrixSym66& err = result.errors;
+
+#ifdef DEBUG
    if (dump) std::cout << "attempt propagation from r=" << r0in << " to r=" << r << std::endl;
    if (dump) std::cout << "x=" << xin << " y=" << yin << " px=" << pxin << " py=" << pyin << " pz=" << pzin << " q=" << inputState.charge << std::endl;
    if ((r0in-r)>=0) {
       if (dump) std::cout << "target radius same or smaller than starting point, returning input" << std::endl;
       return;
    }
+#endif
+
    float pt2 = pxin*pxin+pyin*pyin;
    float pt = sqrt(pt2);
    float ptinv = 1./pt;
@@ -155,14 +173,18 @@ void propagateHelixToR(TrackState& inputState, float r, TrackState& result)
    // float dxdvar = 0.;
    // float dydvar = 0.;
    //5 iterations is a good starting point
-   const unsigned int Niter = 5;
-   for (unsigned int i=0;i<Niter;++i) {
+   const int Niter = 5;
+   for (int i = 0; i < Niter; ++i)
+   {
+#ifdef DEBUG
       if (dump) std::cout << "propagation iteration #" << i << std::endl;
+#endif
       x = par.At(0);
       y = par.At(1);
       px = par.At(3);
       py = par.At(4);
       r0 = sqrt(par.At(0)*par.At(0)+par.At(1)*par.At(1));
+#ifdef DEBUG
       if (dump) std::cout << "r0=" << r0 << " pt=" << pt << std::endl;
       if (dump) {
          if (r==r0) {
@@ -170,13 +192,20 @@ void propagateHelixToR(TrackState& inputState, float r, TrackState& result)
             break;
          }
       }
+#endif
       //distance=r-r0;//remove temporary
       totalDistance+=(r-r0);
+#ifdef DEBUG
       if (dump) std::cout << "distance=" << (r-r0) << std::endl;
+#endif
       angPath = (r-r0)*invcurvature;
+#ifdef DEBUG
       if (dump) std::cout << "angPath=" << angPath << std::endl;
-      cosAP=cos(angPath);
-      sinAP=sin(angPath);
+#endif
+      // cosAP=cos(angPath);
+      // sinAP=sin(angPath);
+      sincos4(angPath, sinAP, cosAP);
+
       //helix propagation formulas
       //http://www.phys.ufl.edu/~avery/fitting/fitting4.pdf
       par.At(0) = par.At(0) + k*(px*sinAP-py*(1-cosAP));
@@ -189,7 +218,9 @@ void propagateHelixToR(TrackState& inputState, float r, TrackState& result)
          //update derivatives on total distance for next step, where totalDistance+=r-r0
          //now r0 depends on px and py
          r0 = 1./r0;//WARNING, now r0 is r0inv (one less temporary)
+#ifdef DEBUG
          if (dump) std::cout << "r0=" << 1./r0 << " r0inv=" << r0 << " pt=" << pt << std::endl;
+#endif
          //update derivative on D
          dAPdx = -x*r0*invcurvature;
          dAPdy = -y*r0*invcurvature;
@@ -214,22 +245,30 @@ void propagateHelixToR(TrackState& inputState, float r, TrackState& result)
          //dTDdpy -= r0*(x*dxdpy + y*(k*dydpy);
          dTDdpy -= r0*(x*(k*(px*cosAP*dAPdpy - 1. + cosAP - py*sinAP*dAPdpy)) + y*(k*(sinAP + py*cosAP*dAPdpy + px*sinAP*dAPdpy)));
       }
+#ifdef DEBUG
       if (dump) std::cout << par.At(0) << " " << par.At(1) << " " << par.At(2) << std::endl;
       if (dump) std::cout << par.At(3) << " " << par.At(4) << " " << par.At(5) << std::endl;
+#endif
    }
    float totalAngPath=totalDistance*invcurvature;
    float& TD=totalDistance;
    float& TP=totalAngPath;
    float& iC=invcurvature;
+#ifdef DEBUG
    if (dump) std::cout << "TD=" << TD << " TP=" << TP << " arrived at r=" << sqrt(par.At(0)*par.At(0)+par.At(1)*par.At(1)) << std::endl;
+#endif
    float dCdpx = k*pxin*ptinv;
    float dCdpy = k*pyin*ptinv;
    float dTPdx = dTDdx*iC;
    float dTPdy = dTDdy*iC;
    float dTPdpx = (dTDdpx/iC - TD*dCdpx)*iC*iC;
    float dTPdpy = (dTDdpy/iC - TD*dCdpy)*iC*iC;
-   float cosTP = cos(TP);
-   float sinTP = sin(TP);
+
+   // float cosTP = cos(TP);
+   // float sinTP = sin(TP);
+   float cosTP, sinTP;
+   sincos4(TP, sinTP, cosTP);
+
    //derive these to compute jacobian
    //x = xin + k*(pxin*sinTP-pyin*(1-cosTP));
    //y = yin + k*(pyin*sinTP+pxin*(1-cosTP));
@@ -261,12 +300,14 @@ void propagateHelixToR(TrackState& inputState, float r, TrackState& result)
    errorProp(4,3) = +sinTP - dTPdpx*(pyin*sinTP - pxin*cosTP);//dpydpx;
    errorProp(4,4) = +cosTP - dTPdpy*(pyin*sinTP - pxin*cosTP);//dpydpy;
    result.errors=ROOT::Math::Similarity(errorProp,err);
+#ifdef DEBUG
    if (dump) {
       std::cout << "errorProp" << std::endl;
       dumpMatrix(errorProp);
       std::cout << "result.errors" << std::endl;
       dumpMatrix(result.errors);
    }
+#endif
    /*
      if (fabs(sqrt(par[0]*par[0]+par[1]*par[1])-r)>0.0001) {
      std::cout << "DID NOT GET TO R, dR=" << fabs(sqrt(par[0]*par[0]+par[1]*par[1])-r)
@@ -451,21 +492,6 @@ TrackState propagateHelixToR_test(TrackState& inputState, float r) {
 //==============================================================================
 //==============================================================================
 
-namespace
-{
-   inline void sincos4(float x, float& sin, float& cos)
-   {
-      // Had this writen with explicit division by factorial.
-      // The *whole* fitting test ran like 2.5% slower on MIC, sigh.
-
-      cos  = 1;
-      sin  = x;   x *= x * 0.5f;
-      cos -= x;   x *= x * 0.33333333f;
-      sin -= x;   x *= x * 0.25f;
-      cos += x;
-   }
-}
-
 void MultHelixProp(const MPlexLL& A, const MPlexLS& B, MPlexLL& C)
 {
    // C = A * B
@@ -505,7 +531,7 @@ void propagateHelixToRMPlex(const MPlexLS &inErr,  const MPlexLV& inPar,
                             const MPlexQI &inChg,  const MPlexHV& msPar,
                                   MPlexLS &outErr,       MPlexLV& outPar)
 {
-   bool dump = false;
+   const bool dump = false;
 
    const idx_t N  = NN;
 
@@ -526,22 +552,26 @@ void propagateHelixToRMPlex(const MPlexLS &inErr,  const MPlexLV& inPar,
       float r    = hipo(msPar.ConstAt(n, 0, 0), msPar.ConstAt(n, 1, 0));
       float r0in = hipo(xin, yin);
 
-      // if (dump) std::cout << "attempt propagation from r=" << r0in << " to r=" << r << std::endl;
-      // if (dump) std::cout << "x=" << xin << " y=" << yin << " px=" << pxin << " py=" << pyin << " pz=" << pzin << " q=" << inChg.At(n, 0, 0) << std::endl;
-      // if ((r0in-r)>=0) {
-      //    if (dump) std::cout << "target radius same or smaller than starting point, returning input" << std::endl;
-      //    return;
-      // }
+#ifdef DEBUG
+      if (dump) std::cout << "attempt propagation from r=" << r0in << " to r=" << r << std::endl;
+      if (dump) std::cout << "x=" << xin << " y=" << yin << " px=" << pxin << " py=" << pyin << " pz=" << pzin << " q=" << inChg.ConstAt(n, 0, 0) << std::endl;
+      if ((r0in-r)>=0) {
+         if (dump) std::cout << "target radius same or smaller than starting point, returning input" << std::endl;
+         return;
+      }
+#endif
 
       float pt2    = pxin*pxin+pyin*pyin;
       float pt     = sqrt(pt2);
       float ptinv  = 1./pt;
       float pt2inv = ptinv*ptinv;
       //p=0.3Br => r=p/(0.3*B)
-      float k = inChg.ConstAt(0, 0, 0) * 100. / (-0.299792458*3.8);
+      float k = inChg.ConstAt(n, 0, 0) * 100. / (-0.299792458*3.8);
       float invcurvature = 1./(pt*k);//in 1./cm
 
-      // if (dump) std::cout << "curvature=" << 1./invcurvature << std::endl;
+#ifdef DEBUG
+      if (dump) std::cout << "curvature=" << 1./invcurvature << std::endl;
+#endif
 
       float ctgTheta=pzin*ptinv;
       //variables to be updated at each iterations
@@ -570,7 +600,9 @@ void propagateHelixToRMPlex(const MPlexLS &inErr,  const MPlexLV& inPar,
       const unsigned int Niter = 5;
       for (unsigned int i=0;i<Niter;++i)
       {
-         // if (dump) std::cout << "propagation iteration #" << i << std::endl;
+#ifdef DEBUG
+         if (dump) std::cout << "propagation iteration #" << i << std::endl;
+#endif
 
          x  = outPar.At(n, 0, 0);
          y  = outPar.At(n, 1, 0);
@@ -578,19 +610,25 @@ void propagateHelixToRMPlex(const MPlexLS &inErr,  const MPlexLV& inPar,
          py = outPar.At(n, 4, 0);
          r0 = hipo(outPar.At(n, 0, 0), outPar.At(n, 1, 0));
 
-         // if (dump) std::cout << "r0=" << r0 << " pt=" << pt << std::endl;
-         // if (dump) {
-         //    if (r==r0) {
-         //       std::cout << "distance = 0 at iteration=" << i << std::endl;
-         //       break;
-         //    }
-         // }
+#ifdef DEBUG
+         if (dump) std::cout << "r0=" << r0 << " pt=" << pt << std::endl;
+         if (dump) {
+            if (r==r0) {
+               std::cout << "distance = 0 at iteration=" << i << std::endl;
+               break;
+            }
+         }
+#endif
 
          //distance=r-r0;//remove temporary
          totalDistance+=(r-r0);
-         // if (dump) std::cout << "distance=" << (r-r0) << std::endl;
+#ifdef DEBUG
+         if (dump) std::cout << "distance=" << (r-r0) << std::endl;
+#endif
          angPath = (r-r0)*invcurvature;
-         // if (dump) std::cout << "angPath=" << angPath << std::endl;
+#ifdef DEBUG
+         if (dump) std::cout << "angPath=" << angPath << std::endl;
+#endif
 
          // cosAP=cos(angPath);
          // sinAP=sin(angPath);
@@ -611,7 +649,9 @@ void propagateHelixToRMPlex(const MPlexLS &inErr,  const MPlexLV& inPar,
             //now r0 depends on px and py
             r0 = 1./r0;//WARNING, now r0 is r0inv (one less temporary)
 
-            // if (dump) std::cout << "r0=" << 1./r0 << " r0inv=" << r0 << " pt=" << pt << std::endl;
+#ifdef DEBUG
+            if (dump) std::cout << "r0=" << 1./r0 << " r0inv=" << r0 << " pt=" << pt << std::endl;
+#endif
 
             //update derivative on D
             dAPdx = -x*r0*invcurvature;
@@ -638,8 +678,10 @@ void propagateHelixToRMPlex(const MPlexLS &inErr,  const MPlexLV& inPar,
             dTDdpy -= r0*(x*(k*(px*cosAP*dAPdpy - 1. + cosAP - py*sinAP*dAPdpy)) + y*(k*(sinAP + py*cosAP*dAPdpy + px*sinAP*dAPdpy)));
          }
 
-         // if (dump) std::cout << outPar.At(n, 0) << " " << outPar.At(n, 1) << " " << outPar.At(n, 2) << std::endl;
-         // if (dump) std::cout << outPar.At(n, 3) << " " << outPar.At(n, 4) << " " << outPar.At(n, 5) << std::endl;
+#ifdef DEBUG
+         if (dump) std::cout << outPar.At(n, 0, 0) << " " << outPar.At(n, 1, 0) << " " << outPar.At(n, 2, 0) << std::endl;
+         if (dump) std::cout << outPar.At(n, 3, 0) << " " << outPar.At(n, 4, 0) << " " << outPar.At(n, 5, 0) << std::endl;
+#endif
       }
 
       float totalAngPath=totalDistance*invcurvature;
@@ -647,7 +689,9 @@ void propagateHelixToRMPlex(const MPlexLS &inErr,  const MPlexLV& inPar,
       float& TP=totalAngPath;
       float& iC=invcurvature;
 
-      // if (dump) std::cout << "TD=" << TD << " TP=" << TP << " arrived at r=" << sqrt(outPar.At(n, 0)*outPar.At(n, 0)+outPar.At(n, 1)*outPar.At(n, 1)) << std::endl;
+#ifdef DEBUG
+      if (dump) std::cout << "TD=" << TD << " TP=" << TP << " arrived at r=" << sqrt(outPar.At(n, 0, 0)*outPar.At(n, 0, 0)+outPar.At(n, 1, 0)*outPar.At(n, 1, 0)) << std::endl;
+#endif
 
       float dCdpx = k*pxin*ptinv;
       float dCdpy = k*pyin*ptinv;
@@ -704,12 +748,22 @@ void propagateHelixToRMPlex(const MPlexLS &inErr,  const MPlexLV& inPar,
    MultHelixPropTransp(errorProp, temp,   outErr);
    
    // This dump is now out of its place as similarity is done with matriplex ops.
-   // if (dump) {
-   //    std::cout << "errorProp" << std::endl;
-   //    dumpMatrix(errorProp);
-   //    std::cout << "result.errors" << std::endl;
-   //    dumpMatrix(result.errors);
-   // }
+#ifdef DEBUG
+   if (dump) {
+     for (int kk = 0; kk < N; ++kk)
+     {
+       printf("outErr %d\n", kk);
+       for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
+           printf("%8f ", outErr.At(kk,i,j)); printf("\n");
+       } printf("\n");
+
+       printf("outPar %d\n", kk);
+       for (int i = 0; i < 6; ++i) {
+           printf("%8f ", outPar.At(kk,i,0)); printf("\n");
+       } printf("\n");
+     }
+   }
+#endif
 
    /*
      if (fabs(sqrt(outPar[0]*outPar[0]+outPar[1]*outPar[1])-r)>0.0001) {
