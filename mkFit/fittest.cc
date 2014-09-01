@@ -12,6 +12,8 @@
 #include "TTree.h"
 #endif
 
+#include <omp.h>
+
 #include <iostream>
 #include <memory>
 
@@ -19,6 +21,13 @@
 
 void generateTracks(std::vector<Track>& simtracks, int Ntracks)
 {
+   g_gen.seed(742331);
+
+   simtracks.resize(Ntracks);
+
+   // double tstart = dtime();
+
+#pragma omp parallel for num_threads(120)
    for (int itrack = 0; itrack < Ntracks; ++itrack)
    {
       //create the track
@@ -30,8 +39,10 @@ void generateTracks(std::vector<Track>& simtracks, int Ntracks)
       float pt = 0.5 + g_unif(g_gen) * 9.5;//this input, 0.5<pt<10 GeV  (below ~0.5 GeV does not make 10 layers)
       setupTrackByToyMC(pos,mom,covtrk,hits,q,pt);
       Track simtrk(q,pos,mom,covtrk,hits,0.);
-      simtracks.push_back(simtrk);
+      simtracks[itrack] = simtrk;
    }
+
+   // printf("gen time = %f\n", dtime() - tstart);
 }
 
 void make_validation_tree(const char         *fname,
@@ -42,7 +53,7 @@ void make_validation_tree(const char         *fname,
 
    assert(simtracks.size() == rectracks.size());
 
-   float pt_mc, pt_fit, pt_err;
+   float pt_mc, pt_fit, pt_err, chg;
 
    TFile *file = TFile::Open(fname, "recreate");
    TTree *tree = new TTree("T", "Validation Tree for simple Kalman fitter");;
@@ -50,6 +61,7 @@ void make_validation_tree(const char         *fname,
    tree->Branch("pt_mc",  &pt_mc,  "pt_mc");
    tree->Branch("pt_fit", &pt_fit, "pt_fit");
    tree->Branch("pt_err", &pt_err, "pt_err");
+   tree->Branch("chg",    &chg,    "chg");
 
    const int NT = simtracks.size();
    for (int i = 0; i < NT; ++i)
@@ -63,6 +75,7 @@ void make_validation_tree(const char         *fname,
       pt_err = sqrt(recerr[3][3]*recp[3]*recp[3] +
                     recerr[4][4]*recp[4]*recp[4] +
                     recerr[3][4]*recp[3]*recp[4] * 2) / pt_fit;
+      chg = simtracks[i].charge();
 
       tree->Fill();
    }
@@ -93,7 +106,7 @@ double runFittingTest(std::vector<Track>& simtracks, std::vector<Track>& rectrac
 
    for (unsigned int itrack=0;itrack<simtracks.size();++itrack)
    {
-      Track& trk = simtracks[itrack];
+      Track trk = simtracks[itrack];
 
       // std::cout << std::endl;
       // std::cout << "processing track #" << itrack << std::endl;
@@ -107,7 +120,7 @@ double runFittingTest(std::vector<Track>& simtracks, std::vector<Track>& rectrac
 
       TrackState initState = trk.state();
       //make a copy since initState is used at the end to fill the tree
-      TrackState updatedState = initState;
+      TrackState& updatedState = trk.state();
     
       bool dump = false;
     
@@ -187,7 +200,7 @@ double runFittingTest(std::vector<Track>& simtracks, std::vector<Track>& rectrac
 
 double runFittingTestPlex(std::vector<Track>& simtracks, std::vector<Track>& rectracks)
 {
-   const int Nhits = 10; // XXXXX ARGH !!!! What if there's a missing / double layer?
+   const int Nhits = MAX_HITS; // XXXXX ARGH !!!! What if there's a missing / double layer?
    // Eventually, should sort track vector by number of hits!
    // And pass the number in on each "setup" call.
    // Reserves should be made for maximum possible number (but this is just
@@ -197,14 +210,26 @@ double runFittingTestPlex(std::vector<Track>& simtracks, std::vector<Track>& rec
    // Further, normal new screws up alignment of ALL MPlex memebrs of MkFitter,
    // even if one adds attr(aligned(64)) thingy to every possible place.
    //
-   MkFitter *mkfp = new (_mm_malloc(sizeof(MkFitter), 64)) MkFitter(Nhits);
+
+   // MkFitter *mkfp = new (_mm_malloc(sizeof(MkFitter), 64)) MkFitter(Nhits);
+
+   MkFitter *mkfp_arr[NUM_THREADS];
+
+   for (int i = 0; i < NUM_THREADS; ++i)
+   {
+     mkfp_arr[i] = new (_mm_malloc(sizeof(MkFitter), 64)) MkFitter(Nhits);
+   }
+
+   int theEnd = simtracks.size();
 
    double time = dtime();
 
-   int theEnd = simtracks.size();
+#pragma omp parallel for num_threads(NUM_THREADS)
    for (int itrack = 0; itrack < theEnd; itrack += NN)
    {
       int end = std::min(itrack + NN, theEnd);
+
+      MkFitter *mkfp = mkfp_arr[omp_get_thread_num()];
 
       mkfp->InputTracksAndHits(simtracks, itrack, end);
 
@@ -215,9 +240,15 @@ double runFittingTestPlex(std::vector<Track>& simtracks, std::vector<Track>& rec
 #endif
    }
 
-   _mm_free(mkfp);
+   time = dtime() - time;
 
-   return dtime() - time;
+   for (int i = 0; i < NUM_THREADS; ++i)
+   {
+     _mm_free(mkfp_arr[i]);
+   }
+   //_mm_free(mkfp);
+
+   return time;
 }
 
 #endif
