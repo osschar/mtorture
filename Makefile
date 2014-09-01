@@ -23,25 +23,25 @@ EXES     := ${TGTS} $(addsuffix -mic, ${TGTS})
 
 all: ${EXES}
 
-matriplex-auto:
+auto-matriplex:
 	${MAKE} -C Matriplex auto && touch $@
 
-auto: matriplex-auto
+auto:: auto-matriplex
 .PHONY: auto
 
-%.o: %.cxx *.h matriplex-auto
+%.o: %.cxx *.h auto-matriplex
 	icc ${CPPFLAGS} ${CXXFLAGS} ${VECHOST} -c -o $@ $<
 
-%.om: %.cxx *.h matriplex-auto
+%.om: %.cxx *.h auto-matriplex
 	icc ${CPPFLAGS} ${CXXFLAGS} ${VECMIC} -c -o $@ $<
 
 
-clean:
+clean::
 	rm -f ${EXES} *.o *.om mkFit/mkFit mkFit/mkFit-mic mkFit/*.o mkFit/*.om
 
-distclean: clean
+distclean:: clean
 	${MAKE} -C Matriplex clean
-	rm -f matriplex-auto
+	rm -f auto-matriplex
 
 echo:
 	@echo CPPFLAGS = ${CPPFLAGS}
@@ -67,13 +67,21 @@ MK_HOST_LIBS   :=
 # MK_HOST_CFLAGS := -I${ROOTSYS}/include
 # MK_HOST_LIBS   := -L${ROOTSYS}/lib -lCore -lRIO -lTree
 
+auto-mkfit: mkFit/GenMPlexOps.pl
+	(cd mkFit; ./GenMPlexOps.pl)
+	touch auto-mkfit
+
+distclean::
+	rm -f auto-mkfit
+	rm -f mkFit/*.ah
+
 .PHONY: mkFit
 mkFit: ${MKEXES}
 
-mkFit/mkFit: auto ${MKFOBJS}
+mkFit/mkFit: auto auto-mkfit ${MKFOBJS}
 	icc ${CXXFLAGS} ${VECHOST} ${LDFLAGS} ${MK_HOST_LIBS} -o $@ ${MKFOBJS}
 
-mkFit/mkFit-mic: auto ${MKFOBJS_MIC}
+mkFit/mkFit-mic: auto auto-mkfit ${MKFOBJS_MIC}
 	icc ${CXXFLAGS} ${VECMIC}  ${LDFLAGS} -o $@ ${MKFOBJS_MIC}
 	scp $@ mic0:
 
