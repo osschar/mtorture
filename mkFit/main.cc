@@ -8,14 +8,6 @@
 
 #include <limits>
 
-#ifndef NUM_THREADS
-#define NUM_THREADS 2
-#endif
-
-#ifndef THREAD_BINDING
-#define THREAD_BINDING spread
-#endif
-
 std::vector<Track> simtracks;
 
 std::vector<Track> smat_tracks;
@@ -25,7 +17,7 @@ std::vector<Track> plex_tracks;
 
 MkFitter *g_mkfp;
 
-const int Nhits = 10; // XXXXX ARGH !!!! What if there's a missing / double layer?
+const int Nhits = MAX_HITS; // XXXXX ARGH !!!! What if there's a missing / double layer?
 
 const int Nloop = 100;
 
@@ -158,18 +150,54 @@ void test_vtune()
 
 void test_standard()
 {
-  int  Ntracks  = 64 * 1024;
+  int  Ntracks  = 1024 * 1024;// * 1024; // * 10
   bool saveTree = false;
 
   generateTracks(simtracks, Ntracks);
 
   double tmp, tsm;
 
-  smat_tracks.reserve(simtracks.size());
-  tsm = runFittingTest(simtracks, smat_tracks);
+  // smat_tracks.reserve(simtracks.size());
+  // tsm = runFittingTest(simtracks, smat_tracks);
 
   plex_tracks.resize(simtracks.size());
   tmp = runFittingTestPlex(simtracks, plex_tracks);
+
+  // Second pass -- select problematic tracks and refit them
+  if (false)
+  {
+    int iout = 0;
+    for (int i = 0; i < Ntracks; ++i)
+    {
+      SVector6 &simp = simtracks[i].parameters();
+      SVector6 &recp = plex_tracks[i].parameters();
+
+      float pt_mc  = sqrt(simp[3]*simp[3] + simp[4]*simp[4]);
+      float pt_fit = sqrt(recp[3]*recp[3] + recp[4]*recp[4]);
+
+      if (std::abs((pt_mc - pt_fit) / pt_mc) > 100)
+      {
+        printf("Got bad track: %d %d %f %f\n", i, iout, pt_mc, pt_fit);
+        if (i != 0)
+          simtracks[iout] = simtracks[i];
+        ++iout;
+        if (iout >= 16)
+          break;
+      }
+    }
+
+    g_dump = true;
+
+    simtracks.resize(16);
+    smat_tracks.resize(0); smat_tracks.reserve(16);
+    plex_tracks.resize(16);
+
+    tsm = runFittingTest(simtracks, smat_tracks);
+
+    printf("\n\n\n===========================================================\n\n\n");
+
+    tmp = runFittingTestPlex(simtracks, plex_tracks);
+  }
 
   printf("SMatrix = %.3f   Matriplex = %.3f   ---   SM/MP = %.3f\n", tsm, tmp, tsm / tmp);
 
@@ -185,9 +213,9 @@ int main()
 {
   // test_matriplex();
 
-  test_vtune();
+  // test_vtune();
 
-  // test_standard();
+  test_standard();
 
   return 0;
 }
