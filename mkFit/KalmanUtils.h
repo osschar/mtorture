@@ -19,32 +19,9 @@ TrackState updateParameters(TrackState& propagatedState, MeasurementState& measu
 
 #ifndef __APPLE__
 
-#include "KalmanOps.h"
-
-struct updateParametersContext
-{
-  // Could also have input / output parameters here (as pointers, so that it's
-  // easy to swap last "out" into "in" for the next measuerement).
-
-  // Temporaries
-  MPlexLS propErr;
-  MPlexHS resErr;
-  MPlexLH kalmanGain;
-  MPlexQF pathLen;
-
-  // XXX The constructor could (should?) take size argument???
-   updateParametersContext() :
-      propErr(),
-      resErr(),
-      kalmanGain(),
-      pathLen()
-   {}
-};
-
 void updateParametersMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
                            const MPlexHS &msErr,  const MPlexHV& msPar,
                                  MPlexLS &outErr,       MPlexLV& outPar);
-
 #endif
 
 #endif

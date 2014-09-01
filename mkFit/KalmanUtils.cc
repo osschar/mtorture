@@ -89,9 +89,11 @@ void updateParameters66(TrackState& propagatedState, MeasurementState& measureme
 
 #ifndef __APPLE__
 
+#include "KalmanOps.h"
+
 void MultKalmanGain(const MPlexLS& A, const MPlexHS& B, MPlexLH& C)
 {
-  // C = A * B, C is 6x3, A is 6x6, B is 6x3
+  // C = A * B, C is 6x3, A is 6x6 sym, B is 3x3 sym
 
   typedef float T;
   const idx_t N = NN;
@@ -118,9 +120,9 @@ void simil_x_propErr(const MPlexHS& A, const MPlexLS& B, MPlexLL& C)
 #include "upParam_simil_x_propErr.ah"
 }
 
-void propErrT_x_simil_propErr(const MPlexLS& A, const MPlexLL& B, MPlexLS& C)
+void propErrT_x_simil_propErr(const MPlexLH& A, const MPlexLS& B, MPlexLS& C)
 {
-  // C = A * B, C is 6x6 sym, A is 6x6 sym, B is 6x6
+  // C = A * B, C is 6x6 sym, A is 6x3, B is 6x6 sym
  
   typedef float T;
   const idx_t N = NN;
@@ -148,7 +150,7 @@ void kalmanGain_x_propErr(const MPlexLH& A, const MPlexLS& B, MPlexLS& C)
 
 void updateParametersMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
                            const MPlexHS &msErr,  const MPlexHV& msPar,
-                                 MPlexLS &outErr,       MPlexLV& outPar)
+                           MPlexLS &outErr,       MPlexLV& outPar)
 {
   // const idx_t N = psErr.N;
   // Assert N-s of all parameters are the same.
@@ -158,73 +160,101 @@ void updateParametersMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
 
   // Also: resErr could be 3x3, kalmanGain 6x3
 
-  updateParametersContext ctx;
+  const bool dump = g_dump;
+
+  // updateParametersContext ctx;
   //assert((long long)(&updateCtx.propErr.fArray[0]) % 64 == 0);
 
   MPlexLS propErr;
   propErr = psErr;       // could use/overwrite psErr?
   propErr.AddNoiseIntoUpperLeft3x3(0.0); // e.g. ?
 
-  // printf("propErr:\n");
-  // for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
-  //     printf("%8f ", propErr.At(0,i,j)); printf("\n");
-  // } printf("\n");
+#ifdef DEBUG
+  if (dump) {
+    printf("propErr:\n");
+    for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
+        printf("%8f ", propErr.At(0,i,j)); printf("\n");
+    } printf("\n");
+  }
+#endif
 
-  // printf("msErr:\n");
-  // for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
-  //     printf("%8f ", msErr.At(0,i,j)); printf("\n");
-  // } printf("\n");
+  // if (dump) {
+  //   printf("msErr:\n");
+  //   for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
+  //       printf("%8f ", msErr.ConstAt(0,i,j)); printf("\n");
+  //   } printf("\n");
+  // }
 
   MPlexHS resErr;
   AddIntoUpperLeft3x3(propErr, msErr, resErr);
   // Do not really need to zero the rest ... it is not used.
 
-  // printf("resErr:\n");
-  // for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
-  //     printf("%8f ", resErr.At(0,i,j)); printf("\n");
-  // } printf("\n");
+#ifdef DEBUG
+  if (dump) {
+    printf("resErr:\n");
+    for (int i = 0; i < 3; ++i) { for (int j = 0; j < 3; ++j)
+        printf("%8f ", resErr.At(0,i,j)); printf("\n");
+    } printf("\n");
+  }
+#endif
 
-  Matriplex::InvertCramer(resErr);
+  Matriplex::InvertCramerSym(resErr);
+  // Matriplex::InvertCholeskySym(resErr);
   // resErr is now resErrInv
   // XXX Both could be done in one operation.
 
-  // printf("resErrInv:\n");
-  // for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
-  //     printf("%8f ", resErr.At(0,i,j)); printf("\n");
-  // } printf("\n");
+#ifdef DEBUG
+  if (dump) {
+    printf("resErrInv:\n");
+    for (int i = 0; i < 3; ++i) { for (int j = 0; j < 3; ++j)
+        printf("%8f ", resErr.At(0,i,j)); printf("\n");
+    } printf("\n");
+  }
+#endif
 
   MPlexLH kalmanGain;
   MultKalmanGain(propErr, resErr, kalmanGain);
 
-  // printf("kalmanGain:\n");
-  // for (int i = 0; i < 6; ++i) { for (int j = 0; j < 3; ++j)
-  //     printf("%8f ", kalmanGain.At(0,i,j)); printf("\n");
-  // } printf("\n");
+#ifdef DEBUG
+  if (dump) {
+    printf("kalmanGain:\n");
+    for (int i = 0; i < 6; ++i) { for (int j = 0; j < 3; ++j)
+        printf("%8f ", kalmanGain.At(0,i,j)); printf("\n");
+    } printf("\n");
+  }
+#endif
 
   // outPar = psPar + kalmanGain*(msPar-psPar)[0-2] (last three are 0!)
   MultResidualsAdd(kalmanGain, psPar, msPar, outPar);
 
-  // printf("outPar:\n");
-  // for (int i = 0; i < 6; ++i) {
-  //     printf("%8f ", outPar.At(0,i,0)); printf("\n");
-  // } printf("\n");
+#ifdef DEBUG
+  if (dump) {
+    printf("outPar:\n");
+    for (int i = 0; i < 6; ++i) {
+      printf("%8f  ", outPar.At(0,i,0));
+    } printf("\n");
+  }
+#endif
 
-
-  // result.errors     = propErr - ROOT::Math::SimilarityT(propErr,resErrInv);
-  // == propErr - kalmanGain*propErr
-  //  outErr = propErr;
-  //  FinalKalmanErr(propErr, kalmanGain, outErr);
+  // outErr = propErr - ROOT::Math::SimilarityT(propErr,resErrInv);
+  //        = propErr - kalmanGain*propErr
+  //
+  // XXX Ideally would also subtract at the same time in auto generated code.
 
   MPlexLS outErrTemp;
   kalmanGain_x_propErr(kalmanGain, propErr, outErrTemp);
-  outErr = propErr - outErrTemp;
+  outErr.Subtract(propErr, outErrTemp);
 
-
-  // printf("outErr:\n");
-  // for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
-  //     printf("%8f ", outErr.At(0,i,j)); printf("\n");
-  // } printf("\n");
+#ifdef DEBUG
+  if (dump) {
+    printf("outErr:\n");
+    for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
+        printf("%8f ", outErr.At(0,i,j)); printf("\n");
+    } printf("\n");
+  }
+#endif
 }
+
 #endif
 
 //==============================================================================
@@ -233,7 +263,7 @@ void updateParametersMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
 TrackState updateParameters(TrackState& propagatedState, MeasurementState& measurementState, 
 			    SMatrix36& projMatrix,SMatrix63& projMatrixT) {
 
-  bool print = false;
+  const bool print = g_dump;
 
   //test adding noise (mutiple scattering) on position (needs to be done more properly...)
   SMatrixSym66 noise;
@@ -263,6 +293,7 @@ TrackState updateParameters(TrackState& propagatedState, MeasurementState& measu
   SMatrixSym66 simil = ROOT::Math::SimilarityT(projMatrix,resErrInv);//fixme check T
   SMatrixSym66 updatedErrs = propErr - ROOT::Math::SimilarityT(propErr,simil);
 
+#ifdef DEBUG
   if (print) {
     std::cout << "\n updateParameters \n" << std::endl;
     std::cout << "noise" << std::endl;
@@ -290,6 +321,7 @@ TrackState updateParameters(TrackState& propagatedState, MeasurementState& measu
     dumpMatrix(updatedErrs);
     std::cout << std::endl;
   }
+#endif
 
   TrackState result;
   result.parameters=updatedParams;
