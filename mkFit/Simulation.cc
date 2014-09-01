@@ -2,9 +2,9 @@
 
 #include "Simulation.h"
 
-void setupTrackByToyMC(SVector3& pos, SVector3& mom, SMatrixSym66& covtrk, std::vector<Hit>& hits, int& charge, float pt) {
-
-  unsigned int nTotHit = 10;
+void setupTrackByToyMC(SVector3& pos, SVector3& mom, SMatrixSym66& covtrk, std::vector<Hit>& hits, int& charge, float pt)
+{
+  const int nTotHit = MAX_HITS;
 
   //assume beam spot width 1mm in xy and 1cm in z
   pos=SVector3(0.1*g_gaus(g_gen), 0.1*g_gaus(g_gen), 1.0*g_gaus(g_gen));
