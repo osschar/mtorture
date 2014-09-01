@@ -1,6 +1,10 @@
 #ifndef _matrix_
 #define _matrix_
 
+#ifndef MAX_HITS
+#define MAX_HITS 10
+#endif
+
 #include "Math/SMatrix.h"
 
 typedef ROOT::Math::SMatrix<float,6,6,ROOT::Math::MatRepSym<float,6> >    SMatrixSym66;
@@ -53,15 +57,24 @@ const idx_t HH =  3; // Dimension of small/short MPlex entities
 typedef Matriplex::Matriplex<float, LL, LL, NN>   MPlexLL;
 typedef Matriplex::Matriplex<float, LL,  1, NN>   MPlexLV;
 typedef Matriplex::MatriplexSym<float, LL,  NN>   MPlexLS;
-typedef Matriplex::Matriplex<float, LL,  HH, NN>   MPlexLH;
 
 typedef Matriplex::Matriplex<float, HH, HH, NN>   MPlexHH;
 typedef Matriplex::Matriplex<float, HH,  1, NN>   MPlexHV;
 typedef Matriplex::MatriplexSym<float, HH,  NN>   MPlexHS;
 
+typedef Matriplex::Matriplex<float, LL, HH, NN>   MPlexLH;
+
 typedef Matriplex::Matriplex<float, 1, 1, NN>     MPlexQF;
 typedef Matriplex::Matriplex<int,   1, 1, NN>     MPlexQI;
 
+#endif
+
+#ifndef NUM_THREADS
+#define NUM_THREADS 1
+#endif
+
+#ifndef THREAD_BINDING
+#define THREAD_BINDING spread
 #endif
 
 //==============================================================================
@@ -71,6 +84,11 @@ typedef Matriplex::Matriplex<int,   1, 1, NN>     MPlexQI;
 extern std::default_random_engine            g_gen;
 extern std::normal_distribution<float>       g_gaus;
 extern std::uniform_real_distribution<float> g_unif;
+
+// All debug printouts are ifdefed with DEBUG
+// #define DEBUG
+
+extern bool g_dump;
 
 #ifdef NO_ROOT
 
