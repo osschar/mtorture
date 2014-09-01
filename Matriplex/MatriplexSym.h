@@ -6,25 +6,6 @@
 
 
 //==============================================================================
-// Intrinsics -- preamble
-//==============================================================================
-
-#if defined(__MIC__) && defined(MPLEX_USE_INTRINSICS)
-
-#include "immintrin.h"
-
-#define MIC_INTRINSICS
-
-#define LD(a, i)      _mm512_load_ps(&a[i*N+n])
-#define ADD(a, b)     _mm512_add_ps(a, b) 
-#define MUL(a, b)     _mm512_mul_ps(a, b)
-#define FMA(a, b, v)  _mm512_fmadd_ps(a, b, v)
-#define ST(a, i, r)   _mm512_store_ps(&a[i*N+n], r)
-
-#endif
-
-
-//==============================================================================
 // MatriplexSym
 //==============================================================================
 
@@ -79,8 +60,10 @@ public:
    T  operator[](idx_t xx) const { return fArray[xx]; }
    T& operator[](idx_t xx)       { return fArray[xx]; }
 
-   idx_t * Offsets()    { return gSymOffsets[D];    }
-   idx_t   Off(idx_t i) { return gSymOffsets[D][i]; }
+   const idx_t * Offsets()    const { return gSymOffsets[D];    }
+         idx_t   Off(idx_t i) const { return gSymOffsets[D][i]; }
+
+   const T& ConstAt(idx_t n, idx_t i, idx_t j) const { return fArray[Off(i * D + j) * N + n]; }
 
    T& At(idx_t n, idx_t i, idx_t j) { return fArray[Off(i * D + j) * N + n]; }
 
@@ -104,6 +87,16 @@ public:
       for (idx_t i = n; i < kTotSize; i += N)
       {
          *(arr++) = fArray[i];
+      }
+   }
+
+   MatriplexSym& Subtract(const MatriplexSym& a, const MatriplexSym& b)
+   {
+      // Does *this = a - b;
+
+      for (idx_t i = 0; i < kTotSize; ++i)
+      {
+         fArray[i] = a.fArray[i] - b.fArray[i];
       }
    }
 
@@ -380,23 +373,6 @@ void InvertCholeskySym(MPlexSym<T, D, N>& A)
 {
    CholeskyInverterSym<T, D, N>::Invert(A);
 }
-
-
-//==============================================================================
-// Intrinsics -- postamble
-//==============================================================================
-
-#ifdef MIC_INTRINSICS
-
-#undef LD(a, i)
-#undef ADD(a, b)
-#undef MUL(a, b)
-#undef FMA(a, b, v)
-#undef ST(a, i, r)
-
-#undef MIC_INTRINSICS
-
-#endif
 
 
 //==============================================================================
