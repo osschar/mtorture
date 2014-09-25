@@ -8,9 +8,9 @@
 # Generate .ah files (make sure DIM, DOM and pattern match):
   ./GMtest.pl
 # Compile host:
-  icc -std=gnu++11 -openmp -mavx -O3 -I.. GMtest.cxx -o GMtest
+  icc -std=gnu++11 -openmp -mavx -O3 -I.. -I../.. GMtest.cxx -o GMtest
 # Compile MIC:
-  icc -std=gnu++11 -openmp -mmic -O3 -I.. GMtest.cxx -o GMtest-mic && scp GMtest-mic mic0:
+  icc -std=gnu++11 -openmp -mmic -O3 -I.. -I../.. GMtest.cxx -o GMtest-mic && scp GMtest-mic mic0:
 */
 
 typedef long long long64;
