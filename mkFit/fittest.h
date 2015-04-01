@@ -12,6 +12,7 @@ double runFittingTest(std::vector<Track>& simtracks, std::vector<Track>& rectrac
 
 #ifndef __APPLE__
 double runFittingTestPlex(std::vector<Track>& simtracks, std::vector<Track>& rectracks);
+double runFittingTestPlex2(std::vector<Track>& simtracks, std::vector<Track>& rectracks);
 #endif
 
 #endif

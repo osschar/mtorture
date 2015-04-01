@@ -3,7 +3,7 @@ all: auto
 auto: std_sym intr_sym
 
 clean:
-	rm -f *.ah
+	rm -f *.ah *.optrpt
 
 # ---------------------------------------------------------------- #
 

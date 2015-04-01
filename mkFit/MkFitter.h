@@ -39,6 +39,13 @@ public:
   void PrintPt(int idx);
 
   void InputTracksAndHits(std::vector<Track>& tracks, int beg, int end);
+  void InputIntrTracksAndHits(std::vector<Track>& tracks, int beg, int end);
+  void InputContigTracksAndHits(std::vector<Track>& tracks, int beg, int end);
+  void PlexifyTracksAndHits(MkFitter& MkFContig);
+  void PlexifyIntrTracksAndHits(MkFitter& MkFContig);
+#ifdef MKLOPT
+  void PlexifyMKLOutTracksAndHits(MkFitter& MkFContig);
+#endif
   void InputTracksOnly   (std::vector<Track>& tracks, int beg, int end);
   void FitTracks();
   void OutputFittedTracks(std::vector<Track>& tracks, int beg, int end);

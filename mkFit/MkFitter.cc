@@ -55,6 +55,129 @@ void MkFitter::InputTracksAndHits(std::vector<Track>& tracks, int beg, int end)
   }
 }
 
+//==============================================================================
+
+void MkFitter::InputIntrTracksAndHits(std::vector<Track>& tracks, int beg, int end)
+{
+  // Assign track parameters to initial state and copy hit values in.
+
+  // This might not be true for the last chunk!
+  // assert(end - beg == NN);
+
+  int itrack = 0;
+  for (int i = beg; i < end; ++i, ++itrack)
+  {
+    Track &trk = tracks[i];
+
+    Err[iC].CopyInIntr(itrack, trk.errors().Array());
+    Par[iC].CopyInIntr(itrack, trk.parameters().Array());
+
+    Chg(itrack, 0, 0) = trk.charge();
+
+    for (int hi = 0; hi < Nhits; ++hi)
+    {
+      Hit &hit = trk.hitsVector()[hi];
+
+      msErr[hi].CopyInIntr(itrack, hit.error().Array());
+      msPar[hi].CopyInIntr(itrack, hit.parameters().Array());
+    }
+  }
+}
+
+//==============================================================================
+
+void MkFitter::InputContigTracksAndHits(std::vector<Track>& tracks, int beg, int end)
+{
+  // Assign track parameters to initial state and copy hit values in -
+  // BUT - store items belonging to the same track in contiguous memory,
+  // i.e., do not put the Matriplex constituents into Matriplex order.
+  // This method differs from InputTracksAndHits in that it requires a
+  // subsequent call to PlexifyTracksAndHits to create a valid MkFitter.
+
+  // This might not be true for the last chunk!
+  // assert(end - beg == NN);
+
+  int itrack = 0;
+  for (int i = beg; i < end; ++i, ++itrack)
+  {
+    Track &trk = tracks[i];
+
+    Err[iC].CopyInContig(itrack, trk.errors().Array());
+    Par[iC].CopyInContig(itrack, trk.parameters().Array());
+
+    Chg(itrack, 0, 0) = trk.charge();
+
+    for (int hi = 0; hi < Nhits; ++hi)
+    {
+      Hit &hit = trk.hitsVector()[hi];
+
+      msErr[hi].CopyInContig(itrack, hit.error().Array());
+      msPar[hi].CopyInContig(itrack, hit.parameters().Array());
+    }
+  }
+}
+
+//==============================================================================
+
+void MkFitter::PlexifyTracksAndHits(MkFitter& MkFContig)
+{
+  Err[iC].Plexify(MkFContig.Err[iC].fArray);
+  Par[iC].Plexify(MkFContig.Par[iC].fArray);
+
+  for (int i = 0; i < NN; ++i)
+  {
+    Chg(i, 0, 0) = MkFContig.Chg(i, 0, 0);
+  }
+
+  for (int hi = 0; hi < Nhits; ++hi)
+  {
+    msErr[hi].Plexify(MkFContig.msErr[hi].fArray);
+    msPar[hi].Plexify(MkFContig.msPar[hi].fArray);
+  }
+}
+
+//==============================================================================
+
+void MkFitter::PlexifyIntrTracksAndHits(MkFitter& MkFContig)
+{
+  Err[iC].PlexifyIntr(MkFContig.Err[iC].fArray);
+  Par[iC].PlexifyIntr(MkFContig.Par[iC].fArray);
+
+  for (int i = 0; i < NN; ++i)
+  {
+    Chg(i, 0, 0) = MkFContig.Chg(i, 0, 0);
+  }
+
+  for (int hi = 0; hi < Nhits; ++hi)
+  {
+    msErr[hi].PlexifyIntr(MkFContig.msErr[hi].fArray);
+    msPar[hi].PlexifyIntr(MkFContig.msPar[hi].fArray);
+  }
+}
+
+//==============================================================================
+
+#ifdef MKLOPT
+void MkFitter::PlexifyMKLOutTracksAndHits(MkFitter& MkFContig)
+{
+  Err[iC].PlexifyMKLOut(MkFContig.Err[iC].fArray);
+  Par[iC].PlexifyMKLOut(MkFContig.Par[iC].fArray);
+
+  for (int i = 0; i < NN; ++i)
+  {
+    Chg(i, 0, 0) = MkFContig.Chg(i, 0, 0);
+  }
+
+  for (int hi = 0; hi < Nhits; ++hi)
+  {
+    msErr[hi].PlexifyMKLOut(MkFContig.msErr[hi].fArray);
+    msPar[hi].PlexifyMKLOut(MkFContig.msPar[hi].fArray);
+  }
+}
+#endif
+
+//==============================================================================
+
 void MkFitter::InputTracksOnly(std::vector<Track>& tracks, int beg, int end)
 {
   // Assign track parameters to initial state, do NOT copy hit values.

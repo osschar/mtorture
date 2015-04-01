@@ -82,6 +82,98 @@ public:
       }
    }
 
+   // test code added by SRL
+   void CopyInIntr(idx_t n, T *arr)
+   {
+#ifndef __MIC__
+      CopyIn(n, arr);
+#else
+      int s = sizeof(T);
+
+      __m512 r = LDF(arr);
+
+      int c[kSize];
+      // define position n within each vector in Matriplex
+      for (int i = n; i < kTotSize; i += N)
+      {
+         c[i] = i;
+      }
+      __m512i x = LDI(c);
+
+      VSF(fArray, x, r, s);
+#endif
+   }
+
+   // test code added by SRL
+   void CopyInContig(idx_t n, T *arr)
+   {
+      for (idx_t i = n*kSize; i < (n+1)*kSize; ++i)
+      {
+         fArray[i] = *(arr++);
+      }
+   }
+
+   // more test code added by SRL
+   void Plexify(T *arr)
+   {
+      // input: arr containing N arrays, each of extent kSize
+      // output: transpose of arr, kSize vectors, each length N
+      int iv = 0;
+      for (idx_t ik = 0; ik < kSize; ++ik)
+      {
+         for (idx_t i = ik; i < kTotSize; i += kSize, ++iv)
+         {
+            fArray[iv] = arr[i];
+         }
+      }
+   }
+
+   // more test code added by SRL
+   void PlexifyIntr(T *arr)
+   {
+#ifndef __MIC__
+      Plexify(arr);
+#else
+      int s = sizeof(T);
+
+      int n[N];
+      for (int i = 0; i < N; ++i)  // N starts of matrices
+      {
+         n[i] = i * kSize;
+      }
+      __m512i xn = LDI(n);
+
+      T *pt = arr, *qt = fArray;
+
+      for (int i = 0; i < kTotSize; i += N)
+      {
+         __m512 c = VGF(xn, pt, s);
+         ++pt;
+         STF(qt, c);
+         qt += N;
+      }
+#endif
+   }
+
+#ifdef MKLOPT
+   // more test code added by SRL
+   void PlexifyMKLOut(T *arr)
+   {
+     mkl_somatcopy('r','t',N,kSize,1.0,arr,kSize,fArray,N);
+   }
+#endif
+
+   //debug code added by SRL
+   void PrintDump()
+   {
+     printf("N = %2d\n",N);
+     for (idx_t n = 0; n < N; ++n)
+     {
+       printf("%10.4f",fArray[n]);
+     }
+     printf("\n");
+     }
+
    void CopyOut(idx_t n, T *arr)
    {
       for (idx_t i = n; i < kTotSize; i += N)

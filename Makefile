@@ -11,9 +11,10 @@ VECMIC   := -mmic -vec-report=${VR}
 
 # -opt-prefetch-distance=64,8
 OPT      := -O3
+MKLOPT   := -mkl:sequential -DMKLOPT
 
 CPPFLAGS := -I. ${USER_CPPFLAGS} ${DEFS}
-CXXFLAGS := ${OPT} -openmp -std=gnu++0x ${USER_CXXFLAGS}
+CXXFLAGS := ${OPT} -openmp -std=gnu++0x ${USER_CXXFLAGS} # $(MKLOPT) -DOUTFIT
 
 LDFLAGS  := ${USER_LDFLAGS}
 
@@ -38,6 +39,7 @@ auto:: auto-matriplex
 
 clean::
 	rm -f ${EXES} *.o *.om mkFit/mkFit mkFit/mkFit-mic mkFit/*.o mkFit/*.om
+	rm -f *.optrpt mkFit/*.optrpt
 
 distclean:: clean
 	${MAKE} -C Matriplex clean

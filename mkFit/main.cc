@@ -12,6 +12,7 @@ std::vector<Track> simtracks;
 
 std::vector<Track> smat_tracks;
 std::vector<Track> plex_tracks;
+std::vector<Track> plex_tracks2;
 
 //==============================================================================
 
@@ -155,13 +156,56 @@ void test_standard()
 
   generateTracks(simtracks, Ntracks);
 
-  double tmp, tsm;
+  double tmp, tmp2, tsm;
 
   // smat_tracks.reserve(simtracks.size());
   // tsm = runFittingTest(simtracks, smat_tracks);
 
   plex_tracks.resize(simtracks.size());
+  plex_tracks2.resize(simtracks.size());
+
   tmp = runFittingTestPlex(simtracks, plex_tracks);
+
+  if (true)
+  {
+    tmp2 = runFittingTestPlex2(simtracks, plex_tracks2);
+
+    // Compare results to make sure they are identical
+
+#ifdef OUTFIT
+    bool allGood = true;
+    int strTestCount = 0, nanCount = 0;
+    char s1[15], s2[15];
+    for (int i = 0; i < Ntracks; ++i)
+    {
+      SVector6 &simp = simtracks[i].parameters();
+      SVector6 &recp = plex_tracks[i].parameters();
+      SVector6 &rec2p = plex_tracks2[i].parameters();
+      for (int j = 0; j < 6; ++j)
+      {
+        if (recp[j] != rec2p[j])
+        {
+          // String conversions should agree to 6 decimal places -
+          // More robust than relative error: no under/overflow
+          ++strTestCount;
+          sprintf(s1,"%14.6e",recp[j]);
+          sprintf(s2,"%14.6e",rec2p[j]);
+          if (strcmp(s1,s2) != 0)
+          {
+            printf("Error: %s %s",s1,s2);
+            allGood = false;
+          }
+          char *s3 = strstr(s1,"a");
+          if (s3 != NULL) ++nanCount;
+        }
+      }
+    }
+    if (allGood) printf("Parameters from Matriplex fits are identical\n");
+    else printf("Parameters from Matriplex fits do not match\n");
+    printf(" strTestCount was %d / %d, nanCount was %d \n",
+           strTestCount,6*Ntracks,nanCount);
+#endif
+  }
 
   // Second pass -- select problematic tracks and refit them
   if (false)
@@ -200,6 +244,7 @@ void test_standard()
   }
 
   printf("SMatrix = %.3f   Matriplex = %.3f   ---   SM/MP = %.3f\n", tsm, tmp, tsm / tmp);
+  printf("Matriplex with new CopyIn = %.3f   ---   SM/MP = %.3f\n", tmp2, tsm / tmp2);
 
 #ifndef NO_ROOT
   make_validation_tree("validation-smat.root", simtracks, smat_tracks);

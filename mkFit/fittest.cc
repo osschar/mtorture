@@ -236,6 +236,78 @@ double runFittingTestPlex(std::vector<Track>& simtracks, std::vector<Track>& rec
       mkfp->FitTracks();
 
 #ifndef NO_ROOT
+#define OUTFIT
+#endif
+#ifdef OUTFIT
+      mkfp->OutputFittedTracks(rectracks, itrack, end);
+#endif
+   }
+
+   time = dtime() - time;
+
+   for (int i = 0; i < NUM_THREADS; ++i)
+   {
+     _mm_free(mkfp_arr[i]);
+   }
+   //_mm_free(mkfp);
+
+   return time;
+}
+
+#endif
+
+//==============================================================================
+// runFittingTestPlex2
+//==============================================================================
+
+#ifndef __APPLE__
+
+double runFittingTestPlex2(std::vector<Track>& simtracks, std::vector<Track>& rectracks)
+{
+   const int Nhits = MAX_HITS;
+   // XXX What if there's a missing / double layer?
+   // Eventually, should sort track vector by number of hits!
+   // And pass the number in on each "setup" call.
+   // Reserves should be made for maximum possible number (but this is just
+   // measurments errors, params).
+
+   // NOTE: MkFitter *MUST* be on heap, not on stack!
+   // Standard operator new screws up alignment of ALL MPlex memebrs of MkFitter,
+   // even if one adds attr(aligned(64)) thingy to every possible place.
+
+   // MkFitter *mkfp = new (_mm_malloc(sizeof(MkFitter), 64)) MkFitter(Nhits);
+
+   MkFitter *mkfp_arr[NUM_THREADS];
+   MkFitter *mkfp_arr2[NUM_THREADS];
+
+   for (int i = 0; i < NUM_THREADS; ++i)
+   {
+     mkfp_arr[i] = new (_mm_malloc(sizeof(MkFitter), 64)) MkFitter(Nhits);
+     mkfp_arr2[i] = new (_mm_malloc(sizeof(MkFitter), 64)) MkFitter(Nhits);
+   }
+
+   int theEnd = simtracks.size();
+
+   double time = dtime();
+
+#pragma omp parallel for num_threads(NUM_THREADS)
+   for (int itrack = 0; itrack < theEnd; itrack += NN)
+   {
+      int end = std::min(itrack + NN, theEnd);
+
+      MkFitter *mkfp = mkfp_arr[omp_get_thread_num()];
+      MkFitter *mkfp2 = mkfp_arr2[omp_get_thread_num()];
+
+      mkfp2->InputContigTracksAndHits(simtracks, itrack, end);
+      mkfp->PlexifyIntrTracksAndHits(*mkfp2);
+      //mkfp->InputIntrTracksAndHits(simtracks, itrack, end);
+
+      mkfp->FitTracks();
+
+#ifndef NO_ROOT
+#define OUTFIT
+#endif
+#ifdef OUTFIT
       mkfp->OutputFittedTracks(rectracks, itrack, end);
 #endif
    }
