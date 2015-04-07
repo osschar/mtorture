@@ -176,6 +176,9 @@ void test_standard()
     bool allGood = true;
     int strTestCount = 0, nanCount = 0;
     char s1[15], s2[15];
+
+    printf("Printing 9 sets of 6 parameters as a spot check...\n");
+    printf("Format is index, input, Mplex fit 1, Mplex fit 2\n");
     for (int i = 0; i < Ntracks; ++i)
     {
       SVector6 &simp = simtracks[i].parameters();
@@ -183,6 +186,10 @@ void test_standard()
       SVector6 &rec2p = plex_tracks2[i].parameters();
       for (int j = 0; j < 6; ++j)
       {
+        if (i < 9)
+        {
+          printf("%3d %14.6f %14.6f %14.6f\n",i,simp[j],recp[j],rec2p[j]); 
+        }
         if (recp[j] != rec2p[j])
         {
           // String conversions should agree to 6 decimal places -
@@ -192,7 +199,7 @@ void test_standard()
           sprintf(s2,"%14.6e",rec2p[j]);
           if (strcmp(s1,s2) != 0)
           {
-            printf("Error: %s %s",s1,s2);
+            printf("  Error: %s %s\n",s1,s2);
             allGood = false;
           }
           char *s3 = strstr(s1,"a");

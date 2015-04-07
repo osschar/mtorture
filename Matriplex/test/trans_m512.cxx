@@ -27,24 +27,25 @@ int main()
     p[i] = i;
   }
 
-  int n[NN];
+  int n[NN] __attribute__((aligned(64)));
 
   for (int i = 0; i < NN; ++i)  // NN starts of matrices
   {
     n[i] = i * MM;
   }
-  __m512i xn = LDI(n, 0);
+  __m512i x = LDI(n, 0);
   int s = 4;
 
   float *pt = p, *qt = q;
   for (int i = 0; i < MM*NN; i += NN)
   {
-    __m512 c = VG(xn, pt, s);
+    __m512 c = VG(x, pt, s);
     ST(qt, 0, c);
     ++pt;
     qt += NN;
   }
 
+  printf(" i    p         q\n");
   for (int i = 0; i < 16; ++i)
   {
     printf("%2d %4.0f %4.0f %4.0f %4.0f %4.0f\n",

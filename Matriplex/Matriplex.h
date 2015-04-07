@@ -5,11 +5,12 @@
 
 // added by SRL, should probably be merged with MatriplexCommon.h somehow
 #include "immintrin.h"
-#define LDF(a)           _mm512_load_ps(a)
-#define LDI(a)           _mm512_load_epi32(a)
-#define VSF(b, x, r, s)  _mm512_i32scatter_ps(b, x, r, s)
-#define VGF(x, a, s)     _mm512_i32gather_ps(x, a, s)
-#define STF(b, r)        _mm512_store_ps(b, r)
+#define LDF(a)               _mm512_load_ps(a)
+#define LDI(a)               _mm512_load_epi32(a)
+#define VSF(b, x, r, s)      _mm512_i32scatter_ps(b, x, r, s)
+#define VSMF(b, k, x, a, s)  _mm512_mask_i32scatter_ps(b, k, x, a, s)
+#define VGF(x, a, s)         _mm512_i32gather_ps(x, a, s)
+#define STF(b, r)            _mm512_store_ps(b, r)
 
 #ifdef MKLOPT
 #include "mkl.h"
@@ -81,19 +82,44 @@ public:
 #ifndef __MIC__
       CopyIn(n, arr);
 #else
+      long long bb = (long long) arr;
+      int bboff = bb % 64;
+      float *pt = (float *) (bb - (long long) bboff);
+      int iga[N] __attribute__((aligned(64)));
+      int isc[N] __attribute__((aligned(64)));
+      int j = n;
       int s = sizeof(T);
 
-      __m512 r = LDF(arr);
-
-      int c[kSize];
-      // define position n within each vector in Matriplex
-      for (int i = n; i < kTotSize; i += N)
+      for (int i = 0; i < N; ++i)
       {
-         c[i] = i;
+         iga[i] = i + bboff/s;
       }
-      __m512i x = LDI(c);
+      __m512i x1 = LDI(iga);
 
-      VSF(fArray, x, r, s);
+      for (int iv = 0; iv < kSize; iv += N)
+      {
+         __m512 r = VGF(x1, pt, s);
+
+         for (int i = 0; i < N; ++i)
+         {
+            isc[i] = j;
+            j += N;
+         }
+         __m512i x2 = LDI(isc);
+
+         int to_go = kSize - iv;
+         if (to_go >= N)
+         {
+            VSF(fArray, x2, r, s);
+         }
+         else
+	 {
+            __mmask16 k = 0xffff >> (N - to_go);
+            VSMF(fArray, k, x2, r, s);
+         }
+
+         pt += N;
+      }
 #endif
    }
 
@@ -127,9 +153,9 @@ public:
 #ifndef __MIC__
       Plexify(arr);
 #else
+      int n[N] __attribute__((aligned(64)));
       int s = sizeof(T);
 
-      int n[N];
       for (int i = 0; i < N; ++i)  // N starts of matrices
       {
          n[i] = i * kSize;
@@ -144,6 +170,39 @@ public:
          ++pt;
          STF(qt, c);
          qt += N;
+      }
+#endif
+   }
+
+   // more test code added by SRL
+   void PlexifyIntr2(T *arr)
+   {
+#ifndef __MIC__
+      Plexify(arr);
+#else
+      //      align_check("PlexifyIntr2 - Reg",arr);
+ 
+      int n[N] __attribute__((aligned(64)));
+      T *pt = arr;
+      int j = 0;
+      int m = 0;
+      int s = sizeof(T);
+
+      for (int iv = 0; iv < kTotSize; iv += N)
+      {
+         __m512 r = LDF(pt);
+
+         for (int i = 0; i < N; ++i)
+         {
+            n[i] = j;
+            j += N;
+            if (j >= kTotSize) j = ++m;
+         }
+         __m512i x = LDI(n);
+
+         VSF(fArray, x, r, s);
+
+         pt += N;
       }
 #endif
    }

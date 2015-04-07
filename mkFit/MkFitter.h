@@ -43,6 +43,7 @@ public:
   void InputContigTracksAndHits(std::vector<Track>& tracks, int beg, int end);
   void PlexifyTracksAndHits(MkFitter& MkFContig);
   void PlexifyIntrTracksAndHits(MkFitter& MkFContig);
+  void PlexifyIntr2TracksAndHits(MkFitter& MkFContig);
 #ifdef MKLOPT
   void PlexifyMKLOutTracksAndHits(MkFitter& MkFContig);
 #endif

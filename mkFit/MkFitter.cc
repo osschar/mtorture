@@ -157,6 +157,25 @@ void MkFitter::PlexifyIntrTracksAndHits(MkFitter& MkFContig)
 
 //==============================================================================
 
+void MkFitter::PlexifyIntr2TracksAndHits(MkFitter& MkFContig)
+{
+  Err[iC].PlexifyIntr2(MkFContig.Err[iC].fArray);
+  Par[iC].PlexifyIntr2(MkFContig.Par[iC].fArray);
+
+  for (int i = 0; i < NN; ++i)
+  {
+    Chg(i, 0, 0) = MkFContig.Chg(i, 0, 0);
+  }
+
+  for (int hi = 0; hi < Nhits; ++hi)
+  {
+    msErr[hi].PlexifyIntr2(MkFContig.msErr[hi].fArray);
+    msPar[hi].PlexifyIntr2(MkFContig.msPar[hi].fArray);
+  }
+}
+
+//==============================================================================
+
 #ifdef MKLOPT
 void MkFitter::PlexifyMKLOutTracksAndHits(MkFitter& MkFContig)
 {

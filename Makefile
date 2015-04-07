@@ -14,7 +14,7 @@ OPT      := -O3
 MKLOPT   := -mkl:sequential -DMKLOPT
 
 CPPFLAGS := -I. ${USER_CPPFLAGS} ${DEFS}
-CXXFLAGS := ${OPT} -openmp -std=gnu++0x ${USER_CXXFLAGS} # $(MKLOPT) -DOUTFIT
+CXXFLAGS := ${OPT} -openmp -std=gnu++0x ${USER_CXXFLAGS} #-DOUTFIT #$(MKLOPT)
 
 LDFLAGS  := ${USER_LDFLAGS}
 
