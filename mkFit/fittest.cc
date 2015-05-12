@@ -222,6 +222,7 @@ double runFittingTestPlex(std::vector<Track>& simtracks, std::vector<Track>& rec
 
    int theEnd = simtracks.size();
 
+   double timein0, timein = 0;
    double time = dtime();
 
 #pragma omp parallel for num_threads(NUM_THREADS)
@@ -229,9 +230,11 @@ double runFittingTestPlex(std::vector<Track>& simtracks, std::vector<Track>& rec
    {
       int end = std::min(itrack + NN, theEnd);
 
+      timein0 = dtime();
       MkFitter *mkfp = mkfp_arr[omp_get_thread_num()];
 
       mkfp->InputTracksAndHits(simtracks, itrack, end);
+      timein += dtime() - timein0;
 
       mkfp->FitTracks();
 
@@ -251,6 +254,7 @@ double runFittingTestPlex(std::vector<Track>& simtracks, std::vector<Track>& rec
    }
    //_mm_free(mkfp);
 
+   printf("Input time, runFittingTestPlex: %6.3f\n",timein);
    return time;
 }
 
@@ -288,6 +292,7 @@ double runFittingTestPlex2(std::vector<Track>& simtracks, std::vector<Track>& re
 
    int theEnd = simtracks.size();
 
+   double timein0, timein = 0;
    double time = dtime();
 
 #pragma omp parallel for num_threads(NUM_THREADS)
@@ -295,12 +300,14 @@ double runFittingTestPlex2(std::vector<Track>& simtracks, std::vector<Track>& re
    {
       int end = std::min(itrack + NN, theEnd);
 
+      timein0 = dtime();
       MkFitter *mkfp = mkfp_arr[omp_get_thread_num()];
       MkFitter *mkfp2 = mkfp_arr2[omp_get_thread_num()];
 
       mkfp2->InputContigTracksAndHits(simtracks, itrack, end);
       mkfp->PlexifyIntrTracksAndHits(*mkfp2);
       //mkfp->InputIntrTracksAndHits(simtracks, itrack, end);
+      timein += dtime() - timein0;
 
       mkfp->FitTracks();
 
@@ -320,6 +327,7 @@ double runFittingTestPlex2(std::vector<Track>& simtracks, std::vector<Track>& re
    }
    //_mm_free(mkfp);
 
+   printf("Input time, runFittingTestPlex2: %6.3f\n",timein);
    return time;
 }
 
