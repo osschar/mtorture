@@ -18,9 +18,9 @@ typedef std::function<long64 (int)> Func_t;
 
 const int ALIGN = 64;
 
-// Set this to 8 for AVX, 16 for MIC
+// Set this to 8 for AVX, 16 for MIC / AVX512
 const idx_t Sfac = 1;
-#ifdef __MIC__
+#if defined(__MIC__) || defined(__AVX512F__)
 const idx_t S = 16 * Sfac;
 #else
 const idx_t S = 8  * Sfac;

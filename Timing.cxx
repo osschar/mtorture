@@ -6,10 +6,18 @@
 long64 Timing::s_cpu_freq       = 1238094000 / 2;
 int    Timing::s_vec_unit_width = 16;
 #else
-// phiphi.t2.ucsd.edu
+// phiphi (Xeon SandyBridge E5-2620)
 // long64 Timing::s_cpu_freq       = 2000003000;
-// black.woof.org
-long64 Timing::s_cpu_freq       = 3100000000;
+
+// black (AMD Bulldozer)
+// long64 Timing::s_cpu_freq       = 3100000000;
+
+// phi2 KNL Xeon Phi 7210
+// long64 Timing::s_cpu_freq       = 1500000000;
+
+// desire (Intel CORE IvyBridge i7-4790S)
+long64 Timing::s_cpu_freq       = 4000000000;
+
 int    Timing::s_vec_unit_width = 8;
 #endif
 

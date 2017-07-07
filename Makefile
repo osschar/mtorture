@@ -9,14 +9,21 @@
 # Vector report level for icc
 VEC_REP := 1
 
+# Define to build for AVX_512, the new mic (KNL) and latest generation Xeons.
+# AVX_512 := 1
+
 # Set to 1 to also do KNC mic build
 # MIC := 1
 
 # Compiler
 ifdef INTEL_LICENSE_FILE
   CXX     := icc
-  VECHOST := -mavx -vec-report=${VR}
-  VECMIC  := -mmic -vec-report=${VR}
+  ifdef AVX_512
+    VECHOST := -xMIC-AVX512 -vec-report=${VEC_REP}
+  else
+    VECHOST := -mavx -vec-report=${VEC_REP}
+  endif
+  VECMIC  := -mmic -vec-report=${VEC_REP}
 else ifdef OSXGCC5
   CXX := c++-mp-5
   TBB_PREFIX := /opt/local
@@ -45,7 +52,9 @@ ifdef MIC
   EXES += $(addsuffix -mic, ${TGTS})
 endif
 
-all: ${EXES}
+# Was: all: ${EXES}
+# t3 t4 and mkFit do now work yet after codas "cleanup"
+all: t1
 
 auto-matriplex:
 	${MAKE} -C Matriplex auto && touch $@
