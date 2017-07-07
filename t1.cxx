@@ -8,16 +8,23 @@
 #define TEST_FUNC sum2_cube
 #endif
 
-int main()
+int main(int argc, char *argv[])
 {
   ArrayTest at(4, g_n_vec_max);
 
-  Timing t([&at](int n_vec)
-           {
-             // return at.sum2(n_vec);
-             return at.TEST_FUNC(n_vec);
-           });
+  Func_t foo;
 
+  if (argc == 1)
+  {
+    foo = [&at](int n_vec) { return at.TEST_FUNC(n_vec); };
+  }
+  else
+  {
+    foo = at.name_to_func(argv[1]);
+  }
+  
+  Timing t(foo);
+  
   t.print_tuple_header();
   // t.print_header();
 

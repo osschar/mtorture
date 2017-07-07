@@ -3,8 +3,6 @@
 
 #include "common.h"
 
-#include <functional>
-
 #include <sys/time.h>
 
 // This becomes a class that also reports time measurements.
@@ -12,9 +10,6 @@
 
 class Timing
 {
-public:
-  typedef std::function<long64 (int)> Func_t;
-
 private:
   double m_beg, m_end, m_diff;
   long64 m_n_ops;

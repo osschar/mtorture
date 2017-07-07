@@ -6,7 +6,10 @@
 long64 Timing::s_cpu_freq       = 1238094000 / 2;
 int    Timing::s_vec_unit_width = 16;
 #else
-long64 Timing::s_cpu_freq       = 2000003000;
+// phiphi.t2.ucsd.edu
+// long64 Timing::s_cpu_freq       = 2000003000;
+// black.woof.org
+long64 Timing::s_cpu_freq       = 3100000000;
 int    Timing::s_vec_unit_width = 8;
 #endif
 

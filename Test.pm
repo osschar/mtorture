@@ -89,7 +89,11 @@ sub new
   $S->{'Src'}     = "$S->{'Base'}.cxx";
   $S->{'ExeHost'} = "$S->{'Base'}";
   $S->{'ExeMic'}  = "$S->{'Base'}-mic";
-  $S->{'AllExes'} = "$S->{'ExeHost'} $S->{'ExeMic'}";
+
+  my @all_exes;
+  push @all_exes, $S->{'ExeHost'} if $S->{'RunHost'};
+  push @all_exes, $S->{'ExeMic'}  if $S->{'RunMic'};
+  $S->{'AllExes'} = join(" ", @all_exes);
 
   $S->{'CmdHost'} = "         $S->{'ExeEnv'} $S->{'EnvHost'} ./$S->{'ExeHost'}";
   $S->{'CmdMic'}  = "ssh mic0 $S->{'ExeEnv'} $S->{'EnvMic'}  ./$S->{'ExeMic'}";

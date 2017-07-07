@@ -1,9 +1,29 @@
 # Request latest gcc!
 # . /opt/rh/devtoolset-2/enable
 
-VR       := 1
-VECHOST  := -mavx -vec-report=${VR}
-VECMIC   := -mmic -vec-report=${VR}
+# Use gcc-5 from MacPorts on OSX
+# OSXGCC5    := yes
+# Use clang from MacPorts on OSX
+# OSXMPCLANG   := yes
+
+# Vector report level for icc
+VEC_REP := 1
+
+# Set to 1 to also do KNC mic build
+# MIC := 1
+
+# Compiler
+ifdef INTEL_LICENSE_FILE
+  CXX     := icc
+  VECHOST := -mavx -vec-report=${VR}
+  VECMIC  := -mmic -vec-report=${VR}
+else ifdef OSXGCC5
+  CXX := c++-mp-5
+  TBB_PREFIX := /opt/local
+else ifdef OSXMPCLANG
+  CXX := clang++-mp-3.9 -Wall -Wno-unknown-pragmas -Wno-missing-braces
+  TBB_PREFIX := /opt/local
+endif
 
 ### To disable vectorization set USER_CXXFLAGS := -no-simd -no-vec
 # Setting only one of the above has little effect.
@@ -19,7 +39,11 @@ LDFLAGS  := ${USER_LDFLAGS}
 
 TGTS     := t1 t2 t3 t4 mkFit/mkFit
 
-EXES     := ${TGTS} $(addsuffix -mic, ${TGTS})
+EXES     := ${TGTS}
+
+ifdef MIC
+  EXES += $(addsuffix -mic, ${TGTS})
+endif
 
 all: ${EXES}
 
@@ -30,10 +54,10 @@ auto:: auto-matriplex
 .PHONY: auto
 
 %.o: %.cxx *.h auto-matriplex
-	icc ${CPPFLAGS} ${CXXFLAGS} ${VECHOST} -c -o $@ $<
+	${CXX} ${CPPFLAGS} ${CXXFLAGS} ${VECHOST} -c -o $@ $<
 
 %.om: %.cxx *.h auto-matriplex
-	icc ${CPPFLAGS} ${CXXFLAGS} ${VECMIC} -c -o $@ $<
+	${CXX} ${CPPFLAGS} ${CXXFLAGS} ${VECMIC} -c -o $@ $<
 
 
 clean::
@@ -47,6 +71,8 @@ echo:
 	@echo CPPFLAGS = ${CPPFLAGS}
 	@echo CXXFLAGS = ${CXXFLAGS}
 	@echo LDFLAGS  = ${LDFLAGS}
+	@echo TGTS     = ${TGTS}
+	@echo EXES     = ${EXES}
 
 ################################################################
 
@@ -79,27 +105,27 @@ distclean::
 mkFit: ${MKEXES}
 
 mkFit/mkFit: auto auto-mkfit ${MKFOBJS}
-	icc ${CXXFLAGS} ${VECHOST} ${LDFLAGS} ${MK_HOST_LIBS} -o $@ ${MKFOBJS}
+	${CXX} ${CXXFLAGS} ${VECHOST} ${LDFLAGS} ${MK_HOST_LIBS} -o $@ ${MKFOBJS}
 
 mkFit/mkFit-mic: auto auto-mkfit ${MKFOBJS_MIC}
-	icc ${CXXFLAGS} ${VECMIC}  ${LDFLAGS} -o $@ ${MKFOBJS_MIC}
+	${CXX} ${CXXFLAGS} ${VECMIC}  ${LDFLAGS} -o $@ ${MKFOBJS_MIC}
 	scp $@ mic0:
 
 mkFit/%.o: mkFit/%.cc mkFit/*.h Matriplex/*
-	icc ${CPPFLAGS} ${CXXFLAGS} ${VECHOST} -IMatriplex ${MK_HOST_CFLAGS} -c -o $@ $<
+	${CXX} ${CPPFLAGS} ${CXXFLAGS} ${VECHOST} -IMatriplex ${MK_HOST_CFLAGS} -c -o $@ $<
 
 mkFit/%.om: mkFit/%.cc mkFit/*.h Matriplex/*
-	icc ${CPPFLAGS} ${CXXFLAGS} ${VECMIC} -DNO_ROOT -IMatriplex -c -o $@ $<
+	${CXX} ${CPPFLAGS} ${CXXFLAGS} ${VECMIC} -DNO_ROOT -IMatriplex -c -o $@ $<
 
 ### t1
 
 T1_DEPS := t1 ArrayTest Timing
 
 t1: $(addsuffix .o, ${T1_DEPS})
-	icc ${CXXFLAGS} ${VECHOST} ${LDFLAGS} -o $@ $^
+	${CXX} ${CXXFLAGS} ${VECHOST} ${LDFLAGS} -o $@ $^
 
 t1-mic:  $(addsuffix .om, ${T1_DEPS})
-	icc ${CXXFLAGS} ${VECMIC} ${LDFLAGS} -o $@ $^
+	${CXX} ${CXXFLAGS} ${VECMIC} ${LDFLAGS} -o $@ $^
 	scp $@ mic0:
 
 run-t1:	t1 t1-mic
@@ -111,10 +137,10 @@ run-t1:	t1 t1-mic
 T2_DEPS := t2 ArrayTest Timing
 
 t2: $(addsuffix .o, ${T2_DEPS})
-	icc ${CXXFLAGS} ${VECHOST} ${LDFLAGS} -o $@ $^
+	${CXX} ${CXXFLAGS} ${VECHOST} ${LDFLAGS} -o $@ $^
 
 t2-mic:  $(addsuffix .om, ${T2_DEPS})
-	icc ${CXXFLAGS} ${VECMIC} ${LDFLAGS} -o $@ $^
+	${CXX} ${CXXFLAGS} ${VECMIC} ${LDFLAGS} -o $@ $^
 	scp $@ mic0:
 
 run-t2:	t2 t2-mic
@@ -130,10 +156,10 @@ T3_OBJS_MIC := $(addsuffix .om, ${T3_DEPS})
 MPlexTest.o MPlexTest.om: Matriplex/Matriplex.h Matriplex/MatriplexSym.h Matriplex/MatriplexVector.h
 
 t3: auto ${T3_OBJS}
-	icc ${CXXFLAGS} ${VECHOST} ${LDFLAGS} -o $@ ${T3_OBJS}
+	${CXX} ${CXXFLAGS} ${VECHOST} ${LDFLAGS} -o $@ ${T3_OBJS}
 
 t3-mic: auto ${T3_OBJS_MIC}
-	icc ${CXXFLAGS} ${VECMIC}  ${LDFLAGS} -o $@ ${T3_OBJS_MIC}
+	${CXX} ${CXXFLAGS} ${VECMIC}  ${LDFLAGS} -o $@ ${T3_OBJS_MIC}
 	scp $@ mic0:
 
 run-t3:	t3 t3-mic
@@ -149,10 +175,10 @@ T4_OBJS_MIC := $(addsuffix .om, ${T4_DEPS})
 MPlexTest.o MPlexTest.om: Matriplex/Matriplex.h Matriplex/MatriplexSym.h Matriplex/MatriplexVector.h
 
 t4: auto ${T4_OBJS}
-	icc ${CXXFLAGS} ${VECHOST} ${LDFLAGS} -o $@ ${T4_OBJS}
+	${CXX} ${CXXFLAGS} ${VECHOST} ${LDFLAGS} -o $@ ${T4_OBJS}
 
 t4-mic: auto ${T4_OBJS_MIC}
-	icc ${CXXFLAGS} ${VECMIC}  ${LDFLAGS} -o $@ ${T4_OBJS_MIC}
+	${CXX} ${CXXFLAGS} ${VECMIC}  ${LDFLAGS} -o $@ ${T4_OBJS_MIC}
 	scp $@ mic0:
 
 run-t4:	t4 t4-mic

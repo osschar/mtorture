@@ -1,16 +1,22 @@
 #ifndef common_h
 #define common_h
 
+#include <functional>
+#include <stdexcept>
+
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <stdexcept>
+
+#include <mm_malloc.h>
 
 typedef long long   long64;
 typedef int         idx_t;
 
-const int  ALIGN   = 64;
+typedef std::function<long64 (int)> Func_t;
+
+const int ALIGN = 64;
 
 // Set this to 8 for AVX, 16 for MIC
 const idx_t Sfac = 1;
@@ -22,18 +28,26 @@ const idx_t S = 8  * Sfac;
 
 
 template <typename X>
-X* new_sth(int n, int align=ALIGN)
+X* new_aligned(int n, int align=ALIGN)
 {
   return (X*) _mm_malloc(sizeof(X) * n, ALIGN);
 }
 
 template <typename X>
-void free_sth(X* x)
+void free_aligned(X* x)
 {
   _mm_free(x);
 }
 
+#ifdef __INTEL_COMPILER
+  #define ASSUME_ALIGNED(a, b) __assume_aligned(a, b)
+  #define ASSUME(a, b) __assume(a == b)
+#else
+  #define ASSUME_ALIGNED(a, b) a = static_cast<decltype(a)>(__builtin_assume_aligned(a, b))
+  #define ASSUME(a, b) __builtin_expect(a, b)
+#endif
 
+  
 //------------------------------------------------------------------------------
 // Globals and environment overrides
 //------------------------------------------------------------------------------
