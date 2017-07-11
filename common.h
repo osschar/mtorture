@@ -16,16 +16,7 @@ typedef int         idx_t;
 
 typedef std::function<long64 (int)> Func_t;
 
-const int ALIGN = 64;
-
-// Set this to 8 for AVX, 16 for MIC / AVX512
-const idx_t Sfac = 1;
-#if defined(__MIC__) || defined(__AVX512F__)
-const idx_t S = 16 * Sfac;
-#else
-const idx_t S = 8  * Sfac;
-#endif
-
+constexpr int ALIGN = 64;
 
 template <typename X>
 X* new_aligned(int n, int align=ALIGN)

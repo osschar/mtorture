@@ -17,7 +17,7 @@ void plot_min(bool save_p=false)
   p.XLabel = "N_{array}";
   // p.PlotOpT = p.PlotFlops = false;
 
-  p.do_all("arr", "min", save_p);
+  p.do_all("arr", "O3", save_p);
 }
 
 void plot_sig(bool save_p=false)
@@ -28,7 +28,7 @@ void plot_sig(bool save_p=false)
   p.XLabel = "N_{array}";
   // p.PlotOpT = p.PlotFlops = false;
 
-  p.do_all("arr", "sig", save_p);
+  p.do_all("arr", "O3", save_p);
 }
 
 void plot_trig(bool save_p=false)
@@ -38,5 +38,17 @@ void plot_trig(bool save_p=false)
   p.XLabel = "N_{array}";
   // p.PlotOpT = p.PlotFlops = false;
 
-  p.do_all("arr", "trig", save_p);
+  p.do_all("arr", "O3", save_p);
+}
+
+//================================================================
+
+void plot_vecopt(bool save_p=false)
+{
+  Plotter p({});
+
+  p.XLabel = "N_{array}";
+  // p.PlotOpT = p.PlotFlops = false;
+
+  p.do_all("arr", "", save_p);
 }

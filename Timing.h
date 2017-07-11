@@ -42,7 +42,7 @@ public:
     m_beg = dtime();
   }
 
-  double stop(long64 n_ops = 0)
+  void stop(long64 n_ops = 0)
   {
     m_end = dtime();
     m_diff = m_end - m_beg;

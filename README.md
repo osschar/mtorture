@@ -6,9 +6,13 @@
 ### Linux
 
 ```
+lscpu
+# CPU flags, look for sse4.2, avx, avx2, avx512
+cat /proc/cpuinfo  | grep flags | tail -n1
 su -
 echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq
+cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq
 # Enter frequency into Timing.cxx (note, this is in kHz, multiply by 1000)
 # Run the tests ...
 echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
@@ -17,6 +21,7 @@ echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 ### OSX
 
 ```
+sysctl machdep.cpu.features
 sysctl hw.cpufrequency_min hw.cpufrequency hw.cpufrequency_max
 # Enter the max value into Timing.cxx (note, this is in Hz, copy as is)
 ```
@@ -43,13 +48,13 @@ Variables:
 
 There is a special target *echo* that will print out the relevant varables, e.g:
 ```
-  make OPT:=-O2 USER_CPPFLAGS:="-DTEST_FUNC=sum3_cube -DFOO=bar" echo
+  make CXX:=my-c++ OPT:=-O2 USER_CPPFLAGS:="-DTEST_FUNC=sum3_cube -DFOO=bar" echo
 ```
 
 
 ### Defines used in tests
 
-- `TEST_FUNC` -- the function that gets called on the test object
+- `TEST_FUNC` -- the default function that gets called on the test object
 
 To use this from a script, you'd have to do something like this:
 ```
