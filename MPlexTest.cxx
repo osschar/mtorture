@@ -39,6 +39,23 @@ MPlexTest::~MPlexTest()
 
 //==============================================================================
 
+Func_t MPlexTest::name_to_func(const std::string& name)
+{
+  // perl -ne 'if (m/^\s*long64\s+(\w[\w\d]*)\(int\s+\w+\);\s*$/) { print "  if (name.compare(\"$1\") == 0) return [&](int n) { return $1(n); };\n"; }' MPlexTest.h
+
+  if (name.compare("mult2") == 0) return [&](int n) { return mult2(n); };
+  if (name.compare("mult2_3out") == 0) return [&](int n) { return mult2_3out(n); };
+  if (name.compare("inv_cramer") == 0) return [&](int n) { return inv_cramer(n); };
+  if (name.compare("inv_cholesky") == 0) return [&](int n) { return inv_cholesky(n); };
+  if (name.compare("mult2_sym") == 0) return [&](int n) { return mult2_sym(n); };
+  if (name.compare("inv_cramer_sym") == 0) return [&](int n) { return inv_cramer_sym(n); };
+  if (name.compare("inv_cholesky_sym") == 0) return [&](int n) { return inv_cholesky_sym(n); };
+
+  throw std::runtime_error("MPlexTest::name_to_func no match");
+}
+
+//==============================================================================
+
 long64 MPlexTest::mult2(int n_vec)
 {
   Matriplex::Multiply(*fMPV[0], *fMPV[1], *fMPV[2], n_vec);

@@ -16,7 +16,10 @@ int    Timing::s_vec_unit_width = 16;
 // long64 Timing::s_cpu_freq       = 1500000000;
 
 // desire (Intel CORE IvyBridge i7-4790S)
-long64 Timing::s_cpu_freq       = 4000000000;
+// long64 Timing::s_cpu_freq       = 4000000000;
+
+// glut mac powerbook
+long64 Timing::s_cpu_freq       = 2600000000;
 
 int    Timing::s_vec_unit_width = 8;
 #endif

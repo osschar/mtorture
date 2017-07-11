@@ -68,13 +68,14 @@ public:
    T& At(idx_t n, idx_t i, idx_t j) { return fArray[Off(i * D + j) * N + n]; }
 
    T& operator()(idx_t n, idx_t i, idx_t j) { return At(n, i, j); }
+   const T& operator()(idx_t n, idx_t i, idx_t j) const { return ConstAt(n, i, j); }
 
    MatriplexSym& operator=(const MatriplexSym& m)
    {
       memcpy(fArray, m.fArray, sizeof(T) * kTotSize); return *this;
    }
 
-   void CopyIn(idx_t n, T *arr)
+   void CopyIn(idx_t n, const T *arr)
    {
       for (idx_t i = n; i < kTotSize; i += N)
       {
@@ -82,7 +83,96 @@ public:
       }
    }
 
-   void CopyOut(idx_t n, T *arr)
+#if defined(MIC_INTRINSICS)
+
+   void SlurpIn(const char *arr, __m512i& vi, const int N_proc = N)
+   {
+      //_mm512_prefetch_i32gather_ps(vi, arr, 1, _MM_HINT_T0);
+
+      const __m512    src = { 0 };
+      const __mmask16 k = N_proc == N ? -1 : (1 << N_proc) - 1;
+
+      for (int i = 0; i < kSize; ++i, arr += sizeof(T))
+      {
+         //_mm512_prefetch_i32gather_ps(vi, arr+2, 1, _MM_HINT_NTA);
+
+         __m512 reg = _mm512_mask_i32gather_ps(src, k, vi, arr, 1);
+         _mm512_mask_store_ps(&fArray[i*N], k, reg);
+      }
+   }
+
+   /*
+   // Experimental methods, SlurpIn() seems to be at least as fast.
+   // See comments in mkFit/MkFitter.cc MkFitter::AddBestHit().
+
+   void ChewIn(const char *arr, int off, int vi[N], const char *tmp,  __m512i& ui)
+   {
+      // This is a hack ... we know sizeof(Hit) = 64 = cache line = vector width.
+
+      for (int i = 0; i < N; ++i)
+      {
+        __m512 reg = _mm512_load_ps(arr + vi[i]);
+         _mm512_store_ps((void*) (tmp + 64*i), reg);
+      }
+
+      for (int i = 0; i < kSize; ++i)
+      {
+         __m512 reg = _mm512_i32gather_ps(ui, tmp + off + i*sizeof(T), 1);
+         _mm512_store_ps(&fArray[i*N], reg);
+      }
+   }
+
+   void Contaginate(const char *arr, int vi[N], const char *tmp)
+   {
+      // This is a hack ... we know sizeof(Hit) = 64 = cache line = vector width.
+
+      for (int i = 0; i < N; ++i)
+      {
+         __m512 reg = _mm512_load_ps(arr + vi[i]);
+         _mm512_store_ps((void*) (tmp + 64*i), reg);
+      }
+   }
+
+   void Plexify(const char *tmp, __m512i& ui)
+   {
+      for (int i = 0; i < kSize; ++i)
+      {
+         __m512 reg = _mm512_i32gather_ps(ui, tmp + i*sizeof(T), 1);
+         _mm512_store_ps(&fArray[i*N], reg);
+      }
+   }
+   */
+
+#else
+
+   void SlurpIn(const char *arr, int vi[N], const int N_proc = N)
+   {
+      // Separate N_proc == N case (gains about 7% in fit test).
+      if (N_proc == N)
+      {
+         for (int i = 0; i < kSize; ++i)
+         {
+            for (int j = 0; j < N; ++j)
+            {
+               fArray[i*N + j] = * (const T*) (arr + i*sizeof(T) + vi[j]);
+            }
+         }
+      }
+      else
+      {
+         for (int i = 0; i < kSize; ++i)
+         {
+            for (int j = 0; j < N_proc; ++j)
+            {
+               fArray[i*N + j] = * (const T*) (arr + i*sizeof(T) + vi[j]);
+            }
+         }
+      }
+   }
+
+#endif
+
+   void CopyOut(idx_t n, T *arr) const
    {
       for (idx_t i = n; i < kTotSize; i += N)
       {
@@ -90,14 +180,29 @@ public:
       }
    }
 
+   void SetDiagonal3x3(idx_t n, T d)
+   {
+      T *p = fArray + n;
+
+      p[0*N] = d;
+      p[1*N] = 0;
+      p[2*N] = d;
+      p[3*N] = 0;
+      p[4*N] = 0;
+      p[5*N] = d;
+   }
+
    MatriplexSym& Subtract(const MatriplexSym& a, const MatriplexSym& b)
    {
       // Does *this = a - b;
 
+#pragma ivdep
       for (idx_t i = 0; i < kTotSize; ++i)
       {
          fArray[i] = a.fArray[i] - b.fArray[i];
       }
+
+      return *this;
    }
 
    // ==================================================================
@@ -109,7 +214,7 @@ public:
       // XXXXX Review, cannonize
       // XXX icc bitch says: loop was not vectorized: cannot vectorize empty simd loop
 
-      T *p = fArray; __assume_aligned(p, 64);
+      T *p = fArray; ASSUME_ALIGNED(p, 64);
 
 #pragma omp simd
       for (idx_t n = 0; n < N; ++n)
@@ -124,7 +229,7 @@ public:
    {
       typedef T TT;
 
-      T *a = fArray; __assume_aligned(a, 64);
+      T *a = fArray; ASSUME_ALIGNED(a, 64);
 
 #pragma simd
       for (idx_t n = 0; n < N; ++n)
@@ -177,11 +282,11 @@ struct SymMultiplyCls<T, 3, N>
                         const MPlexSym<T, 3, N>& B,
                         MPlex<T, 3, 3, N>& C)
 {
-   const T *a = A.fArray; __assume_aligned(a, 64);
-   const T *b = B.fArray; __assume_aligned(b, 64);
-         T *c = C.fArray; __assume_aligned(c, 64);
+   const T *a = A.fArray; ASSUME_ALIGNED(a, 64);
+   const T *b = B.fArray; ASSUME_ALIGNED(b, 64);
+         T *c = C.fArray; ASSUME_ALIGNED(c, 64);
 
-#ifdef MIC_INTRINSICS
+#ifdef MPLEX_INTRINSICS
 
    for (idx_t n = 0; n < N; n += 64 / sizeof(T))
    {
@@ -207,11 +312,11 @@ struct SymMultiplyCls<T, 6, N>
                         const MPlexSym<float, 6, N>& B,
                         MPlex<float, 6, 6, N>& C)
 {
-   const T *a = A.fArray; __assume_aligned(a, 64);
-   const T *b = B.fArray; __assume_aligned(b, 64);
-         T *c = C.fArray; __assume_aligned(c, 64);
+   const T *a = A.fArray; ASSUME_ALIGNED(a, 64);
+   const T *b = B.fArray; ASSUME_ALIGNED(b, 64);
+         T *c = C.fArray; ASSUME_ALIGNED(c, 64);
 
-#ifdef MIC_INTRINSICS
+#ifdef MPLEX_INTRINSICS
 
    for (idx_t n = 0; n < N; n += 64 / sizeof(T))
    {
@@ -259,7 +364,7 @@ struct CramerInverterSym<T, 2, N>
    {
       typedef T TT;
 
-      T *a = A.fArray; __assume_aligned(a, 64);
+      T *a = A.fArray; ASSUME_ALIGNED(a, 64);
 
 #pragma simd
       for (idx_t n = 0; n < N; ++n)
@@ -282,7 +387,7 @@ struct CramerInverterSym<T, 3, N>
    {
       typedef T TT;
 
-      T *a = A.fArray; __assume_aligned(a, 64);
+      T *a = A.fArray; ASSUME_ALIGNED(a, 64);
 
 #pragma simd
       for (idx_t n = 0; n < N; ++n)

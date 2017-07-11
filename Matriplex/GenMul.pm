@@ -1,5 +1,15 @@
 ########################################################################
 ########################################################################
+# Top level package
+########################################################################
+########################################################################
+
+package GenMul;
+
+my $G_vec_width = 1;
+
+########################################################################
+########################################################################
 # MATRIX CLASSES
 ########################################################################
 ########################################################################
@@ -167,6 +177,7 @@ use Carp;
 
 # Offsets converting from full matrix indices to symmetric ones:
 my @Offs;
+@Offs[2] = [ 0, 1, 1, 2 ];
 @Offs[3] = [ 0, 1, 3, 1, 2, 4, 3, 4, 5 ];
 @Offs[4] = [ 0, 1, 3, 6, 1, 2, 4, 7, 3, 4, 5, 8, 6, 7, 8, 9 ];
 @Offs[5] = [ 0, 1, 3, 6, 10, 1, 2, 4, 7, 11, 3, 4, 5, 8, 12, 6, 7, 8, 9, 13, 10, 11, 12, 13, 14 ];
@@ -301,8 +312,8 @@ sub new
   my $S = {@_};
   bless($S, $class);
 
-  $S->{prefix}  = "      " unless defined $S->{prefix};
-  $S->{vectype} = "__m512" unless defined $S->{vectype};
+  $S->{prefix}  = "      "    unless defined $S->{prefix};
+  $S->{vectype} = "IntrVec_t" unless defined $S->{vectype};
 
   $S->{class} = $class;
 
@@ -372,13 +383,32 @@ sub handle_all_zeros_ones
 
   if ($zeros or $ones)
   {
-    $S->unshift_out("");
+    my @zo;
 
-    $S->unshift_out("$S->{vectype} all_ones  = { ", join(", ", (1) x 16), " };")
+    push @zo, "#ifdef MIC_INTRINSICS";
+
+    push @zo, "$S->{vectype} all_zeros = { " . join(", ", (0) x 16) . " };"
+        if $zeros;
+
+    push @zo, "$S->{vectype} all_ones  = { " . join(", ", (1) x 16) . " };"
         if $ones;
 
-    $S->unshift_out("$S->{vectype} all_zeros = { ", join(", ", (0) x 16), " };")
+    push @zo, "#else";
+
+    push @zo, "$S->{vectype} all_zeros = { " . join(", ", (0) x 8) . " };"
         if $zeros;
+
+    push @zo, "$S->{vectype} all_ones  = { " . join(", ", (1) x 8) . " };"
+        if $ones;
+
+    push @zo, "#endif";
+
+    push @zo, "";
+
+    for $zol (reverse @zo)
+    {
+      $S->unshift_out($zol);
+    }
   }
 }
 
@@ -482,6 +512,75 @@ sub multiply_standard
         $S->generate_indices_and_patterns_for_multiplication($i, $j, $k);
 
         my $addend = $S->generate_addend_standard('a', 'b');
+
+        push @sum, $addend if defined $addend;
+      }
+      if (@sum)
+      {
+        print join(" + ", @sum), ";";
+      }
+      else
+      {
+        print "0;"
+      }
+      print "\n";
+    }
+  }
+
+  $S->delete_temporaries();
+}
+
+# ----------------------------------------------------------------------
+
+sub generate_addend_gpu
+{
+  my ($S, $x, $y) = @_;
+
+  return undef if $S->{$x}{pat} eq '0' or  $S->{$y}{pat} eq '0';
+  return "1"   if $S->{$x}{pat} eq '1' and $S->{$y}{pat} eq '1';
+
+  my $xstr = sprintf "$S->{$x}{mat}{name}\[%2d*$S->{$x}{mat}{name}N+$S->{$x}{mat}{name}n]", $S->{$x}{idx};
+  my $ystr = sprintf "$S->{$y}{mat}{name}\[%2d*$S->{$y}{mat}{name}N+$S->{$y}{mat}{name}n]", $S->{$y}{idx};
+
+  return $xstr if $S->{$y}{pat} eq '1';
+  return $ystr if $S->{$x}{pat} eq '1';
+
+  return "${xstr}*${ystr}";
+}
+
+sub multiply_gpu
+{
+  # Standard mutiplication - outputs unrolled C code, one line
+  # per target matrix element.
+  # Arguments: a, b, c   -- all GenMul::MBase with right dimensions.
+  # Does:      c = a * b
+
+  check_multiply_arguments(@_);
+
+  my ($S, $a, $b, $c) = @_;
+
+  my $is_c_symmetric = $c->isa("GenMul::MatrixSym");
+
+  # With no_size_check matrices do not have to be compatible.
+  my $k_max = $a->{N} <= $b->{M} ? $a->{N} : $b->{M};
+
+  for (my $i = 0; $i < $c->{M}; ++$i)
+  {
+    my $j_max = $is_c_symmetric ?  $i + 1 : $c->{N};
+
+    for (my $j = 0; $j < $j_max; ++$j)
+    {
+      my $x = $c->idx($i, $j);
+
+      printf "$S->{prefix}$c->{name}\[%2d*$c->{name}N+$c->{name}n\] = ", $x;
+
+      my @sum;
+
+      for (my $k = 0; $k < $k_max; ++$k)
+      {
+        $S->generate_indices_and_patterns_for_multiplication($i, $j, $k);
+
+        my $addend = $S->generate_addend_gpu('a', 'b');
 
         push @sum, $addend if defined $addend;
       }
@@ -679,9 +778,10 @@ sub dump_multiply_std_and_intrinsic
   }
 
   print <<"FNORD";
-#ifdef MIC_INTRINSICS
+#ifndef __CUDACC__
+#ifdef MPLEX_INTRINSICS
 
-   for (int n = 0; n < N; n += 64 / sizeof(T))
+   for (int n = 0; n < N; n += MPLEX_INTRINSICS_WIDTH_BYTES / sizeof(T))
    {
 FNORD
 
@@ -702,6 +802,11 @@ FNORD
   print <<"FNORD";
    }
 #endif
+#else  // __CUDACC__
+FNORD
+  $S->multiply_gpu($a, $b, $c);
+  print <<"FNORD";
+#endif  // __CUDACC__
 FNORD
 
   

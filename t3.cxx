@@ -11,15 +11,22 @@
 const int mp_len     = S ;
 const int mp_vec_max = g_n_vec_max / (MPT_DIM * MPT_DIM * MPT_SIZE);
 
-int main()
+int main(int argc, char *argv[])
 {
   MPlexTest mpt(3, 2, mp_vec_max);
 
-  Timing t([&](int n_vec)
-           {
-             return mpt.TEST_FUNC(n_vec);
-           });
+  Func_t foo;
 
+  if (argc == 1)
+  {
+    foo = [&mpt](int n_vec) { return mpt.TEST_FUNC(n_vec); };
+  }
+  else
+  {
+    foo = mpt.name_to_func(argv[1]);
+  }
+  
+  Timing t(foo);
 
   t.print_tuple_header();
   // t.print_header();

@@ -4,9 +4,12 @@ make t1
 
 # Limit benchmark extent / duration
 
-export N_VEC_MIN=32
-export N_VEC_MAX=65536
-export TEST_DURATION=1.0
+#export N_VEC_MIN=32
+#export N_VEC_MAX=65536
+#export TEST_DURATION=0.5
+
+# Precise test -- takes a long while
+#export TEST_DURATION=5.0
 
 echo Entering loop for tests with minimal number of operations per loop
 for test in sum2 sum3 mul2 mul3 div2 div3 ; do

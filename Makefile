@@ -2,7 +2,7 @@
 # . /opt/rh/devtoolset-2/enable
 
 # Use gcc-5 from MacPorts on OSX
-# OSXGCC5    := yes
+OSXGCC5    := yes
 # Use clang from MacPorts on OSX
 # OSXMPCLANG   := yes
 

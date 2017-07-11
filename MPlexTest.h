@@ -1,6 +1,8 @@
 #ifndef MPlexText_h
 #define MPlexText_h
 
+#include "common.h"
+
 #include "Matriplex/Matriplex.h"
 #include "Matriplex/MatriplexSym.h"
 #include "Matriplex/MatriplexVector.h"
@@ -40,6 +42,8 @@ public:
   MP&   MPlex   (int i, int m) { return (*fMPV[i])[m];  }
   MPS&  MPlexSym(int i, int m) { return (*fMPVS[i])[m]; }
 
+  Func_t name_to_func(const std::string& name);
+
   // ----------------------------------------------------------------
 
   long64 mult2(int n_vec);
@@ -55,4 +59,4 @@ public:
   long64 inv_cholesky_sym(int n_vec);
 };
 
-#endif;
+#endif

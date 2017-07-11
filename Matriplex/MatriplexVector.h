@@ -24,12 +24,12 @@ class MatriplexVector
 public:
    MatriplexVector(idx_t n) : fN(n)
    {
-      fV = new_sth<MP>(fN);
+      fV = new_aligned<MP>(fN);
    }
 
    ~MatriplexVector()
    {
-      free_sth(fV);
+      free_aligned(fV);
    }
 
    idx_t size() const { return fN; }
@@ -41,20 +41,20 @@ public:
    const MP& mplex(int i)      const { return fV[i]; }
    const MP& operator[](int i) const { return fV[i]; }
 
-   void SetVal(T v)
-   {
-      for (idx_t i = 0; i < kTotSize; ++i)
-      {
-         fArray[i] = v;
-      }
-   }
+   // void SetVal(T v)
+   // {
+   //    for (idx_t i = 0; i < kTotSize; ++i)
+   //    {
+   //       fArray[i] = v;
+   //    }
+   // }
 
-   T& At(idx_t n, idx_t i, idx_t j)         { return fV[n/N].At(i, j, n%N); }
+   // T& At(idx_t n, idx_t i, idx_t j)         { return fV[n/N].At(i, j, n%N); }
 
-   T& operator()(idx_t n, idx_t i, idx_t j) { return fV[n/N].At(i, j, n%N); }
+   // T& operator()(idx_t n, idx_t i, idx_t j) { return fV[n/N].At(i, j, n%N); }
 
-   void CopyIn (idx_t n, T *arr)            { fV[n/N].CopyIn (n%N, arr); }
-   void CopyOut(idx_t n, T *arr)            { fV[n/N].CopyOut(n%N, arr); }
+   // void CopyIn (idx_t n, T *arr)            { fV[n/N].CopyIn (n%N, arr); }
+   // void CopyOut(idx_t n, T *arr)            { fV[n/N].CopyOut(n%N, arr); }
 };
 
 template<class MP> using MPlexVec = MatriplexVector<MP>;
