@@ -118,7 +118,7 @@ public:
 
     mg->Draw("apl");
 
-    gPad->BuildLegend(0.8, 0.8, 0.99, 0.99);
+    gPad->BuildLegend(0.8, 0.65, 0.99, 0.99);
 
     if (save_p)
     {

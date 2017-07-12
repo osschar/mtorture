@@ -5,7 +5,9 @@ void codas()
   printf("CoDaS plotting macros loaded:\n"
          " - plot_min()\n"
          " - plot_sig()\n"
+         " # Following ones require running of additional tests\n"
          " - plot_trig()\n"
+         " - plot_vecopt()\n"
          );
 
 }
@@ -45,7 +47,7 @@ void plot_trig(bool save_p=false)
 
 void plot_vecopt(bool save_p=false)
 {
-  Plotter p({});
+  Plotter p({"sum2_cube_O3","sum2_cube_sse4.2", "sum2_cube_avx"});
 
   p.XLabel = "N_{array}";
   // p.PlotOpT = p.PlotFlops = false;

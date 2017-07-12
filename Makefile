@@ -1,10 +1,10 @@
-# Request latest gcc!
-# . /opt/rh/devtoolset-2/enable
-
 # Use gcc-5 from MacPorts on OSX
 # OSXGCC5    := yes
 # Use clang from MacPorts on OSX
-# OSXMPCLANG   := yes
+# OSXMPCLANG := yes
+#
+# Can also just set CXX here:
+# CXX := my-c++-compiler
 
 # Vector report level for icc
 VEC_REP := 1
