@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 # Quick test
-# export TEST_DURATION=0.25
+export TEST_DURATION=0.25
 
 # Precise test -- takes a long while
-export TEST_DURATION=5.0
+# export TEST_DURATION=5.0
 
 ########################################################################
 
