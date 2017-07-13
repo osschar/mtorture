@@ -264,13 +264,44 @@ template<typename T, idx_t D, idx_t N> using MPlexSym = MatriplexSym<T, D, N>;
 //==============================================================================
 
 template<typename T, idx_t D, idx_t N>
+void MultiplyGeneral(const MPlexSym<T, D, N>& A,
+                     const MPlexSym<T, D, N>& B,
+                     MPlex<T, D, D, N>& C)
+{
+   for (idx_t i = 0; i < D; ++i)
+   {
+      for (idx_t j = 0; j < D; ++j)
+      {
+#pragma simd
+         for (idx_t n = 0; n < N; ++n)
+         {
+            C(n,i,j) = 0;
+         }
+
+         //#pragma omp simd collapse(2)
+         for (idx_t k = 0; k < D; ++k)
+         {
+#pragma simd
+            for (idx_t n = 0; n < N; ++n)
+            {
+               // C.fArray[i, j, n] += A.fArray[i, k, n] * B.fArray[k, j, n];
+               C(n,i,j) += A(n,i,k) * B(n,k,j);
+            }
+         }
+      }
+   }
+}
+
+//------------------------------------------------------------------------------
+
+template<typename T, idx_t D, idx_t N>
 struct SymMultiplyCls
 {
    static void Multiply(const MPlexSym<T, D, N>& A,
                         const MPlexSym<T, D, N>& B,
                         MPlex<T, D, D, N>& C)
    {
-      throw std::runtime_error("general symmetric multiplication not supported");
+      throw std::runtime_error("general symmetric multiplication not supported, well, call MultiplyGeneral()");
    }
 };
 
@@ -286,22 +317,7 @@ struct SymMultiplyCls<T, 3, N>
    const T *b = B.fArray; ASSUME_ALIGNED(b, 64);
          T *c = C.fArray; ASSUME_ALIGNED(c, 64);
 
-#ifdef MPLEX_INTRINSICS
-
-   for (idx_t n = 0; n < N; n += 64 / sizeof(T))
-   {
-#include "intr_sym_3x3.ah"
-   }
-
-#else
-
-#pragma simd
-   for (idx_t n = 0; n < N; ++n)
-   {
-#include "std_sym_3x3.ah"
-   }
-
-#endif
+  #include "Matrix33x33.ah"
 }
 };
 
@@ -316,22 +332,7 @@ struct SymMultiplyCls<T, 6, N>
    const T *b = B.fArray; ASSUME_ALIGNED(b, 64);
          T *c = C.fArray; ASSUME_ALIGNED(c, 64);
 
-#ifdef MPLEX_INTRINSICS
-
-   for (idx_t n = 0; n < N; n += 64 / sizeof(T))
-   {
-      #include "intr_sym_6x6.ah"
-   }
-
-#else
-
-#pragma simd
-   for (idx_t n = 0; n < N; ++n)
-   {
-      #include "std_sym_6x6.ah"
-   }
-
-#endif
+   #include "MatrixSym66x66.ah"
 }
 };
 

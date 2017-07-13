@@ -8,7 +8,6 @@
 #define TEST_FUNC mult2
 #endif
 
-const int mp_len     = S ;
 const int mp_vec_max = g_n_vec_max / (MPT_DIM * MPT_DIM * MPT_SIZE);
 
 int main(int argc, char *argv[])

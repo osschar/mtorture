@@ -54,3 +54,29 @@ void plot_vecopt(bool save_p=false)
 
   p.do_all("arr", "", save_p);
 }
+
+//================================================================
+// Matriplex plots
+//================================================================
+
+void plot_mplex_3_8(bool save_p=false)
+{
+  Plotter p({"general_3_8", "std_3_8", "intr_3_8",
+             "sym_general_3_8", "sym_std_3_8", "sym_intr_3_8"});
+
+  p.XLabel = "N_{array}";
+  // p.PlotOpT = p.PlotFlops = false;
+
+  p.do_all("mplx_mult2", "", save_p);
+}
+
+void plot_mplex_6_8(bool save_p=false)
+{
+  Plotter p({"general_6_8", "std_6_8", "intr_6_8",
+             "sym_general_6_8", "sym_std_6_8", "sym_intr_6_8"});
+
+  p.XLabel = "N_{array}";
+  // p.PlotOpT = p.PlotFlops = false;
+
+  p.do_all("mplx_mult2", "", save_p);
+}

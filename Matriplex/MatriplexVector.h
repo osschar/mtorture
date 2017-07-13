@@ -132,6 +132,23 @@ void Multiply(const MPlexVec<MPlexSym<T, D, N>>& A,
    }
 }
 
+template<typename T, idx_t D, idx_t N>
+void MultiplyGeneral(const MPlexVec<MPlexSym<T, D, N>>& A,
+                     const MPlexVec<MPlexSym<T, D, N>>& B,
+                           MPlexVec<MPlex<T, D, D, N>>& C,
+                           int n_to_process = 0)
+{
+   assert(A.size() == B.size());
+   assert(A.size() == C.size());
+
+   const int np = n_to_process ? n_to_process : A.size();
+
+   for (int i = 0; i < np; ++i)
+   {
+      MultiplyGeneral(A[i], B[i], C[i]);
+   }
+}
+
 //==============================================================================
 
 template<typename T, idx_t D, idx_t N>

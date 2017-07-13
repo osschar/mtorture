@@ -47,6 +47,7 @@ public:
   // ----------------------------------------------------------------
 
   long64 mult2(int n_vec);
+  long64 mult2_general(int n_vec);
   long64 mult2_3out(int n_vec);
   long64 mult2_3in (int n_vec);
 
@@ -54,6 +55,7 @@ public:
   long64 inv_cholesky(int n_vec);
 
   long64 mult2_sym(int n_vec);
+  long64 mult2_sym_general(int n_vec);
 
   long64 inv_cramer_sym(int n_vec);
   long64 inv_cholesky_sym(int n_vec);

@@ -34,6 +34,10 @@ t4-mic
 
 # Auto generated code, included in source ...
 *.ah
+
+# Result files
+*.rt
+
 # ... and a make touch file for target that generates matriplex related ones.
 matriplex-auto
 
