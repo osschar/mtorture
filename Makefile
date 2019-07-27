@@ -16,6 +16,7 @@ VEC_REP := 1
 # MIC := 1
 
 # Compiler
+ifeq "$(origin CXX)" "default"
 ifdef INTEL_LICENSE_FILE
   CXX     := icc
   ifdef AVX_512
@@ -30,6 +31,7 @@ else ifdef OSXGCC5
 else ifdef OSXMPCLANG
   CXX := clang++-mp-3.9 -Wall -Wno-unknown-pragmas -Wno-missing-braces
   TBB_PREFIX := /opt/local
+endif
 endif
 
 ### To disable vectorization set USER_CXXFLAGS := -no-simd -no-vec
